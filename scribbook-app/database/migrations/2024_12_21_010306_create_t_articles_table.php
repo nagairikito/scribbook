@@ -1,0 +1,32 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        if(!Schema::hasTable('article_comments')) {
+            Schema::create('articles', function (Blueprint $table) {
+                $table->increments('id');
+                $table->string('title', 255)->comment('ブログタイトル');
+                $table->text('contents')->comment('ブログコンテンツ');
+                $table->integer('cerated_by_id')->comment('ユーザーID: users.id');
+                $table->timestamps();
+            });
+        }
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('articles');
+    }
+};
