@@ -20,17 +20,17 @@
                     <p>ログインID</p>
                     <input type="text" name="login_id">
                     @if($errors->has('login_id'))
-                        <p>{{ $errors->first('login_id') }}</p>
+                        <p class="error-message">{{ $errors->first('login_id') }}</p>
                     @endif
                     <p>パスワード</p>
                     <input type="password" name="password">
                     @if($errors->has('password'))
-                        <p>{{ $errors->first('password') }}</p>
+                        <p class="error-message">{{ $errors->first('password') }}</p>
                     @endif
                     <input type="submit" value="ログイン">
                 </form>
                 @if(session('error_login'))
-                    <p>{{ session('error_login') }}</p>
+                    <p class="error-message">{{ session('error_login') }}</p>
                 @endif
             </div>
             <p>アカウントをお持ちでない方は<a href="{{ route('account_registeration_form') }}">こちら</a></p>

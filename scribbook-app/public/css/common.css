@@ -16,6 +16,18 @@ a {
     color: inherit;
 }
 
+.a-style {
+    text-decoration: underline;
+}
+
 main {
     min-height: 100vh;
+}
+
+.success-message {
+    color: green;
+}
+
+.error-message {
+    color: red;
 }

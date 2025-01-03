@@ -18,6 +18,8 @@
             <div class="advertise-area">広告</div>
 
             <div class="main-contents">
+                @include('TopPage.session_messages')
+
                 <div class="topics">
                     <ul class="topic-wrapper">
                         <li class="topic-article">
@@ -65,6 +67,7 @@
                         
                     </tr>
                 </table>
+
             </div>
 
             <div class="advertise-area">広告</div>

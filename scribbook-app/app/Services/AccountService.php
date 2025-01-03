@@ -8,7 +8,7 @@ use App\Repositories\AccountRepository;
 
 use App\Const\AccountConst;
 use Illuminate\Support\Facades\Auth;
-
+use stdClass;
 
 class AccountService extends Service
 {
@@ -48,7 +48,7 @@ class AccountService extends Service
         }
 
         if(password_verify($inputData['password'], $loginUserInfo['password']) == false) {
-            $loginStatus = AccountConst::NOT_MATCH_PASSWORD;
+            $loginStatus = AccountConst::NOT_MATCH_LOGIN_PASSWORD;
             return $loginStatus;
         }
 
@@ -64,6 +64,24 @@ class AccountService extends Service
     }
 
     /**
+     * ログアウト
+     * @param $inputData
+     * @return $result
+     */
+    public function logout($inputData) {
+        if(!Auth::user() || Auth::id() != $inputData['id']) {
+            return false;
+        }
+        // $objInputData = $this->toObject($inputData);
+        Auth::logout();
+        $inputData->session()->invalidate(); // セッションを削除
+        $inputData->session()->regenerateToken(); // セッションの再作成
+
+        return true;
+
+    }
+
+    /**
      * プロフィール更新
      * @param $inputData
      * @return $updateStatus
@@ -72,13 +90,13 @@ class AccountService extends Service
         $updateStatus = AccountConst::UPDATE_INITIAL_VALUE;
 
         if(!Auth::user() || Auth::id() != $inputData['id']) {
-            $updateStatus = AccountConst::FAIL_USER_AUTHENTICATION;
+            $updateStatus = AccountConst::FAIL_UPDATE_USER_AUTHENTICATION;
             return $updateStatus;
         }
 
         $targetAccount = $this->accountRepository->getAccountById($inputData['id']);
         if(!$targetAccount) {
-            $updateStatus = AccountConst::NOT_FOUND_USER_ID;
+            $updateStatus = AccountConst::NOT_FOUND_UPDATE_USER_ID;
             return $updateStatus;
         }
 
@@ -91,4 +109,40 @@ class AccountService extends Service
 
     }
 
+    /**
+     * アカウント削除
+     * @param $inputData
+     * @return 
+     */
+    public function deleteAccount($inputData) {
+        $deleteStatus = AccountConst::DELETE_INITIAL_VALUE;
+
+        if(!Auth::user() || Auth::id() != $inputData['id']) {
+            $deleteStatus = AccountConst::FAIL_DELETE_USER_AUTHENTICATION;
+            return $deleteStatus;
+        }
+
+        $targetAccount = $this->accountRepository->getAccountById($inputData['id']);
+        if(!$targetAccount) {
+            $deleteStatus = AccountConst::NOT_FOUND_DELETE_USER_ID;
+            return $deleteStatus;
+        }
+
+        $checkDelete = $this->accountRepository->deleteAccount($inputData);
+        if($checkDelete) {
+            // $this->logout($inputData);
+            $deleteStatus = AccountConst::SUCCESS_ACCOUNT_DELETING;
+        }
+
+        return $deleteStatus;
+    }
+
+
+    function toObject($array) {
+        $obj = new stdClass;
+        foreach($array as $k => $v) {
+            $obj->{$k} = $v;
+        }
+        return $obj;
+    }
 }

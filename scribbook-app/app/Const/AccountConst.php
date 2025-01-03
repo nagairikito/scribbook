@@ -10,7 +10,7 @@ class AccountConst
     // ログイン
     const LOGIN_INITIAL_VALUE             = 0;
     const NOT_FOUND_LOGIN_ID              = 1;
-    const NOT_MATCH_PASSWORD              = 2;
+    const NOT_MATCH_LOGIN_PASSWORD        = 2;
     const SUCCESS_LOGIN                   = 3;
 
     // ユーザーステータス
@@ -19,8 +19,14 @@ class AccountConst
 
     // プロフィール更新ステータス
     const UPDATE_INITIAL_VALUE            = 0;
-    const FAIL_USER_AUTHENTICATION        = 1;
-    const NOT_FOUND_USER_ID               = 2;
+    const FAIL_UPDATE_USER_AUTHENTICATION = 1;
+    const NOT_FOUND_UPDATE_USER_ID        = 2;
     const SUCCESS_ACCOUNT_UPDATING        = 3;
+
+    // アカウント削除ステータス
+    const DELETE_INITIAL_VALUE            = 0;
+    const FAIL_DELETE_USER_AUTHENTICATION = 1;
+    const NOT_FOUND_DELETE_USER_ID        = 2;
+    const SUCCESS_ACCOUNT_DELETING        = 3;
 
 }

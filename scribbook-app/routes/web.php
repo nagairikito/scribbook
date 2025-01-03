@@ -17,6 +17,7 @@ Route::post('/login', [AccountController::class, 'login'])->name('login');
 Route::get('/logout', [AccountController::class, 'logout'])->name('logout');
 Route::get('/profile', [AccountController::class, 'profileTop'])->name('profile_top');
 Route::post('/updateProfile', [AccountController::class, 'updateProfile'])->name('update_profile');
+Route::get('/deleteAccount', [AccountController::class, 'deleteAccount'])->name('delete_account');
 
 // ブログ関連
 Route::get('/postBlogForm', [BlogController::class, 'postBlogForm'])->name('post_blog_form');

@@ -15,17 +15,6 @@ class AccountRepository extends Repository
         $this->user = new User;
     }
     
-    
-    /**
-     * ログイン
-     * @param $login_id
-     * @return array $loginUser
-     */
-    public function login($login_id) {
-        $loginUser = $this->user->where('login_id', '=', $login_id)->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)->first();
-        return $loginUser;
-    }
-
     /**
      * アカウント新規登録
      * @param $inputData
@@ -50,6 +39,16 @@ class AccountRepository extends Repository
     }
 
     /**
+     * ログイン
+     * @param $login_id
+     * @return array $loginUser
+     */
+    public function login($login_id) {
+        $loginUser = $this->user->where('login_id', '=', $login_id)->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)->first();
+        return $loginUser;
+    }
+
+    /**
      * ユーザーのプロフィール情報を更新
      * @param $inputData
      * @return $result
@@ -61,6 +60,18 @@ class AccountRepository extends Repository
         $targetAccount->password = $inputData['password'];
         $targetAccount->icon_image = $inputData['icon_image'];
         $targetAccount->discription = $inputData['discription'];
+        $result = $targetAccount->save();
+        return $result;
+    }
+
+    /**
+     * アカウント削除
+     * @param $inputData
+     * @return $result
+     */
+    public function deleteAccount($inputData) {
+        $targetAccount = $this->user->where('id', '=', $inputData['id'])->first();
+        $targetAccount->delete_flag = AccountConst::USER_DELETE_FLAG_ON;
         $result = $targetAccount->save();
         return $result;
     }

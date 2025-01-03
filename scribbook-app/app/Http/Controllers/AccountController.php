@@ -82,12 +82,11 @@ class AccountController extends Controller
             case AccountConst::NOT_FOUND_LOGIN_ID:
                 return back()->with('error_login', 'ログインIDが存在しないまたは入力された内容が正しくありません')->withInput($inputData);
             
-            case AccountConst::NOT_MATCH_PASSWORD:
+            case AccountConst::NOT_MATCH_LOGIN_PASSWORD:
                 return back()->with('error_login', '入力されたパスワードが正しくありません')->withInput($inputData);
 
             case AccountConst::SUCCESS_LOGIN:
-                return view('TopPage/toppage');
-                // return [response($loginStatus, 200), response()->view('TopPage/toppage', [$loginStatus], 200)];
+                return redirect(route('toppage'))->with('success_login', 'ログインしました');
             
             default:
                 return back()->with('error_login', '予期せぬエラーが発生しました')->withInput($inputData);
@@ -101,6 +100,15 @@ class AccountController extends Controller
      * @return view
      */
     public function logout(Request $request) {
+        // $inputData = [
+        //     'id' => $request['id']
+        // ];
+        // $result = $this->accountService->logout($inputData);
+
+        // if($result == true) {
+        //     return redirect(route('toppage'))->with('success_logout', 'ログアウトしました');
+        // }
+        // return back()->with('error_logout', 'セッションが切れています');
         $result = Auth::logout();
         $request->session()->invalidate(); // セッションを削除
         $request->session()->regenerateToken(); // セッションの再作成
@@ -134,10 +142,10 @@ class AccountController extends Controller
         $result = $this->accountService->updateProfile($inputData);
 
         switch($result) {
-            case AccountConst::FAIL_USER_AUTHENTICATION:
+            case AccountConst::FAIL_UPDATE_USER_AUTHENTICATION:
                 return back()->with('error_update', 'セッションが切れています。再度ログインしなおしてください')->withInput($inputData);
             
-            case AccountConst::NOT_FOUND_USER_ID:
+            case AccountConst::NOT_FOUND_UPDATE_USER_ID:
                 return back()->with('error_update', 'アカウント情報が見つかりません')->withInput($inputData);
 
             case AccountConst::SUCCESS_ACCOUNT_UPDATING:
@@ -148,6 +156,34 @@ class AccountController extends Controller
         }
     }
 
+    /**
+     * アカウント削除
+     * @param $request
+     * @return view
+     */
+    public function deleteAccount(Request $request) {
+        $inputData = [
+            'id' => $request['id']
+        ];
+
+        $result = $this->accountService->deleteAccount($inputData);
+
+        switch($result) {
+            case AccountConst::FAIL_DELETE_USER_AUTHENTICATION:
+                return back()->with('error_delete', 'セッションが切れています。再度ログインしなおしてください')->withInput($inputData);
+            
+            case AccountConst::NOT_FOUND_DELETE_USER_ID:
+                return back()->with('error_delete', 'アカウント情報が見つかりません')->withInput($inputData);
+
+            case AccountConst::SUCCESS_ACCOUNT_DELETING:
+                $this->logout($request);
+                return redirect(route('toppage'))->with('success_delete', 'アカウントを削除しました');
+            
+            default:
+                return back()->with('error_delete', '予期せぬエラーが発生しました')->withInput($inputData);
+        }
+
+    }
 
 
 }

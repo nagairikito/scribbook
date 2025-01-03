@@ -11,14 +11,12 @@
 <body>
     @include('a_CommonParts.header')
     <main id="profile-top">
-        <div class="main-wrapper">
+        <div class="profile-top-wrapper">
             <h1>プロフィール</h1>
-            <div class="profile-wrapper">
-                @if(session('success_update'))
-                    <p>{{ session('success_update') }}</p>
-                @endif
-                <div class="profile-card">
-                    @if(Auth::user())
+            @if(Auth::user() || Auth::id() == Auth::user()->id)
+                <div class="profile">
+                    @include('Account.session_messages')
+                    <div class="profile-card">
                         <ul>
                             <li class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)">プロフィール編集</li><!-- onClickでモーダルオンにする、パスワードをかける -->
                             <li class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)">プライバシー設定</li><!-- onClickでモーダルオンにする、パスワードをかける、アカウント削除機能 -->
@@ -35,16 +33,16 @@
                             <li>ユーザーID:　{{ Auth::user()->id }}（ログインIDとは異なります）</li>
                             <li>概要欄:<div class="discription">{{ Auth::user()->discription }}</div></li>
                         </ul>
-                    @endif
+                    </div>
                 </div>
-            </div>
+            @endif
         </div>
 
         <!-- モーダル -->
         <div class="modal close">
             <div class="modal-wrapper">
                 <div class="modal-contents edit-profile display-none">
-                    @if(Auth::user())
+                    @if(Auth::user() || Auth::id() == Auth::user()->id)
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
                             <ul>
@@ -53,7 +51,7 @@
                             </ul>
                             <div>
                                 @if(session('error_update'))
-                                    <p>{{ session('error_update') }}</p>
+                                    <p class="error-message">{{ session('error_update') }}</p>
                                 @endif
                             </div>
                             <ul>
@@ -67,7 +65,7 @@
                                     <p>名前:</p>
                                     <input type="text" name="name" value="{{ Auth::user()->name }}">
                                     @if($errors->has('name'))
-                                        <p>{{ $errors->first('name') }}</p>
+                                        <p class="error-message">{{ $errors->first('name') }}</p>
                                     @endif
                                 </li>
                                 <li>
@@ -78,7 +76,7 @@
                                     <p>概要欄:</p>
                                     <textarea name="discription" cols="70" rows="15">{{ Auth::user()->discription }}</textarea>
                                     @if($errors->has('discription'))
-                                        <p>{{ $errors->first('discription') }}</p>
+                                        <p class="error-message">{{ $errors->first('discription') }}</p>
                                     @endif
                                 </li>
                                 <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
@@ -87,18 +85,23 @@
                                 <input type="hidden" name="password_confirmation" value="{{ Auth::user()->password }}">
                             </ul>
                         </form>
+                        <form action="{{ route('delete_account') }}">
+                        @csrf
+                            <input type="hidden" name="id" value="{{ Auth::id() }}">
+                            <input type="submit" value="アカウント削除">
+                        </form>
                     @endif
 
 
                 </div>
 
                 <div class="modal-contents privacy-setting display-none">
-                    @if(Auth::user())
+                    @if(Auth::user() || Auth::id() == Auth::user()->id)
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
                             <ul>
-                                <li onclick="closeModal(PRIVACY_SETTING)">✕</li>
                                 <li><input type="submit" value="保存"></li>
+                                <li onclick="closeModal(PRIVACY_SETTING)">✕</li>
                             </ul>
                             <ul>
                                 <li>
@@ -109,7 +112,7 @@
                                     <p>新しいログインID:</p>
                                     <input type="text" name="login_id">
                                     @if($errors->has('login_id'))
-                                        <p>{{ $errors->first('login_id') }}</p>
+                                        <p class="error-message">{{ $errors->first('login_id') }}</p>
                                     @endif
                                     <p>※ログインIDのみ変更したい場合は新しいパスワードと確認用パスワードに現在のパスワードを入力してください</p>
                                 </li>
@@ -117,7 +120,7 @@
                                     <p>新しいパスワード:</p>
                                     <input type="password" name="password">
                                     @if($errors->has('password'))
-                                        <p>{{ $errors->first('password') }}</p>
+                                        <p class="error-message">{{ $errors->first('password') }}</p>
                                     @endif
                                 </li>
                                 <li>
