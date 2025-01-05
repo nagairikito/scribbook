@@ -1,3 +1,11 @@
+/* #profile-top .open-edit-profile-modal, #profile-top .open-privacy-setting-modal {
+    cursor: pointer;
+}
+
+#profile-top .close-edit-profile-modal, #profile-top .close-privacy-setting-modal {
+    cursor: pointer;
+} */
+
 #profile-top .modal.close {
     visibility: hidden;
 }

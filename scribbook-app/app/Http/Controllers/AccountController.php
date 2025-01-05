@@ -8,8 +8,11 @@ use App\Http\Requests\AccountRegisterationRequest;
 use App\Http\Requests\AccountUpdatingRequest;
 use App\Http\Requests\LoginRequest;
 use App\Models\User;
+use App\Models\Article;
 use App\Repositories\AccountRepository;
+use App\Repositories\BlogRepository;
 use App\Services\AccountService;
+use App\Services\BlogService;
 
 use App\Const\AccountConst;
 use Illuminate\Support\Facades\Auth;
@@ -18,15 +21,19 @@ use Illuminate\Support\Facades\Auth;
 class AccountController extends Controller
 {
     public $accountService;
+    public $blogService;
     public function __construct() {
         // Modelのインスタンス化
         $user = new User;
+        $blog = new Article();
 
         // Repositryのインスタンス化
         $userRepository = new AccountRepository($user);
+        $blogRepository = new BlogRepository($blog);
 
         // Serviceのインスタンス化
         $this->accountService = new AccountService($userRepository);
+        $this->blogService = new BlogService($blogRepository);
         
     }
 
@@ -100,20 +107,12 @@ class AccountController extends Controller
      * @return view
      */
     public function logout(Request $request) {
-        // $inputData = [
-        //     'id' => $request['id']
-        // ];
-        // $result = $this->accountService->logout($inputData);
+        $result = $this->accountService->logout($request);
 
-        // if($result == true) {
-        //     return redirect(route('toppage'))->with('success_logout', 'ログアウトしました');
-        // }
-        // return back()->with('error_logout', 'セッションが切れています');
-        $result = Auth::logout();
-        $request->session()->invalidate(); // セッションを削除
-        $request->session()->regenerateToken(); // セッションの再作成
-
-        return redirect(route('toppage'));
+        if($result == true) {
+            return redirect(route('toppage'))->with('success_logout', 'ログアウトしました');
+        }
+        return back()->with('error_logout', 'セッションが切れています');
     }
 
     /**
@@ -121,7 +120,18 @@ class AccountController extends Controller
      * @return view
      */
     public function profileTop() {
-        return view('Account/profile_top');
+        $loginUserId = Auth::id();
+        if(!Auth::user() || Auth::id() != $loginUserId) {
+            return back()->with('error', 'セッションの期限が切れています');
+        }
+
+        $targetAccount = $this->accountService->accountRepository->getAccountById($loginUserId);
+        if(!$targetAccount) {
+            return back()->with('error','対象のアカウントが見つかりません');
+        }
+
+        $blogs = $this->blogService->getBlogsByUserId($targetAccount[0]['id']);
+        return view('Account/profile_top', ['blogs' => $blogs]);
     }
 
     /**
@@ -166,7 +176,7 @@ class AccountController extends Controller
             'id' => $request['id']
         ];
 
-        $result = $this->accountService->deleteAccount($inputData);
+        $result = $this->accountService->deleteAccount($inputData, $request);
 
         switch($result) {
             case AccountConst::FAIL_DELETE_USER_AUTHENTICATION:

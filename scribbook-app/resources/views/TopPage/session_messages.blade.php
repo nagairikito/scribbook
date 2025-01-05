@@ -8,6 +8,10 @@
     <title>Document</title>
 </head>
 <body>
+    @if(session('error'))
+        <p class="error-message">{{ session('error') }}</p>
+    @endif
+
     @if(session('success_login'))
         <p class="success-message">{{ session('success_login') }}</p>
     @endif
@@ -18,6 +22,22 @@
 
     @if(session('error_delete'))
         <p class="error-message">{{ session('error_delete') }}</p>
+    @endif
+
+    @if(session('success_post_blog'))
+        <p class="success-message">{{ session('success_post_blog') }}</p>
+    @endif
+
+    @if(session('error_delete'))
+        <p class="error-message">{{ session('error_post_blog') }}</p>
+    @endif
+
+    @if(session('success_edit_blog'))
+        <p class="success-message">{{ session('success_edit_blog') }}</p>
+    @endif
+
+    @if(session('success_delete_blog'))
+        <p class="success-message">{{ session('success_delete_blog') }}</p>
     @endif
 </body>
 </html>

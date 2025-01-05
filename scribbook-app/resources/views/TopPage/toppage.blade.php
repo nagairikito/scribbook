@@ -59,13 +59,18 @@
                         <th>投稿者</th>
                         <th>投稿日</th>
                     </tr>
-                    <tr>
-                        <td><a href="">ブログの作り方</a></td>
-                        <td><a href="">日々の何気ない出来事を書き込む</a></td>
-                        <td class="post-user">srcibookun</td>
-                        <td class="posted-at">2024/12/15</td>
-                        
-                    </tr>
+                    @if(count($allBlogs) > 0)
+                        @foreach($allBlogs as $blog)
+                            <tr>
+                                <td><a href="{{ route('blogDetail', ['id' => $blog->id]) }}">{{ $blog->title }}</a></td>
+                                <td class="blog-contents"><a href="{{ route('blogDetail', ['id' => $blog->id]) }}">{{ $blog->contents }}</a></td>
+                                <td class="post-user"><a href="{{ route('blogDetail', ['id' => $blog->id]) }}">{{ $blog->name }}</a></td>
+                                <td class="posted-at">{{ $blog->created_at }}</td>
+                            </tr>
+                        @endforeach
+                    @else
+                        <tr></tr>
+                    @endif
                 </table>
 
             </div>

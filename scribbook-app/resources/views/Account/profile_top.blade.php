@@ -10,6 +10,7 @@
 </head>
 <body>
     @include('a_CommonParts.header')
+
     <main id="profile-top">
         <div class="profile-top-wrapper">
             <h1>プロフィール</h1>
@@ -23,6 +24,7 @@
                             <li>
                                 <form action="{{ route('logout') }}" metohd="POST">
                                 @csrf
+                                    <input type="hidden" name="id" value="{{ Auth::id() }}">
                                     <input type="submit" value="ログアウト">
                                 </form>
                             </li>
@@ -35,7 +37,23 @@
                         </ul>
                     </div>
                 </div>
+
+                <h2>マイブログ</h2>
+                @if(count($blogs) > 0)
+                <table border="0">
+                    @foreach($blogs as $blog)
+                        <tr key="{{ $blog->id }}">
+                                <td><a href="{{ route('blogDetail', ['id' => $blog->id]) }}">{{ $blog->title }}</a></td>
+                                <td><a>{{ $blog->created_at }}</a></td>
+                        </tr>
+                    @endforeach
+                </table>
+                @else
+                    <p>投稿がありません</p>
+                @endif
             @endif
+            
+
         </div>
 
         <!-- モーダル -->
@@ -46,7 +64,7 @@
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
                             <ul>
-                                <li onclick="closeModal(EDIT_PROFILE)">✕</li>
+                                <li class="close-edit-profile-modal" onclick="closeModal(EDIT_PROFILE)">✕</li>
                                 <li><input type="submit" value="保存"></li>
                             </ul>
                             <div>
@@ -100,8 +118,8 @@
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
                             <ul>
+                                <li class="close-privacy-setting-modal" onclick="closeModal(PRIVACY_SETTING)">✕</li>
                                 <li><input type="submit" value="保存"></li>
-                                <li onclick="closeModal(PRIVACY_SETTING)">✕</li>
                             </ul>
                             <ul>
                                 <li>

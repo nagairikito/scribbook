@@ -16,7 +16,7 @@ return new class extends Migration
                 $table->increments('id');
                 $table->string('title', 255)->comment('ブログタイトル');
                 $table->text('contents')->comment('ブログコンテンツ');
-                $table->integer('cerated_by_id')->comment('ユーザーID: users.id');
+                $table->integer('created_by')->comment('ユーザーID: users.id');
                 $table->timestamps();
             });
         }

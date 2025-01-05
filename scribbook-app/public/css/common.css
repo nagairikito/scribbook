@@ -13,11 +13,13 @@ li {
 
 a {
     text-decoration: none;
+    cursor: pointer;
     color: inherit;
 }
 
-.a-style {
+.underline {
     text-decoration: underline;
+    color: rgb(20, 20, 255);
 }
 
 main {

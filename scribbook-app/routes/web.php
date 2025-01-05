@@ -20,5 +20,9 @@ Route::post('/updateProfile', [AccountController::class, 'updateProfile'])->name
 Route::get('/deleteAccount', [AccountController::class, 'deleteAccount'])->name('delete_account');
 
 // ブログ関連
-Route::get('/postBlogForm', [BlogController::class, 'postBlogForm'])->name('post_blog_form');
+Route::get('/blogPostingForm', [BlogController::class, 'blogPostingForm'])->name('blog_posting_form');
 Route::post('/postBlog', [BlogController::class, 'postBlog'])->name('post_blog');
+Route::post('/blogEditingForm', [BlogController::class, 'blogEditingForm'])->name('blog_editing_form');
+Route::post('/eidtBlog', [BlogController::class, 'editBlog'])->name('edit_blog');
+Route::post('/deleteBlog', [BlogController::class, 'deleteBlog'])->name('delete_blog');
+Route::get('blogDedail/{id}', [BlogController::class, 'blogDetail'])->name('blogDetail');

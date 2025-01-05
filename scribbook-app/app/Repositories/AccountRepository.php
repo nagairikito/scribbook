@@ -10,6 +10,7 @@ use App\Const\AccountConst;
 class AccountRepository extends Repository
 {
     public $user;
+    public $accountRepository;
     public function __construct() {
         // Modelのインスタンス化
         $this->user = new User;
@@ -35,7 +36,7 @@ class AccountRepository extends Repository
      */
     public function getAccountById($id) {
         $result = $this->user->where('id', '=', $id)->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)->get();
-        return $result;
+        return !empty($result) ? $result->toArray() : [];
     }
 
     /**

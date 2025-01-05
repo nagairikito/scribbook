@@ -8,7 +8,6 @@ use App\Repositories\AccountRepository;
 
 use App\Const\AccountConst;
 use Illuminate\Support\Facades\Auth;
-use stdClass;
 
 class AccountService extends Service
 {
@@ -68,14 +67,16 @@ class AccountService extends Service
      * @param $inputData
      * @return $result
      */
-    public function logout($inputData) {
-        if(!Auth::user() || Auth::id() != $inputData['id']) {
+    public function logout($request) {
+        // dd($inputData['id']);
+
+        if(!Auth::user() || Auth::id() != $request['id']) {
             return false;
         }
-        // $objInputData = $this->toObject($inputData);
+
         Auth::logout();
-        $inputData->session()->invalidate(); // セッションを削除
-        $inputData->session()->regenerateToken(); // セッションの再作成
+        $request->session()->invalidate(); // セッションを削除
+        $request->session()->regenerateToken(); // セッションの再作成
 
         return true;
 
@@ -114,7 +115,7 @@ class AccountService extends Service
      * @param $inputData
      * @return 
      */
-    public function deleteAccount($inputData) {
+    public function deleteAccount($inputData, $request) {
         $deleteStatus = AccountConst::DELETE_INITIAL_VALUE;
 
         if(!Auth::user() || Auth::id() != $inputData['id']) {
@@ -130,19 +131,12 @@ class AccountService extends Service
 
         $checkDelete = $this->accountRepository->deleteAccount($inputData);
         if($checkDelete) {
-            // $this->logout($inputData);
+            // $this->logout($request);
+            $this->logout($inputData);
             $deleteStatus = AccountConst::SUCCESS_ACCOUNT_DELETING;
         }
 
         return $deleteStatus;
     }
 
-
-    function toObject($array) {
-        $obj = new stdClass;
-        foreach($array as $k => $v) {
-            $obj->{$k} = $v;
-        }
-        return $obj;
-    }
 }
