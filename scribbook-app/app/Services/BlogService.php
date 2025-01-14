@@ -3,27 +3,38 @@
 namespace App\Services;
 
 use Illuminate\Http\Request;
-use App\Models\Article;
 use App\Models\User;
+use App\Models\Article;
+use App\Models\ArticleComment;
+use App\Models\FavoriteBlog;
 use App\Repositories\BlogRepository;
+use App\Repositories\BlogCommentsRepository;
 use App\Repositories\AccountRepository;
+use App\Repositories\FavoriteBlogRepository;
 
 use App\Const\BlogConst;
 use Illuminate\Support\Facades\Auth;
 
 class BlogService extends Service
 {
-    public $blogRepository;
     public $accountRepository;
+    public $blogRepository;
+    public $blogCommentsRepository;
+    public $favoriteBlogRepository;
+
     public function __construct() {
 
         // Modelのインスタンス化
-        $blog = new Article;
         $user = new User;
+        $blog = new Article;
+        $blogComments = new ArticleComment;
+        $favoriteBlog = new FavoriteBlog;
 
         // Repositryのインスタンス化
-        $this->blogRepository = new BlogRepository($blog);
         $this->accountRepository = new AccountRepository($user);
+        $this->blogRepository = new BlogRepository($blog);
+        $this->blogCommentsRepository = new BlogCommentsRepository($blogComments);
+        $this->favoriteBlogRepository = new FavoriteBlogRepository($favoriteBlog);
 
     }
     
@@ -104,7 +115,7 @@ class BlogService extends Service
             return $deleteBlogStatus;
         }
 
-        $checkDeleteBlog = $this->blogRepository->editBlog($inputData['id']);
+        $checkDeleteBlog = $this->blogRepository->deleteBlog($inputData['id']);
         if($checkDeleteBlog) {
             $deleteBlogStatus = BlogConst::SUCCESS_BLOG_DELETING;
             return $deleteBlogStatus;
@@ -129,13 +140,10 @@ class BlogService extends Service
      * @return $blogs
      */
     public function getBlogByUserId($inputData) {
-        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-            return;
-        }
 
         $loginUser = $this->accountRepository->getAccountById($inputData['user_id']);
         if(!$loginUser) {
-            return;
+            return [];
         }
 
         $blogs = $this->blogRepository->getBlogByUserId($inputData['id']);
@@ -148,13 +156,10 @@ class BlogService extends Service
      * @return $blogs
      */
     public function getBlogsByUserId($userId) {
-        if(!Auth::user() || Auth::id() != $userId) {
-            return;
-        }
 
-        $loginUser = $this->accountRepository->getAccountById($userId);
-        if(!$loginUser) {
-            return;
+        $targetUser = $this->accountRepository->getAccountById($userId);
+        if(!$targetUser) {
+            return [];
         }
 
         $blogs = $this->blogRepository->getBlogsByUserId($userId);
@@ -168,7 +173,155 @@ class BlogService extends Service
      */
     public function blogDetail($id) {
         $blog = $this->blogRepository->blogDetail($id);
+
         return $blog;
+    }
+
+    /**
+     * ブログに紐づくコメントを取得
+     * @param $id
+     * @return $comments
+     */
+    public function getBlogComments($id) {
+        $comments = $this->blogCommentsRepository->getBlogComments($id);
+
+        return $comments;
+    }
+
+    /**
+     * 対象ユーザーIDに紐づくお気に入り登録されたブログを全件取得
+     * @param $id
+     * @return $favoriteBlogs
+     */
+    public function getAllFavoriteBlogsByUserId($id) {
+        if(!Auth::user() || Auth::id() != $id) {
+            return [];
+        }
+        
+        $checkExistsUser = $this->accountRepository->getAccountById($id);
+        if(!$checkExistsUser) {
+            return [];
+        }
+
+        $favoriteBlogs = $this->favoriteBlogRepository->getAllFavoriteBlogsByUserId($id);
+        return $favoriteBlogs;
+    }
+
+    /**
+     * ユーザーIDとブログIDをもとに対象のブログがお気に入り登録されているかを判定
+     * @param $user_id, $blog_id
+     * @return $result
+     */
+    public function checkExsitsFavoriteBlogByBlogIdAndUserId($user_id, $blog_id) {
+
+        $checkExistsUser = $this->accountRepository->getAccountById($user_id);
+        if(!$checkExistsUser) {
+            return false;
+        }
+
+        $inputData = [
+            'user_id' => $user_id,
+            'blog_id' => $blog_id,
+        ];
+
+        $result = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+        
+        return $result;
+    }
+    
+    /**
+     * ブログコメント登録
+     * @param $inputData
+     * @return $result
+     */
+    public function postComment($inputData) {
+        $postCommentStauts = false;
+
+        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+            return $postCommentStauts;
+        }
+
+        $loginUser = $this->accountRepository->getAccountById($inputData['created_by']);
+        if(!$loginUser) {
+            return $postCommentStauts;
+        }
+
+        $result = $this->blogCommentsRepository->postComment($inputData);
+        if($result) {
+            $postCommentStauts = true;
+        }
+
+        return $postCommentStauts;
+    }
+
+    /**
+     * ブログお気に入り登録
+     * @param $inputData
+     * @return $result
+     */
+    public function registerFavoriteBlog($inputData) {
+        $registerFavoriteBlogStatus = false;
+
+        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
+        if(!$targetUser) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
+        if(!$targetBlog) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+        if($checkExsitsFavoriteBlog) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $result = $this->favoriteBlogRepository->registerFavoriteBlog($inputData);
+        if($result == true) {
+            $registerFavoriteBlogStatus = true;
+        }
+
+        return $registerFavoriteBlogStatus;
+    }
+
+    /**
+     * ブログお気に入り登録解除
+     * @param $inputData
+     * @return $result
+     */
+    public function deleteFavoriteBlog($inputData) {
+        $deleteFavoriteBlogStatus = false;
+
+        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
+        if(!$targetUser) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
+        if(!$targetBlog) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+        if(!$checkExsitsFavoriteBlog) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $result = $this->favoriteBlogRepository->deleteFavoriteBlog($inputData);
+        if($result == true) {
+            $deleteFavoriteBlogStatus = true;
+        }
+
+        return $deleteFavoriteBlogStatus;
     }
 
 }

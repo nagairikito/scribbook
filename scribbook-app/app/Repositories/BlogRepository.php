@@ -12,6 +12,7 @@ use function Laravel\Prompts\select;
 class BlogRepository extends Repository
 {
     public $blog;
+    
     public function __construct() {
         // Modelのインスタンス化
         $this->blog = new Article;
@@ -37,11 +38,11 @@ class BlogRepository extends Repository
      * @return $$result
      */
     public function editBlog($inputData) {
-        $targetBlog = $this->blog->where('id', '=', $inputData['id'])->first();
-        $targetBlog->title = $inputData['title'];
-        $targetBlog->contents = $inputData['contents'];
-        $targetBlog->created_by = $inputData['user_id'];
-        $result = $this->blog->save();
+        $result = $this->blog->where('id', '=', $inputData['id'])->update([
+            'title'         => $inputData['title'],
+            'contents'      => $inputData['contents'],
+            'created_by'    => $inputData['created_by'],
+        ]);
         return $result;
     }
 
@@ -65,6 +66,7 @@ class BlogRepository extends Repository
             'articles.id',
             'articles.title',
             'articles.contents',
+            'articles.created_by',
             'users.name',
             'articles.created_at',
         )
@@ -72,7 +74,7 @@ class BlogRepository extends Repository
         ->orderByDesc('articles.created_at')
         ->get();
 
-        return $allblogs;
+        return !empty($allblogs) ? $allblogs->toArray() : [];
         // return !empty($allblogs) ? $allblogs->toArray() : [];
     }
 
@@ -84,10 +86,14 @@ class BlogRepository extends Repository
     public function getBlogByUserId($id) {
         $blog = $this->blog
         ->join('users', 'users.id', '=', 'articles.created_by')
-        ->where('articles.created_by', '=', $id)
+        ->where('articles.id', '=', $id)
+        ->select(
+            'articles.*',
+            'users.name',
+        )
         ->get();
 
-        return $blog;
+        return !empty($blog) ? $blog->toArray() : [];
     }
 
     /**
@@ -98,10 +104,19 @@ class BlogRepository extends Repository
     public function getBlogsByUserId($userId) {
         $blogs = $this->blog
         ->join('users', 'users.id', '=', 'articles.created_by')
+        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
         ->where('created_by', '=', $userId)
+        ->select([
+            'articles.id',
+            'articles.title',
+            'articles.contents',
+            'articles.created_by',
+            'articles.updated_at',
+            'users.name',
+        ])
         ->get();
 
-        return $blogs;
+        return !empty($blogs) ? $blogs->toArray() : [];
     }
 
     /**
@@ -114,15 +129,16 @@ class BlogRepository extends Repository
             'articles.id',
             'articles.title',
             'articles.contents',
-            'users.name',
             'articles.created_by',
-            'articles.created_at',
+            'articles.updated_at',
+            'users.name',
         )
         ->join('users', 'users.id', '=', 'articles.created_by')
+        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
         ->where('articles.id', '=', $id)
         ->get();
 
-        return $blog;
+        return !empty($blog) ? $blog->toArray() : [];
     }
 
 }

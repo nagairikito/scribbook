@@ -20,10 +20,10 @@
             </div>
             <div class="header-nav">
                 <ul class="header-nav-list">
-                    <li><a href="{{ route('blog_posting_form') }}">投稿</a></li>
-                    <li><a href="">後で見る</a></li>
                     @if(Auth::user())
-                        <li><a href="{{ route('profile_top')}}">アカウント</a></li>
+                        <li><a href="{{ route('blog_posting_form') }}">投稿</a></li>
+                        <li><a href="{{ route('favorite_blogs_page', ['id' => Auth::id()]) }}">評価したブログ</a></li>
+                        <li><a href="{{ route('profile_top', ['id' => Auth::id()]) }}">アカウント</a></li>
                     @endif
                     @if(!Auth::user())
                         <li><a href="{{ route('account_registeration_form') }}">新規作成</a></li>

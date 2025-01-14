@@ -119,19 +119,19 @@ class AccountController extends Controller
      * プロフィール初期表示
      * @return view
      */
-    public function profileTop() {
-        $loginUserId = Auth::id();
-        if(!Auth::user() || Auth::id() != $loginUserId) {
-            return back()->with('error', 'セッションの期限が切れています');
-        }
+    public function profileTop(Request $request) {
+        $inputData = [
+            'user_id' => $request['id']
+        ];
 
-        $targetAccount = $this->accountService->accountRepository->getAccountById($loginUserId);
+        $targetAccount = $this->accountService->accountRepository->getAccountById($inputData['user_id']);
         if(!$targetAccount) {
             return back()->with('error','対象のアカウントが見つかりません');
         }
 
         $blogs = $this->blogService->getBlogsByUserId($targetAccount[0]['id']);
-        return view('Account/profile_top', ['blogs' => $blogs]);
+
+        return view('Account/profile_top', ['blogs' => $blogs, 'user' => $targetAccount]);
     }
 
     /**

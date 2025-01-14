@@ -21,11 +21,11 @@ class TopPageController extends Controller
 
         // Repositoryのインスタンス化
         $accountRepository = new AccountRepository($user);
-        $blogRepository = new BlogRepository($user);
+        $blogRepository = new BlogRepository($blog);
 
         // Serviceのインスタンス化
-        $this->accountService = new AccountService($user);
-        $this->blogService = new BlogService($user);
+        $this->accountService = new AccountService($accountRepository);
+        $this->blogService = new BlogService($blogRepository);
     }
     
     /**
@@ -33,6 +33,7 @@ class TopPageController extends Controller
      */
     public function index() {
         $allBlogs = $this->blogService->getAllBlogs();
-        return view('TopPage/toppage', compact('allBlogs'));
+
+        return view('TopPage/toppage', ['allBlogs' => $allBlogs]);
     }
 }

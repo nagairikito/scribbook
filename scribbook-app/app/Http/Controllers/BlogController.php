@@ -3,17 +3,19 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\BlogPostingRequest;
+use App\Const\BlogConst;
+use Illuminate\Support\Facades\Auth;
+
 
 use App\Models\Article;
 use App\Repositories\BlogRepository;
 use App\Services\BlogService;
 
-use App\Const\BlogConst;
-use App\Http\Requests\BlogPostingRequest;
-
 class BlogController extends Controller
 {
     public $blogService;
+
     public function __construct() {
         // Modelのインスタンス化
         $blog = new Article;
@@ -75,6 +77,11 @@ class BlogController extends Controller
         ];
 
         $blog = $this->blogService->getBlogByUserId($inputData);
+
+        if(empty($blog)) {
+            return redirect(route('toppage'))->with('error_get_blog_detail', '予期せぬエラーが発生しました');
+        }
+
         return view('Blog/blog_editing_form', ['blog' => $blog]);
     }
 
@@ -83,7 +90,7 @@ class BlogController extends Controller
      * @param $request
      * @return view
      */
-    public function blogEdit(BlogPostingRequest $request) {
+    public function editBlog(BlogPostingRequest $request) {
         $inputData = [
             'id' => $request['blog_id'],
             'title' => $request['title'],
@@ -101,7 +108,7 @@ class BlogController extends Controller
                 return back()->with('error_edit_blog', 'ブログを更新できません');
 
             case BlogConst::SUCCESS_BLOG_EDITING;
-                return view('TopPage/toppage')->with('success_edit_blog', 'ブログを更新しました');
+                return redirect(route('profile_top'))->with('success_edit_blog', 'ブログを更新しました');
 
             default;
                 return back()->with('error_edit_blog', '予期せぬエラーが発生しました');
@@ -129,7 +136,7 @@ class BlogController extends Controller
                 return back()->with('error_delete_blog', 'ブログを削除できません');
 
             case BlogConst::SUCCESS_BLOG_DELETING;
-                return view('TopPage/toppage')->with('success_delete_blog', 'ブログを削除しました');
+                return redirect(route('profile_top'))->with('success_delete_blog', 'ブログを削除しました');
 
             default;
                 return back()->with('error_delete_blog', '予期せぬエラーが発生しました');
@@ -144,10 +151,95 @@ class BlogController extends Controller
      */
     public function blogDetail($id) {
         $blog = $this->blogService->blogDetail($id);
+        $comments = $this->blogService->getBlogComments($id);
 
-        return view('Blog/blog_detail', ['blog' => $blog]);
+        if(empty($blog)) {
+            return back()->with('error_get_blog_detail', 'ブログが見つかりませんでした');
+        }
+
+        $blog[0]['favorite_flag'] = false;
+        if(Auth::user()) {
+            $checkFavoriteBlog = $this->blogService->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $id);
+            if($checkFavoriteBlog) {
+                $blog[0]['favorite_flag'] = true;
+            }
+        }
+
+        return view('Blog/blog_detail', ['blog' => $blog, 'comments' => $comments]);
     }
 
+    /**
+     * コメント送信
+     * @param $request
+     * @return $result
+     */
+    public function postComment(Request $request) {
+        $inputData = [
+            'target_article'     => $request['target_blog'],
+            'comment'            => $request['comment'],
+            'created_by'         => $request['login_user_id'],
+        ];
 
+        $result = $this->blogService->postComment($inputData);
+        
+        if($result == true) {
+            return redirect(route('blog_detail', ['id' => $inputData['target_article']]));
+        }
+        return back()->with('error_post_comment', 'コメントを投稿できませんでした');
+    }
 
+    /**
+     * お気に入りブログ一覧を表示
+     * @param $id
+     * @return $favoriteBlogs
+     */
+    public function getFavoriteBlogs($request) {
+        $inputData = [
+            'id' => $request,
+        ];
+
+        $favoriteBlogs = $this->blogService->getAllFavoriteBlogsByUserId($inputData['id']);
+
+        return view('Blog/favorite_blogs', ['favoriteBlogs' => $favoriteBlogs]);
+    }
+
+    /**
+     * ブログお気に入り登録
+     * @param $request
+     * @return $result
+     */
+    public function registerFavoriteBlog(Request $request) {
+        $inputData = [
+            'user_id' => $request['login_user_id'],
+            'blog_id' => $request['blog_id'],
+        ];
+
+        $result = $this->blogService->registerFavoriteBlog($inputData);
+
+        if($result == true) {
+            return redirect(route('blog_detail', ['id' => $inputData['blog_id']]))->with('success_register_favorite_blog', 'お気に入り登録しました');
+        }
+
+        return back()->with('error_register_favorite_blog', 'お気に入り登録できません、もしくは既にお気に入り登録されています');
+    }
+
+    /**
+     * ブログお気に入り登録解除
+     * @param $request
+     * @return $result
+     */
+    public function deleteFavoriteBlog(Request $request) {
+        $inputData = [
+            'user_id' => $request['login_user_id'],
+            'blog_id' => $request['blog_id'],
+        ];
+
+        $result = $this->blogService->deleteFavoriteBlog($inputData);
+
+        if($result == true) {
+            return redirect(route('blog_detail', ['id' => $inputData['blog_id']]))->with('success_register_favorite_blog', 'お気に入り登録を解除しました');
+        }
+
+        return back()->with('error_register_favorite_blog', 'お気に入り登録を解除できません、もしくは既にお気に入り登録が解除されています');
+    }
 }

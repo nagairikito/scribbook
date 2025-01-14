@@ -17,6 +17,7 @@ return new class extends Migration
                 $table->string('comment')->comment('ブログコメント');
                 $table->integer('created_by')->comment('コメント作成者: user.id');
                 $table->timestamps();
+                $table->comment('ブログコメント');
             });
         }
     }

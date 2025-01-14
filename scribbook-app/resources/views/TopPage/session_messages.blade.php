@@ -1,13 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/common.css">
-
-    <title>Document</title>
-</head>
-<body>
     @if(session('error'))
         <p class="error-message">{{ session('error') }}</p>
     @endif
@@ -32,12 +22,7 @@
         <p class="error-message">{{ session('error_post_blog') }}</p>
     @endif
 
-    @if(session('success_edit_blog'))
-        <p class="success-message">{{ session('success_edit_blog') }}</p>
+    @if(session('error_get_blog_detail'))
+        <p class="error-message">{{ session('error_get_blog_detail') }}</p>
     @endif
 
-    @if(session('success_delete_blog'))
-        <p class="success-message">{{ session('success_delete_blog') }}</p>
-    @endif
-</body>
-</html>

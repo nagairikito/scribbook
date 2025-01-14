@@ -21,6 +21,7 @@ return new class extends Migration
                 $table->string('discription', 500)->nullable()->comment('プロフィール概要欄');
                 $table->integer('delete_flag')->default(0)->comment('削除フラグ');
                 $table->timestamps();
+                $table->comment('ユーザー');
             });
         }
 

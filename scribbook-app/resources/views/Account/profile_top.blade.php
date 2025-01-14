@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="css/common.css">
-    <link rel="stylesheet" href="css/Account/account.css">
-    <script src="js/Account/profileTop.js" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/common.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Account/account.css') }}">
+    <script src="{{ asset('js/Account/profileTop.js') }}" defer></script>
+    
     <title>プロフィール</title>
 </head>
 <body>
@@ -14,10 +15,11 @@
     <main id="profile-top">
         <div class="profile-top-wrapper">
             <h1>プロフィール</h1>
-            @if(Auth::user() || Auth::id() == Auth::user()->id)
-                <div class="profile">
-                    @include('Account.session_messages')
-                    <div class="profile-card">
+            <div class="profile">
+                @include('Account.session_messages')
+
+                <div class="profile-card">
+                    @if(Auth::user() && Auth::id() == $user[0]['id'])
                         <ul>
                             <li class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)">プロフィール編集</li><!-- onClickでモーダルオンにする、パスワードをかける -->
                             <li class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)">プライバシー設定</li><!-- onClickでモーダルオンにする、パスワードをかける、アカウント削除機能 -->
@@ -29,38 +31,38 @@
                                 </form>
                             </li>
                         </ul>
-                        <ul>
-                            <li>{{ Auth::user()->icon_image }}</li>
-                            <li>名前:　{{ Auth::user()->name }}</li>
-                            <li>ユーザーID:　{{ Auth::user()->id }}（ログインIDとは異なります）</li>
-                            <li>概要欄:<div class="discription">{{ Auth::user()->discription }}</div></li>
-                        </ul>
-                    </div>
-                </div>
+                    @endif
 
-                <h2>マイブログ</h2>
-                @if(count($blogs) > 0)
+                    <ul>
+                        <li>{{ $user[0]['icon_image'] }}</li>
+                        <li>名前:　{{ $user[0]['name'] }}</li>
+                        <li>ユーザーID:　{{ $user[0]['id'] }}（ログインIDとは異なります）</li>
+                        <li>概要欄:<div class="discription">{{ $user[0]['discription'] }}</div></li>
+                    </ul>
+                </div>
+            </div>
+
+            <h2>ブログ一覧</h2>
+            @if(count($blogs) > 0)
                 <table border="0">
                     @foreach($blogs as $blog)
-                        <tr key="{{ $blog->id }}">
-                                <td><a href="{{ route('blogDetail', ['id' => $blog->id]) }}">{{ $blog->title }}</a></td>
-                                <td><a>{{ $blog->created_at }}</a></td>
+                        <tr key="{{ $blog['id'] }}">
+                                <td><a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">{{ $blog['title'] }}</a></td>
+                                <td><a>{{ $blog['updated_at'] }}</a></td>
                         </tr>
                     @endforeach
                 </table>
-                @else
-                    <p>投稿がありません</p>
-                @endif
+            @else
+                <p>投稿がありません</p>
             @endif
             
-
         </div>
 
-        <!-- モーダル -->
-        <div class="modal close">
-            <div class="modal-wrapper">
-                <div class="modal-contents edit-profile display-none">
-                    @if(Auth::user() || Auth::id() == Auth::user()->id)
+        @if(Auth::user() && Auth::id() == $user[0]['id'])
+            <!-- モーダル -->
+            <div class="modal close">
+                <div class="modal-wrapper">
+                    <div class="modal-contents edit-profile display-none">
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
                             <ul>
@@ -108,13 +110,9 @@
                             <input type="hidden" name="id" value="{{ Auth::id() }}">
                             <input type="submit" value="アカウント削除">
                         </form>
-                    @endif
+                    </div>
 
-
-                </div>
-
-                <div class="modal-contents privacy-setting display-none">
-                    @if(Auth::user() || Auth::id() == Auth::user()->id)
+                    <div class="modal-contents privacy-setting display-none">
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
                             <ul>
@@ -151,11 +149,13 @@
                                 <input type="hidden" name="discription" value="{{ Auth::user()->discription }}">
                             </ul>
                         </form>
-                    @endif
+                    </div>
+
+                    <div class="modal-background"></div>
+
                 </div>
             </div>
-            <div class="modal-background"></div>
-        </div>
+        @endif
 
     </main>
 
