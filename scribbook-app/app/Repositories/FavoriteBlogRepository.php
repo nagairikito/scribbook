@@ -41,7 +41,7 @@ class FavoriteBlogRepository extends Repository
     }
     
     /**
-     * ユーザーIDとブログIDをもとにお気に入り登録されているかを判定
+     * ユーザーIDとブログIDをもとに対象のブログがお気に入り登録されているかを判定
      * @param $inputData
      * @return $result
      */

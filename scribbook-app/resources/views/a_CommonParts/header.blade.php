@@ -13,10 +13,11 @@
                 <div class="header-logo-wrapper"><a href="{{ route('toppage') }}">mark</a></div>
             </div>
             <div class="header-search-bar">
-                <div class="header-search-bar-wrapper">
-                    <input class="search-textbox" type="search">
+                <form action="{{ route('search') }}" method="GET" class="header-search-bar-wrapper">
+                @csrf
+                    <input class="search-textbox" type="search" name="keyword">
                     <input class="search-button" type="submit" value="検索🔍">
-                </div>
+                </form>
             </div>
             <div class="header-nav">
                 <ul class="header-nav-list">

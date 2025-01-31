@@ -157,14 +157,6 @@ class BlogController extends Controller
             return back()->with('error_get_blog_detail', 'ブログが見つかりませんでした');
         }
 
-        $blog[0]['favorite_flag'] = false;
-        if(Auth::user()) {
-            $checkFavoriteBlog = $this->blogService->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $id);
-            if($checkFavoriteBlog) {
-                $blog[0]['favorite_flag'] = true;
-            }
-        }
-
         return view('Blog/blog_detail', ['blog' => $blog, 'comments' => $comments]);
     }
 
@@ -193,9 +185,9 @@ class BlogController extends Controller
      * @param $id
      * @return $favoriteBlogs
      */
-    public function getFavoriteBlogs($request) {
+    public function getFavoriteBlogs(Request $request) {
         $inputData = [
-            'id' => $request,
+            'id' => $request['id'],
         ];
 
         $favoriteBlogs = $this->blogService->getAllFavoriteBlogsByUserId($inputData['id']);

@@ -17,7 +17,7 @@ return new class extends Migration
                 $table->string('name', 255)->comment('ユーザー名');
                 $table->string('login_id', 255)->unique()->comment('ログインID');
                 $table->string('password', 255)->comment('ログインパスワード');
-                $table->string('icon_image')->default('noImage.jpeg')->comment('プロフィールアイコンPath');
+                $table->string('icon_image')->default('noImage.png')->comment('プロフィールアイコンPath');
                 $table->string('discription', 500)->nullable()->comment('プロフィール概要欄');
                 $table->integer('delete_flag')->default(0)->comment('削除フラグ');
                 $table->timestamps();

@@ -41,11 +41,8 @@
     left: 0;
 }
 
-#profile-top .modal-contents.edit-profile.display-none {
+#profile-top .modal-contents.edit-profile.display-none, 
+#profile-top .modal-contents.privacy-setting.display-none,
+#profile-top .modal-contents.favorite-user.display-none {
     visibility: hidden;
 }
-
-#profile-top .modal-contents.privacy-setting.display-none {
-    visibility: hidden;
-}
-

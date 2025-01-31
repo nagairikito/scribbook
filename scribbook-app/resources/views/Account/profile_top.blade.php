@@ -21,8 +21,8 @@
                 <div class="profile-card">
                     @if(Auth::user() && Auth::id() == $user[0]['id'])
                         <ul>
-                            <li class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)">プロフィール編集</li><!-- onClickでモーダルオンにする、パスワードをかける -->
-                            <li class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)">プライバシー設定</li><!-- onClickでモーダルオンにする、パスワードをかける、アカウント削除機能 -->
+                            <li class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)">プロフィール編集</li>
+                            <li class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)">プライバシー設定</li>
                             <li>
                                 <form action="{{ route('logout') }}" metohd="POST">
                                 @csrf
@@ -34,9 +34,32 @@
                     @endif
 
                     <ul>
-                        <li>{{ $user[0]['icon_image'] }}</li>
+                        <li><img src="{{ asset('storage/user_icon_images/' .$user[0]['icon_image']) }}"></li>
                         <li>名前:　{{ $user[0]['name'] }}</li>
                         <li>ユーザーID:　{{ $user[0]['id'] }}（ログインIDとは異なります）</li>
+
+                        @if(Auth::user() && Auth::id() == $user[0]['id'])
+                            <li class="open-favorite-user-modal" onclick="openModal(FAVORITE_USER)">お気に入りユーザー</li>
+
+                        @elseif(Auth::user() && Auth::id() != $user[0]['id'])
+                            @if($user[0]['favorite_flag'] == false)
+                                <form action="{{ route('register_favorite_user') }}" metohd="POST">
+                                @csrf
+                                    <input type="submit" value="お気に入り登録">
+                                    <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                    <input type="hidden" name="target_favorite_user_id" value="{{ $user[0]['id'] }}">
+                                </form>
+                            @else
+                                <form action="{{ route('delete_favorite_user') }}" metohd="POST">
+                                    @csrf
+                                        <input type="submit" value="お気に入り登録解除">
+                                        <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                        <input type="hidden" name="target_favorite_user_id" value="{{ $user[0]['id'] }}">
+                                        <input type="hidden" name="page_type" value="profile_top">
+                                </form>
+                            @endif
+                        @endif
+
                         <li>概要欄:<div class="discription">{{ $user[0]['discription'] }}</div></li>
                     </ul>
                 </div>
@@ -62,8 +85,10 @@
             <!-- モーダル -->
             <div class="modal close">
                 <div class="modal-wrapper">
+
+                    <!-- プロフィール編集モーダル -->
                     <div class="modal-contents edit-profile display-none">
-                        <form action="{{ route('update_profile') }}" method="POST">
+                        <form action="{{ route('update_profile') }}" method="POST" enctype="multipart/form-data">
                         @csrf
                             <ul>
                                 <li class="close-edit-profile-modal" onclick="closeModal(EDIT_PROFILE)">✕</li>
@@ -76,10 +101,11 @@
                             </div>
                             <ul>
                                 
-                                <li>{{ Auth::user()->icon_image }}</li>
                                 <li>
-                                    <p>プロフィール画像選択:</p>
-                                    <input type="file" name="icon_image" value="{{ Auth::user()->icon_image }}">
+                                    <img src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}" style="width: 200px; height: 200px;">
+                                    <i onclick="initUserIcon()">✕</i>
+                                    <input type="file" name="icon_image_file">
+                                    <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
                                 </li>
                                 <li>
                                     <p>名前:</p>
@@ -112,6 +138,7 @@
                         </form>
                     </div>
 
+                    <!-- プライバシー設定モーダル -->
                     <div class="modal-contents privacy-setting display-none">
                         <form action="{{ route('update_profile') }}" method="POST">
                         @csrf
@@ -151,6 +178,31 @@
                         </form>
                     </div>
 
+                    <!-- お気に入りユーザーモーダル -->
+                    <div class="modal-contents favorite-user display-none">
+                        <div class="close-privacy-setting-modal" onclick="closeModal(FAVORITE_USER)">✕</div>
+                        @if(count($user[0]['favorite_users']) > 0)
+                            <ul>
+                                @foreach($user[0]['favorite_users'] as $favorite_user)
+                                    <li>
+                                        <div><a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}"><img src="{{ asset('storage/user_icon_images/' . $favorite_user['icon_image']) }}"></a></div>
+                                        <div><a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}"></a>{{ $favorite_user['name'] }}</div>
+                                        <form action="{{ route('delete_favorite_user') }}">
+                                        @csrf
+                                            <input type="submit" value="お気に入り登録解除">
+                                            <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                            <input type="hidden" name="target_favorite_user_id" value="{{ $favorite_user['id'] }}">
+                                            <input type="hidden" name="page_type" value="my_favorite_users">
+                                        </form>
+                                    </li>
+                                @endforeach
+                            </ul>
+                        @else
+                            <p>お気に入り登録されているユーザーがいません</p>
+                        @endif
+                    </div>
+
+                    <!-- モーダル背景 -->
                     <div class="modal-background"></div>
 
                 </div>

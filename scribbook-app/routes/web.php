@@ -1,13 +1,17 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\TopPageController;
+use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BlogController;
-use App\Http\Controllers\TopPageController;
 
 
 // トップページ
 Route::get('/', [TopPageController::class, 'index'])->name('toppage');
+
+// 検索
+Route::get('/search', [SearchController::class, 'search'])->name('search');
 
 // アカウント関連
 Route::get('/accountRegisterationForm', [AccountController::class, 'accountRegisterationForm'])->name('account_registeration_form');
@@ -16,8 +20,13 @@ Route::get('/loginForm', [AccountController::class, 'loginForm'])->name('login_f
 Route::post('/login', [AccountController::class, 'login'])->name('login');
 Route::get('/logout', [AccountController::class, 'logout'])->name('logout');
 Route::get('/profile/{id}', [AccountController::class, 'profileTop'])->name('profile_top');
+Route::get('/registerFavoriteUser', [AccountController::class, 'registerFavoriteUser'])->name('create_favorite_user_registeration'); //profile_topがリクエストパラメータ付きURL（GETメソッド）であるためそのページでのPOSTメソッド記述はできない、そのためユーザーお気に入り登録処理を一度GETメソッドで取得する
+Route::post('/registerFavoriteUser', [AccountController::class, 'registerFavoriteUser'])->name('register_favorite_user');
+Route::get('/deleteFavoriteUser', [AccountController::class, 'deleteFavoriteUser'])->name('create_favorite_user_deleting'); //profile_topがリクエストパラメータ付きURL（GETメソッド）であるためそのページでのPOSTメソッド記述はできない、そのためユーザーお気に入り登録処理を一度GETメソッドで取得する
+Route::post('/deleteFavoriteUser', [AccountController::class, 'deleteFavoriteUser'])->name('delete_favorite_user');
 Route::post('/updateProfile', [AccountController::class, 'updateProfile'])->name('update_profile');
 Route::get('/deleteAccount', [AccountController::class, 'deleteAccount'])->name('delete_account');
+Route::post('deleteUserIcon', [AccountController::class, 'deleteIconImageFromStorage'])->name('delete_user_icon');
 
 // ブログ関連
 Route::get('/blogPostingForm', [BlogController::class, 'blogPostingForm'])->name('blog_posting_form');

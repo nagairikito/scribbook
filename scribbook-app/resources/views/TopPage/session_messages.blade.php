@@ -10,6 +10,10 @@
         <p class="success-message">{{ session('success_logout') }}</p>
     @endif
 
+    @if(session('success_delete'))
+        <p class="success-message">{{ session('success_delete') }}</p>
+    @endif
+
     @if(session('error_delete'))
         <p class="error-message">{{ session('error_delete') }}</p>
     @endif

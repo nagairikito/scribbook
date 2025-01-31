@@ -28,7 +28,7 @@ class AccountUpdatingRequest extends FormRequest
             'name'                    => 'required|string|max:255',
             'login_id'                => "required|string|max:255|unique:users,login_id,{$loginUserId},id",
             'password'                => 'required|confirmed|string|max:255',
-            'icon_image'              => 'nullable|string|max:255',
+            'icon_image'              => 'nullable|max:255',
             'discription'             => 'nullable|string|max:500',
         ];
     }

@@ -174,6 +174,16 @@ class BlogService extends Service
     public function blogDetail($id) {
         $blog = $this->blogRepository->blogDetail($id);
 
+        $blog[0]['favorite_flag'] = false;
+        if(Auth::user()) {
+            // $checkFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $id);
+            $checkFavoriteBlog = $this->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $id);
+            if($checkFavoriteBlog) {
+                $blog[0]['favorite_flag'] = true;
+            }
+        }
+
+
         return $blog;
     }
 

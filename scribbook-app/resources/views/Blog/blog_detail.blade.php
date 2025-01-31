@@ -81,7 +81,7 @@
                             <ul class="comment-list">
                                 @foreach($comments as $comment)
                                     <li>
-                                        <div class="profile">{{ $comment['icon_image'] }}</div>
+                                        <div class="profile"><img src="{{ asset('storage/user_icon_images/' . $comment['icon_image']) }}"></div>
                                         <p>{{ $comment['name'] }}</p>
                                         <p>{{ $comment['created_at'] }}</p>
                                         <p>{{ $comment['comment'] }}</p>

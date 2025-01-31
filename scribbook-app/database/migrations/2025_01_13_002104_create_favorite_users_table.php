@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('favorite_users', function (Blueprint $table) {
             $table->integer('user_id')->comment('users.id');
-            $table->integer('blog_id')->comment('articles.id');
+            $table->integer('favorite_user_id')->comment('users.id');
             $table->timestamps();
             $table->comment('お気に入りユーザー');
         });
