@@ -5,9 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/a_CommonParts/header.css') }}">
+
 </head>
 <body>
-    <header>
+    <header id="header">
         <div class="header-wrapper">
             <div class="header-logo">
                 <div class="header-logo-wrapper"><a href="{{ route('toppage') }}">mark</a></div>
@@ -23,7 +24,7 @@
                 <ul class="header-nav-list">
                     @if(Auth::user())
                         <li><a href="{{ route('blog_posting_form') }}">投稿</a></li>
-                        <li><a href="{{ route('favorite_blogs_page', ['id' => Auth::id()]) }}">評価したブログ</a></li>
+                        <li><a href="">通知</a></li>
                         <li><a href="{{ route('profile_top', ['id' => Auth::id()]) }}">アカウント</a></li>
                     @endif
                     @if(!Auth::user())

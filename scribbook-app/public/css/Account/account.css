@@ -1,16 +1,16 @@
-/* #profile-top .open-edit-profile-modal, #profile-top .open-privacy-setting-modal {
+/* .profile-top .open-edit-profile-modal, .profile-top .open-privacy-setting-modal {
     cursor: pointer;
 }
 
-#profile-top .close-edit-profile-modal, #profile-top .close-privacy-setting-modal {
+.profile-top .close-edit-profile-modal, .profile-top .close-privacy-setting-modal {
     cursor: pointer;
 } */
 
-#profile-top .modal.close {
+.profile-top .modal.close {
     visibility: hidden;
 }
 
-#profile-top .modal.open{
+.profile-top .modal.open{
     visibility: visible;
     position: fixed;
     width: 100%;
@@ -19,7 +19,7 @@
     left: 0;
 }
 
-#profile-top .modal-contents {
+.profile-top .modal-contents {
     z-index: 1;
     position: absolute;
     top: 50%;
@@ -31,7 +31,7 @@
     background-color: white;
 }
 
-#profile-top .modal-background {
+.profile-top .modal-background {
     background-color: gray;
     position: absolute;
     opacity: 0.5;
@@ -41,8 +41,8 @@
     left: 0;
 }
 
-#profile-top .modal-contents.edit-profile.display-none, 
-#profile-top .modal-contents.privacy-setting.display-none,
-#profile-top .modal-contents.favorite-user.display-none {
+.profile-top .modal-contents.edit-profile.display-none, 
+.profile-top .modal-contents.privacy-setting.display-none,
+.profile-top .modal-contents.favorite-user.display-none {
     visibility: hidden;
 }
