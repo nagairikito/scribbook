@@ -79,7 +79,29 @@ class BlogRepository extends Repository
     }
 
     /**
-     * ユーザーIDに紐づくブログからブログIDをもとに１件取得
+     * トピックス取得
+     * @return $allBlogs
+     */
+    public function getTopics() {
+        $allblogs = $this->blog->select(
+            'articles.id',
+            'articles.title',
+            'articles.contents',
+            'articles.created_by',
+            'users.name',
+            'articles.created_at',
+        )
+        ->join('users', 'users.id', '=', 'articles.created_by')
+        ->orderByDesc('articles.view_count')
+        ->limit(10)
+        ->get();
+
+        return !empty($allblogs) ? $allblogs->toArray() : [];
+        // return !empty($allblogs) ? $allblogs->toArray() : [];
+    }
+
+    /**
+     * ユーザーIDに紐づくブログIDをもとに１件取得
      * @param $id
      * @return $blog
      */
@@ -94,6 +116,29 @@ class BlogRepository extends Repository
         ->get();
 
         return !empty($blog) ? $blog->toArray() : [];
+    }
+
+    /**
+     * ユーザーIDに紐づくお気に入り登録したユーザーのブログ全件取得
+     * @param $id
+     * @return $blogs
+     */
+    public function getBlogPostedByFavoriteUserByUserId($id) {
+        $blogs = $this->blog
+        ->join('favorite_users', 'favorite_user_id', '=', 'articles.created_by')
+        ->join('users', 'users.id', '=', 'favorite_users.favorite_user_id')
+        ->where('favorite_users.user_id', '=', $id)
+        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
+        ->select(
+            'articles.*',
+            'users.name',
+            'users.icon_image',
+        )
+        ->get();
+
+        $blogs = $blogs->sortByDesc('articles.updated_at');
+
+        return !empty($blogs) ? $blogs->toArray() : [];
     }
 
     /**
@@ -130,6 +175,7 @@ class BlogRepository extends Repository
             'articles.title',
             'articles.contents',
             'articles.created_by',
+            'articles.view_count',
             'articles.updated_at',
             'users.name',
         )
@@ -139,6 +185,18 @@ class BlogRepository extends Repository
         ->get();
 
         return !empty($blog) ? $blog->toArray() : [];
+    }
+
+    /**
+     * ブログ閲覧数増加
+     */
+    public function increaseViewCount($id) {
+        $targetBlog = $this->blog->where('id', '=', $id)->first();
+        $targetBlog->view_count += 1;
+        $targetBlog->timestamps = false;
+        $result = $targetBlog->save();
+
+        return $result;
     }
 
 }

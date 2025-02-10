@@ -5,6 +5,7 @@ use App\Http\Controllers\TopPageController;
 use App\Http\Controllers\SearchController;
 use App\Http\Controllers\AccountController;
 use App\Http\Controllers\BlogController;
+use App\Http\Controllers\TalkController;
 
 
 // トップページ
@@ -26,9 +27,15 @@ Route::get('/deleteFavoriteUser', [AccountController::class, 'deleteFavoriteUser
 Route::post('/deleteFavoriteUser', [AccountController::class, 'deleteFavoriteUser'])->name('delete_favorite_user');
 Route::post('/updateProfile', [AccountController::class, 'updateProfile'])->name('update_profile');
 Route::get('/deleteAccount', [AccountController::class, 'deleteAccount'])->name('delete_account');
-Route::post('deleteUserIcon', [AccountController::class, 'deleteIconImageFromStorage'])->name('delete_user_icon');
+Route::post('/deleteUserIcon', [AccountController::class, 'deleteIconImageFromStorage'])->name('delete_user_icon');
+
+// トーク
+Route::get('/talkList', [TalkController::class, 'showTalkRoomList'])->name('show_talk_list');
+Route::get('/talkRoom', [TalkController::class, 'displayTalkRoom'])->name('display_talk_room');
+Route::post('/sendMessage', [TalkController::class, 'sendMessage'])->name('send_message');
 
 // ブログ関連
+Route::get('/topics', [BlogController::class, 'topics'])->name('topics');
 Route::get('/blogPostingForm', [BlogController::class, 'blogPostingForm'])->name('blog_posting_form');
 Route::post('/postBlog', [BlogController::class, 'postBlog'])->name('post_blog');
 Route::post('/blogEditingForm', [BlogController::class, 'blogEditingForm'])->name('blog_editing_form');
@@ -38,4 +45,8 @@ Route::get('/blogDedail/{id}', [BlogController::class, 'blogDetail'])->name('blo
 Route::post('/postComment', [BlogController::class, 'postComment'])->name('post_comment');
 Route::post('/reisterFavoriteBlog', [BlogController::class, 'registerFavoriteBlog'])->name('register_favorite_blog');
 Route::post('/deleteFavoriteBlog', [BlogController::class, 'deleteFavoriteBlog'])->name('delete_favorite_blog');
-Route::get('/favoriteBlogs/{id}', [BlogController::class, 'getFavoriteBlogs'])->name('favorite_blogs_page');
+Route::get('/getBlogPostedByFavoriteUserByUserId/{id}', [BlogController::class, 'getBlogPostedByFavoriteUserByUserId'])->name('create_favorite_user_blogs'); 
+Route::post('/getBlogPostedByFavoriteUserByUserId/{id}', [BlogController::class, 'getBlogPostedByFavoriteUserByUserId'])->name('favorite_user_blogs');
+Route::get('/favoriteBlogs/{id}', [BlogController::class, 'getFavoriteBlogs'])->name('favorite_blogs');
+Route::get('/myBlogs/{id}', [BlogController::class, 'showMYBlogs'])->name('my_blogs');
+Route::get('/BrowsingHistory/{id}', [BlogController::class, 'showBrowsingHistory'])->name('show_browsing_history');

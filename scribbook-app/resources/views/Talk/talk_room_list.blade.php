@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -10,7 +11,7 @@
     <script src="{{ asset('js/Blog/topicsGetScreenSize.js') }}" defer></script>
 
 
-    <title>お気に入りブログ</title>
+    <title>マイブログ</title>
 </head>
 <body>
     @include('a_CommonParts.header')
@@ -20,22 +21,14 @@
 
                 <div class="main-contents">    
                     <div class="main-contents-wrapper">
-                        <h1>お気に入りブログ</h1>
-                        @if(count($favoriteBlogs) > 0)
+                        <h1>トーク</h1>
+                        @if(count($talkRooms) > 0)
                             <ul class="blog-list-wrapper">
-                                @foreach($favoriteBlogs as $blog)
-                                    <li class="blog-unit">
-                                        <a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">
-                                            <p class="title">{{ $blog['title'] }}</p>
-                                            <p class="blog-contents">{{ $blog['contents'] }}</p>
-                                            <p class="posted-at">{{ $blog['created_at'] }}</td>
-                                        </a>
-                                        <p class="post-user"><a href="{{ route('profile_top', ['id' => $blog['created_by']]) }}">{{ $blog['name'] }}</a></p>
-                                    </li>
+                                @foreach($talkRooms as $talkRoom)
                                 @endforeach
                             </ul>
                         @else
-                            <p>お気に入り登録したブログはありません</p>
+                            <p>トークがありません</p>
                         @endif
                     </div>
 

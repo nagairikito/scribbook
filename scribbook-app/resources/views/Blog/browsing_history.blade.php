@@ -7,9 +7,9 @@
 
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/a_CommonParts/main.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/TopPage/toppage.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/Blog/topics.css') }}">
     <script src="{{ asset('js/a_CommonParts/getScreenSize.js') }}" defer></script>
-    <script src="{{ asset('js/TopPage/topPageGetScreenSize.js') }}" defer></script>
+    <script src="{{ asset('js/Blog/topicsGetScreenSize.js') }}" defer></script>
 
 
 </head>
@@ -20,13 +20,12 @@
                 @include('a_CommonParts.nav')
 
                 <div class="main-contents">
-                    @include('TopPage.session_messages')
 
                     <div class="blog-list">
-                        <h2>トップ</h2>
-                        @if(count($allBlogs) > 0)
+                        <h2>閲覧履歴</h2>
+                        @if(count($blogs) > 0)
                             <ul class="blog-list-wrapper">
-                                @foreach($allBlogs as $blog)
+                                @foreach($blogs as $blog)
                                     <li class="blog-unit">
                                         <a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">
                                             <p class="title">{{ $blog['title'] }}</p>
@@ -38,7 +37,7 @@
                                 @endforeach
                             </ul>
                         @else
-                            <p>ブログがありません</p>
+                            <p>閲覧履歴がありません</p>
                         @endif
                     </div>
 

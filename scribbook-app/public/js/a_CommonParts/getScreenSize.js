@@ -3,6 +3,6 @@ let mainWrapper = document.querySelector('.main-wrapper');
 let footer = document.getElementById('footer');
 
 let w = window.screen.availWidth;
-header.setAttribute('style', 'min-width:' + w + 'px; width: 100%;');
+header.setAttribute('style', 'width:' + w + 'px;');
 mainWrapper.setAttribute('style', 'width:' + w + 'px; margin:0 auto;');
-footer.setAttribute('style', 'min-width:' + w + 'px; width: 100%;');
+footer.setAttribute('style', 'width:' + w + 'px;');

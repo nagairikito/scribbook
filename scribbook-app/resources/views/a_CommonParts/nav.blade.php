@@ -11,12 +11,13 @@
 <div class="nav">
     <ul class="nav-wrapper">
             <li><a href="{{ route('toppage') }}">トップ</a></li>
-            <li><a href="">トピックス</a></li>
+            <li><a href="{{ route('topics') }}">トピックス</a></li>
         @if(Auth::user())
-            <li>評価したユーザー</li>
-            <li><a href="{{ route('favorite_blogs_page', ['id' => Auth::id()]) }}">評価したブログ</a></li>
-            <li<a href="">履歴</a></li>
-            <li<a href="">トーク</a></li>
+            <li><a href="{{ route('my_blogs', ['id' => Auth::id()]) }}">マイブログ</a></li>
+            <li><a href="{{ route('favorite_user_blogs', ['id' => Auth::id()]) }}">評価したユーザー</a></li>
+            <li><a href="{{ route('favorite_blogs', ['id' => Auth::id()]) }}">評価したブログ</a></li>
+            <li><a href="{{ route('show_browsing_history', ['id' => Auth::id()]) }}">履歴</a></li>
+            <li><a href="">トーク</a></li>
         @endif
     </ul>
 </div>

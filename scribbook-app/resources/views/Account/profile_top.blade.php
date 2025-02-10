@@ -30,7 +30,7 @@
                                         <li class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)">プロフィール編集</li>
                                         <li class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)">プライバシー設定</li>
                                         <li>
-                                            <form action="{{ route('logout') }}" metohd="POST">
+                                            <form action="{{ route('logout') }}" method="GET">
                                             @csrf
                                                 <input type="hidden" name="id" value="{{ Auth::id() }}">
                                                 <input type="submit" value="ログアウト">
@@ -64,6 +64,15 @@
                                                     <input type="hidden" name="page_type" value="profile_top">
                                             </form>
                                         @endif
+                                        <div>
+                                            <form action="{{ route('display_talk_room') }}" method="get">
+                                            @csrf
+                                                <input type="hidden" name="sender" value="{{ Auth::id() }}">
+                                                <input type="hidden" name="recipient" value="{{ $user[0]['id'] }}">
+                                                <input type="submit" value="メッセージを送る">
+                                            </form>
+                                        </div>
+
                                     @endif
 
                                     <li>概要欄:<div class="discription">{{ $user[0]['discription'] }}</div></li>

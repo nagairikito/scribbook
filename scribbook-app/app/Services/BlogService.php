@@ -7,8 +7,10 @@ use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleComment;
 use App\Models\FavoriteBlog;
+use App\Models\BrowsingHistory;
 use App\Repositories\BlogRepository;
 use App\Repositories\BlogCommentsRepository;
+use App\Repositories\BrowsingHistoryRepository;
 use App\Repositories\AccountRepository;
 use App\Repositories\FavoriteBlogRepository;
 
@@ -21,6 +23,7 @@ class BlogService extends Service
     public $blogRepository;
     public $blogCommentsRepository;
     public $favoriteBlogRepository;
+    public $BrowsingHistoryRepository;
 
     public function __construct() {
 
@@ -29,12 +32,14 @@ class BlogService extends Service
         $blog = new Article;
         $blogComments = new ArticleComment;
         $favoriteBlog = new FavoriteBlog;
+        $browsingHistory = new BrowsingHistory;
 
         // Repositryのインスタンス化
         $this->accountRepository = new AccountRepository($user);
         $this->blogRepository = new BlogRepository($blog);
         $this->blogCommentsRepository = new BlogCommentsRepository($blogComments);
         $this->favoriteBlogRepository = new FavoriteBlogRepository($favoriteBlog);
+        $this->BrowsingHistoryRepository = new BrowsingHistoryRepository($browsingHistory);
 
     }
     
@@ -135,6 +140,14 @@ class BlogService extends Service
     }
 
     /**
+     * トピックス取得
+     */
+    public function getTopics() {
+        $topics = $this->blogRepository->getTopics();
+        return $topics;
+    }
+
+    /**
      * ユーザーIDに紐づくブログからブログIDをもとに1件取得
      * @param $userId
      * @return $blogs
@@ -167,12 +180,34 @@ class BlogService extends Service
     }
 
     /**
+     * ユーザーIDに紐づくお気に入り登録したユーザーのブログ全件取得
+     * @param $userId
+     * @return $blogs
+     */
+    public function getBlogPostedByFavoriteUserByUserId($userId) {
+
+        $targetUser = $this->accountRepository->getAccountById($userId);
+        if(!$targetUser) {
+            return [];
+        }
+
+        $getBlogPostedByFavoriteUser = $this->blogRepository->getBlogPostedByFavoriteUserByUserId($userId);
+        return $getBlogPostedByFavoriteUser;
+    }
+
+    /**
      * ブログ詳細取得
      * @param $id
      * @return $blog
      */
     public function blogDetail($id) {
         $blog = $this->blogRepository->blogDetail($id);
+
+        // 閲覧処理（閲覧数増加、閲覧履歴の登録）
+        $this->blogRepository->increaseViewCount($id);
+        if(Auth::id()) {
+            $this->BrowsingHistoryRepository->upsertBrowsingHistory(Auth::id() ,$id);
+        }
 
         $blog[0]['favorite_flag'] = false;
         if(Auth::user()) {
@@ -333,5 +368,20 @@ class BlogService extends Service
 
         return $deleteFavoriteBlogStatus;
     }
+
+    /**
+     * 閲覧履歴
+     */
+    public function showBrowsingHistory($inputData) {
+        $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
+        if(!$targetUser) {
+            return false;
+        }
+
+        $browsingHistory = $this->BrowsingHistoryRepository->getBrowsingHisotryByUserId($inputData['user_id']);
+        return $browsingHistory;
+
+    }
+
 
 }

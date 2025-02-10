@@ -27,6 +27,44 @@ class BlogController extends Controller
         $this->blogService = new BlogService($blogRepository);
 
     }
+
+    /**
+     * トピックス表示
+     */
+    public function topics() {
+        $allBlogs = $this->blogService->getTopics();
+
+        return view('Blog/topics', ['allBlogs' => $allBlogs]);
+    }
+
+    /**
+     * マイブログ表示
+     */
+    public function showMYBlogs(Request $request) {
+        $inputData = [
+            'user_id' => $request['id']
+        ];
+
+        $myBlogs = $this->blogService->getBlogsByUserId($inputData['user_id']);
+
+        return view('Blog/my_blogs', compact('myBlogs'));
+
+    }
+
+    /**
+     * ユーザーIDに紐づくお気に入り登録したユーザーのブログ全件取得
+     * @param $request
+     * @return view
+     */
+    public function getBlogPostedByFavoriteUserByUserId(Request $request) {
+        $inputData = [
+            'user_id' => $request['id'],
+        ];
+        $blogsPostedByFavoriteUser = $this->blogService->getBlogPostedByFavoriteUserByUserId($inputData['user_id']);
+
+        return view('Blog/favorite_user_blogs', compact('blogsPostedByFavoriteUser'));
+    }
+
     
     /**
      * ブログ投稿フォーム
@@ -233,5 +271,19 @@ class BlogController extends Controller
         }
 
         return back()->with('error_register_favorite_blog', 'お気に入り登録を解除できません、もしくは既にお気に入り登録が解除されています');
+    }
+
+    /**
+     * 閲覧履歴表示
+     */
+    public function showBrowsingHistory(Request $request) {
+        $inputData = [
+            'user_id' => $request['id'],
+        ];
+
+        $blogs = $this->blogService->showBrowsingHistory($inputData);
+
+        return view('Blog/browsing_history', compact('blogs'));
+
     }
 }
