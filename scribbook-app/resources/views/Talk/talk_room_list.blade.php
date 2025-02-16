@@ -11,7 +11,7 @@
     <script src="{{ asset('js/Blog/topicsGetScreenSize.js') }}" defer></script>
 
 
-    <title>マイブログ</title>
+    <title>トークルームリスト</title>
 </head>
 <body>
     @include('a_CommonParts.header')
@@ -22,14 +22,29 @@
                 <div class="main-contents">    
                     <div class="main-contents-wrapper">
                         <h1>トーク</h1>
-                        @if(count($talkRooms) > 0)
-                            <ul class="blog-list-wrapper">
-                                @foreach($talkRooms as $talkRoom)
+                        <ul class="">
+                            @if(count($talkRoomList) > 0)
+                                @foreach($talkRoomList as $talkRoom)
+                                    <li>
+                                        <a href="{{ route('display_talk_room', ['sender' => Auth::id(), 'recipient' => $talkRoom['user_id']]) }}">
+                                            <img class="" src="{{ asset('storage/user_icon_images/' .$talkRoom['icon_image']) }}">
+                                            <div class="">
+                                                <p>{{ $talkRoom['name'] }}</p>
+                                                    @if($talkRoom['latest_message']['attached_file_path'] == null)
+                                                        <p>{{ $talkRoom['latest_message']['message'] }}</p>
+                                                    @elseif($talkRoom['latest_message']['message'] == null)
+                                                        <p>画像を送信しました</p>
+                                                    @endif
+                                                <p>{{ $talkRoom['updated_at'] }}</p>    
+                                            </div>
+                                        </a>
+                                    </li>
                                 @endforeach
-                            </ul>
-                        @else
-                            <p>トークがありません</p>
-                        @endif
+                            
+                            @else
+                                <li>トークがありません</li>
+                            @endif
+                        </ul>
                     </div>
 
                 </div>

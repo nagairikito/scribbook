@@ -1,13 +1,13 @@
 header {
     height: 5%;
     min-height: 50px;
-    width: 100%;
+    width: 100vw;
 
 }
 
 header .header-wrapper {
     height: 5%;
-    width: 100%;
+    width: 100vw;
     padding: 10px;
     background-color: #ccf0ff;
 

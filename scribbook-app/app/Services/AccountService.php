@@ -98,7 +98,7 @@ class AccountService extends Service
     public function getAccountById($id) {
         $checkExistsUser = $this->accountRepository->existsAccountById($id);
         if(!$checkExistsUser) {
-            Auth::logout();
+            // Auth::logout();
             return [];
         }
 

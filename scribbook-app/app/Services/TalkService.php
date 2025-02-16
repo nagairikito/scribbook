@@ -25,6 +25,54 @@ class TalkService extends Service
     }
 
     /**
+     * ユーザーIDに紐づくトークルームを全件取得
+     */
+    public function getTalkRoomListByUserId($userId) {
+        // talk_roomsのuser_id_1に登録されているかチェック
+        $talkRoomIdList1 = $this->talkRoomRepository->checkExistsUserId1AndGetTalkRoomIdByTargetUserId($userId, 'user_id_1', 'delete_flag_1');
+
+        $talkRoomList1 = [];
+        if($talkRoomIdList1) {
+
+            $talkRoomIds1 = [];
+            foreach($talkRoomIdList1 as $talkRoomId1) {
+                $talkRoomIds1[] = $talkRoomId1['id'];
+            }
+            $preTalkRoomList1 = $this->talkRoomRepository->getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds1, 'user_id_2', 'delete_flag_1');
+            
+            foreach($preTalkRoomList1 as $preTalkRoom1) {
+                $latestMessage = $this->talkRepository->getLatestMessageByTalkRoomId($preTalkRoom1['talk_room_id'], 'delete_flag_1');
+                $preTalkRoom1['latest_message'] = $latestMessage;
+                $talkRoomList1[] = $preTalkRoom1;
+            }
+        }
+
+        // talk_roomsのuser_id_2に登録されているかチェック
+        $talkRoomIdList2 = $this->talkRoomRepository->checkExistsUserId1AndGetTalkRoomIdByTargetUserId($userId, 'user_id_2', 'delete_flag_2');
+
+        $talkRoomList2 = [];
+        if($talkRoomIdList2) {
+            $talkRoomIds2 = [];
+            foreach($talkRoomIdList2 as $talkRoomId2) {
+                $talkRoomIds2[] = $talkRoomId2['id'];
+            }
+            $preTalkRoomList2[] = $this->talkRoomRepository->getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds2, 'user_id_1', 'delete_flag_2');
+        
+            foreach($preTalkRoomList2 as $preTalkRoom2) {
+                $latestMessage = $this->talkRepository->getLatestMessageByTalkRoomId($preTalkRoom2['talk_room_id'], 'delete_flag_2');
+                $preTalkRoom2['latest_message'] = $latestMessage;
+                $talkRoomList2[] = $preTalkRoom2;
+            }
+        }
+
+
+        $margedTalkRoomList = array_merge($talkRoomList1, $talkRoomList2);
+        $talkRoomList = collect($margedTalkRoomList)->sortByDesc('updated_at')->toArray();
+
+        return $talkRoomList;
+    }
+
+    /**
      * 2ユーザー間のトークルームIDの取得
      */
     public function getTargetTalkRoomId($user_id_1, $user_id_2) {
@@ -57,6 +105,9 @@ class TalkService extends Service
      */
     public function sendMessage($inputData) {
         $talkRoomId = $this->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
+        if($talkRoomId) {
+            $this->talkRoomRepository->updateTalkRoom($talkRoomId);
+        }
         if($talkRoomId == null) {
             $this->talkRoomRepository->createTalkRoom($inputData['sender'], $inputData['recipient']);
             $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);

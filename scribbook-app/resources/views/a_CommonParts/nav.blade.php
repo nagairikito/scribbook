@@ -17,7 +17,7 @@
             <li><a href="{{ route('favorite_user_blogs', ['id' => Auth::id()]) }}">評価したユーザー</a></li>
             <li><a href="{{ route('favorite_blogs', ['id' => Auth::id()]) }}">評価したブログ</a></li>
             <li><a href="{{ route('show_browsing_history', ['id' => Auth::id()]) }}">履歴</a></li>
-            <li><a href="">トーク</a></li>
+            <li><a href="{{ route('talk_room_list', Auth::id()) }}">トーク</a></li>
         @endif
     </ul>
 </div>

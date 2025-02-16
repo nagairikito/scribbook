@@ -3,9 +3,9 @@
 namespace App\Repositories;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Models\Talk;
-
-use App\Const\AccountConst;
+use App\Const\TalkConst;
 
 class TalkRepository extends Repository
 {
@@ -37,17 +37,42 @@ class TalkRepository extends Repository
      */
     public function getAllMessageesByRoomId($inputData) {
         $messages = $this->talk
-        ->select(
-            'message',
-            'attached_file_path',
-            'created_by',
-            'message',
-        )
+        ->join('users', 'users.id', '=', 'talks.created_by')
         ->where('talk_room_id', '=', $inputData['talk_room_id'])
-        ->orderByDesc('updated_at')
+        ->orderBy('updated_at')
+        ->select(
+            'talks.message',
+            'talks.attached_file_path',
+            'talks.updated_at',
+            'talks.created_by',
+            'users.name',
+            'users.icon_image',
+        )
+
         ->get();
 
         return !empty($messages) ? $messages->toArray() : [];
+    }
+
+    /**
+     * トークルームの最新のメッセージを取得
+     * @param $inputData
+     * @return boolean $result
+     */
+    public function getLatestMessageByTalkRoomId($talkRoomId, $deleteFlagColumn) {
+        $latestMessages = $this->talk
+        ->join('talk_rooms', 'talk_rooms.id', 'talks.talk_room_id')
+        ->where('talks.talk_room_id', $talkRoomId)
+        ->where('talks.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
+        ->where('talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
+        ->orderByDesc('talks.updated_at')
+        ->select(
+            'message',
+            'attached_file_path',
+        )
+        ->first();
+
+        return !empty($latestMessages) ? $latestMessages->toArray() : [];
     }
 
 }

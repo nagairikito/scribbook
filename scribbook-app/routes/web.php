@@ -30,8 +30,10 @@ Route::get('/deleteAccount', [AccountController::class, 'deleteAccount'])->name(
 Route::post('/deleteUserIcon', [AccountController::class, 'deleteIconImageFromStorage'])->name('delete_user_icon');
 
 // トーク
-Route::get('/talkList', [TalkController::class, 'showTalkRoomList'])->name('show_talk_list');
+Route::get('/talkRoomList/{id}', [TalkController::class, 'showTalkRoomList'])->name('talk_room_list');
 Route::get('/talkRoom', [TalkController::class, 'displayTalkRoom'])->name('display_talk_room');
+Route::get('/talkRoom/{sender}/{recipient}', [TalkController::class, 'displayTalkRoom'])->name('display_talk_room');
+Route::get('/sendMessage', [TalkController::class, 'sendMessage'])->name('create_send_message');
 Route::post('/sendMessage', [TalkController::class, 'sendMessage'])->name('send_message');
 
 // ブログ関連

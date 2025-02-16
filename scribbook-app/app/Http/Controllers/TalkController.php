@@ -3,22 +3,27 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Talk;
 use App\Models\TalkRoom;
+use App\Repositories\AccountRepository;
 use App\Repositories\TalkRepository;
 use App\Repositories\TalkRoomRepository;
 use App\Services\TalkService;
 
 class TalkController extends Controller
 {
+    public $accountRepository;
     public $talkService;
     public $talkRoomService;
     public function __construct() {
         // Modelのインスタンス化
+        $user = new User;
         $talk = new Talk;
         $talkRoom = new TalkRoom;
 
         // Repositoryのインスタンス化
+        $this->accountRepository = new AccountRepository($user);
         $talkRepository = new TalkRepository($talk);
         $talkRoomRepository = new TalkRoomRepository($talkRoom);
 
@@ -27,10 +32,13 @@ class TalkController extends Controller
     }
     
     /**
-     * トップページ初期表示
+     * トークルームリスト表示
      */
-    public function showTalkRoomList() {
-        $talkRoomList = $this->talkRoomService->getTalkRoomList();
+    public function showTalkRoomList(Request $request) {
+        $inputData = [
+            'user_id' => $request['id'],
+        ];
+        $talkRoomList = $this->talkService->getTalkRoomListByUserId($inputData['user_id']);
 
         return view('Talk/talk_room_list', compact('talkRoomList'));
     }
@@ -47,9 +55,14 @@ class TalkController extends Controller
         $talkRoomId = $this->talkService->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
         $inputData['talk_room_id'] = $talkRoomId;
         $messages = $this->talkService->getAllMessageesByRoomId($inputData);
+
+        $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
+        $recipientName = $recipient[0]['name'];
+
         $talkRoom = [
             'messages' => $messages,
             'recipient' => $inputData['recipient'],
+            'recipient_name' => $recipientName,
         ];
 
         return view('Talk/display_talk_room', compact('talkRoom'));
@@ -66,9 +79,14 @@ class TalkController extends Controller
         ];
 
         $messages = $this->talkService->sendMessage($inputData);
+        
+        $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
+        $recipientName = $recipient[0]['name'];
+
         $talkRoom = [
             'messages' => $messages,
             'recipient' => $inputData['recipient'],
+            'recipient_name' => $recipientName,
         ];
 
         return view('Talk/display_talk_room', compact('talkRoom'));
