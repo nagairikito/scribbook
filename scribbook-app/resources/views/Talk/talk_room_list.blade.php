@@ -50,14 +50,18 @@
             let pollingInterval;
             let pollingCount = 0;
             // if(pollingCount < MAX_POLLING_COUNT) {
-            for(let i=0; i<MAX_POLLING_COUNT; i++) {
+            for(let i=0; pollingCount<MAX_POLLING_COUNT; i++) {
                 execPolling();
                 pollingCount += 1;
-                console.log('ポーリング'+pollingCount+'回目');
+                // console.log('ポーリング'+pollingCount+'回目');
+                if(i==4) {
+                    initPolling(pollingInterval);
+                    console.log('ポーリング終了');
+                }
             }
 
-            initPolling(pollingInterval);
-            console.log('ポーリング終了');
+            // initPolling(pollingInterval);
+            // console.log('ポーリング終了');
 
 
             // ポーリング処理

@@ -35,18 +35,6 @@ class TalkController extends Controller
     /**
      * トークルームリスト表示
      */
-    // public function showTalkRoomList(Request $request) {
-    //     $inputData = [
-    //         'user_id' => $request['id'],
-    //     ];
-    //     $talkRoomList = $this->talkService->getTalkRoomListByUserId($inputData['user_id']);
-
-    //     return view('Talk/talk_room_list', compact('talkRoomList'));
-    // }
-
-    /**
-     * トークルームリスト表示
-     */
     public function showTalkRoomList(Request $request) {
         $talkRoomList = [];
         return view('Talk/talk_room_list', compact('talkRoomList'));
@@ -61,32 +49,6 @@ class TalkController extends Controller
             'html' => view('Talk/talk_room_list_parts', ['talkRoomList' => $talkRoomList])->render(),
         ]);
     }
-
-
-    /**
-     * トークルーム詳細
-     */
-    // public function displayTalkRoom(Request $request) {
-    //     $inputData = [
-    //         'sender' => $request['sender'],
-    //         'recipient' => $request['recipient'],
-    //     ];
-
-    //     $talkRoomId = $this->talkService->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
-    //     $inputData['talk_room_id'] = $talkRoomId;
-    //     $messages = $this->talkService->getAllMessageesByRoomId($inputData);
-
-    //     $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
-    //     $recipientName = $recipient[0]['name'];
-
-    //     $talkRoom = [
-    //         'messages' => $messages,
-    //         'recipient' => $inputData['recipient'],
-    //         'recipient_name' => $recipientName,
-    //     ];
-
-    //     return view('Talk/display_talk_room', compact('talkRoom'));
-    // }
 
     /**
      * トークルーム詳細
@@ -128,18 +90,6 @@ class TalkController extends Controller
 
         $messages = $this->talkService->sendMessage($inputData);
         
-        // $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
-        // $recipientName = $recipient[0]['name'];
-
-        // $talkRoom = [
-        //     'message' => $inputData['message'],
-        //     'sent_at' => now(),
-        //     // 'recipient' => $inputData['recipient'],
-        //     // 'recipient_name' => $recipientName,
-
-        // ];
-
-        // return response()->json(['talkRoom' => $talkRoom]);
         return response()->json(['data' => $inputData]);
     }
 
@@ -159,12 +109,6 @@ class TalkController extends Controller
         $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
         $recipientName = $recipient[0]['name'];
 
-        // $talkRoom = [
-        //     'messages' => $messages,
-        //     'sender' => $inputData['sender'],
-        //     'recipient' => $inputData['recipient'],
-        //     'recipient_name' => $recipientName,
-        // ];
         $talkRoom = [
             'messages' => $messages,
             'sender' => Auth::id(),
@@ -172,38 +116,8 @@ class TalkController extends Controller
             'recipient_name' => $recipientName,
         ];
 
-        // viewを返すパターン
-        // return response()->json([
-        //     'html' => view('Talks.display_talk_room', ['talkRoom' => $talkRoom])->render()
-        // ]);
         return response()->json(['talkRoom' => $talkRoom]);
         
     }
-
-    /**
-     * 送信者による最新の送信メッセージを取得
-     */
-    // public function getLatestMessageBySender(Request $request) {
-    //     $inputData = [
-    //         'sender' => request()->get('sender'),
-    //         'recipient' => request()->get('recipient'),
-    //     ];
-
-    //     $talkRoomId = $this->talkService->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
-    //     $inputData['talk_room_id'] = $talkRoomId;
-    //     $message = $this->talkService->getLatestMessageBySender($inputData);
-
-    //     $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
-    //     $recipientName = $recipient[0]['name'];
-
-    //     $talkRoom = [
-    //         'message' => $message,
-    //         'sender' => $inputData['sender'],
-    //         'recipient' => $inputData['recipient'],
-    //         'recipient_name' => $recipientName,
-    //     ];
-
-    //     return response()->json(['talkRoom' => $talkRoom]);
-    // }
 
 }

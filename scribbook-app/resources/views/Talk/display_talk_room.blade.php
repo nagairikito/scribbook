@@ -82,8 +82,9 @@
 
                 })
                 .done((res) => {
+                    getMessagesFisrt(res.data);
                     polling();
-                    getScrollHeight();
+                    // getScrollHeight();
                     console.log('成功');
                 })
                 .fail((error) => {
@@ -177,41 +178,28 @@
         window.addEventListener("DOMContentLoaded", function () {
             let datas = setUpUser();
             getMessagesFisrt(datas['data1']);
+            setInterval(() => {
+                getMessages(datas['data1'])
+            }, 3000);
         });
 
         function polling() {
-            let datas = setUpUser();
-
-            // initPolling();
-
-            const MAX_POLLING_COUNT = 5 // ポーリング回数
-            let pollingInterval;
-            let pollingCount = 0;
-            // if(pollingCount < MAX_POLLING_COUNT) {
-            for(let i=0; i<MAX_POLLING_COUNT; i++) {
-                execPolling(datas);
-                pollingCount += 1;
-                console.log('ポーリング'+pollingCount+'回目');
-            }
-
-            initPolling(pollingInterval);
-
+            let datas = setUpUser(); // 送信者と受信者をURLパラメータから取得
+            const POLLING_DURATION  = 2000 // ポーリング間隔
+            // const POLLING_INTERVAL  = 10000 // ポーリング秒数
 
             // ポーリング処理
-            function execPolling(datas) {
-                console.log(datas)
-                pollingInterval = setInterval(function() {
-                    getMessages(datas['data1']);
-                    getMessages(datas['data2']);
-                }, 2000);
-            }
+            pollingInterval = setInterval(function() {
+                getMessages(datas['data1']);
+            }, POLLING_DURATION);
 
-            // ポーリングの初期化
-            function initPolling(pollingInterval = null) {
-                if (pollingInterval) {
-                    clearInterval(pollingInterval);
-                }
-            }
+            // ポーリング停止処理
+            // setTimeout(() => {
+            //     if (pollingInterval) {
+            //         console.log('test');
+            //         clearInterval(pollingInterval);
+            //     }
+            // }, POLLING_INTERVAL)
         }
 
         function setUpUser() {

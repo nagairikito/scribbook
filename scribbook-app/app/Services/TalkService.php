@@ -111,15 +111,7 @@ class TalkService extends Service
         $messages = $this->talkRepository->getAllMessageesByRoomId($talkRoom);
         return $messages;
     }
-    
-    /**
-     * 送信者による最新の送信メッセージを取得
-     */
-    // public function getLatestMessageBySender($talkRoom) {
-    //     $messages = $this->talkRepository->getLatestMessageBySender($talkRoom);
-    //     return $messages;
-    // }
-    
+        
     /**
      * メッセージ送信処理
      * @param $inputData
