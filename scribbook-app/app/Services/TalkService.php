@@ -42,6 +42,13 @@ class TalkService extends Service
             
             foreach($preTalkRoomList1 as $preTalkRoom1) {
                 $latestMessage = $this->talkRepository->getLatestMessageByTalkRoomId($preTalkRoom1['talk_room_id'], 'delete_flag_1');
+                if($latestMessage == null) {
+                    $latestMessage = [
+                        'message' => null,
+                        'attached_file_path' => null,    
+                    ];
+                }
+
                 $preTalkRoom1['latest_message'] = $latestMessage;
                 $talkRoomList1[] = $preTalkRoom1;
             }
@@ -56,10 +63,17 @@ class TalkService extends Service
             foreach($talkRoomIdList2 as $talkRoomId2) {
                 $talkRoomIds2[] = $talkRoomId2['id'];
             }
-            $preTalkRoomList2[] = $this->talkRoomRepository->getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds2, 'user_id_1', 'delete_flag_2');
+            $preTalkRoomList2 = $this->talkRoomRepository->getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds2, 'user_id_1', 'delete_flag_2');
         
             foreach($preTalkRoomList2 as $preTalkRoom2) {
                 $latestMessage = $this->talkRepository->getLatestMessageByTalkRoomId($preTalkRoom2['talk_room_id'], 'delete_flag_2');
+                if($latestMessage == null) {
+                    $latestMessage = [
+                        'message' => null,
+                        'attached_file_path' => null,    
+                    ];
+                }
+
                 $preTalkRoom2['latest_message'] = $latestMessage;
                 $talkRoomList2[] = $preTalkRoom2;
             }
@@ -97,6 +111,14 @@ class TalkService extends Service
         $messages = $this->talkRepository->getAllMessageesByRoomId($talkRoom);
         return $messages;
     }
+    
+    /**
+     * 送信者による最新の送信メッセージを取得
+     */
+    // public function getLatestMessageBySender($talkRoom) {
+    //     $messages = $this->talkRepository->getLatestMessageBySender($talkRoom);
+    //     return $messages;
+    // }
     
     /**
      * メッセージ送信処理

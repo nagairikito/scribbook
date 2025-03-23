@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
     <link rel="stylesheet" href="{{ asset('css/a_CommonParts/main.css') }}">
     <script src="{{ asset('js/a_CommonParts/getScreenSize.js') }}" defer></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>  <!-- JQuery-->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
 
     <link rel="stylesheet" href="{{ asset('css/Talk/talk.css') }}">
 
@@ -28,40 +30,15 @@
                         </div>
 
                         <div class="message-display">
-                            @if($talkRoom['messages'] > 0)
-                                @foreach($talkRoom['messages'] as $message)
-
-                                    @if($message['created_by'] == Auth::id() )
-                                        <div class="message send">
-                                            <p class="message-contents">{{ $message['message'] }}</p>
-                                            <p class="send-at">{{ $message['updated_at'] }}</p>
-                                        </div>
-
-                                    @else
-                                        <div class="message receive">
-                                            <a href="{{ route('profile_top', $talkRoom['recipient']) }}">
-                                                <img class="icon" src="{{ asset('storage/user_icon_images/' .$message['icon_image']) }}">
-                                            </a>
-                                            <div>
-                                                <p class="message-contents">{{ $message['message'] }}</p>
-                                            </div>
-                                            <p class="send-at">{{ $message['updated_at'] }}</p>
-                                        </div>
-
-                                    @endif
-
-                                @endforeach
-                            @endif
-
                         </div>
 
                         <div class="message-send-textbox">
-                            <form action="{{ route('send_message') }}" method="POST">
+                            <form>
                             @csrf
-                                <input type="text" name="message">
+                                <input type="text" class="input-message" name="message">
                                 <input type="hidden" name="sender" value="{{ Auth::id() }}">
                                 <input type="hidden" name="recipient" value="{{ $talkRoom['recipient'] }}">
-                                <input type="submit" value="送信">
+                                <input type="submit" class="send" value="送信">
 
                             </form>
                         </div>
@@ -73,5 +50,196 @@
             </div>
         </main>
     @include('a_CommonParts.footer')
+
+
+    <script>
+        // Ajax通信 
+        $(document).ready(function() {
+
+            $.ajaxSetup({
+                headers: { 'X-CSRF-TOKEN': $("[name='csrf-token']").attr("content") },
+            })
+
+            $('.send').on('click', function (e) {
+                e.preventDefault();
+
+                sender = $('input[name="sender"]').val();
+                recipient = $('input[name="recipient"]').val();
+                message = $('input[name="message"]').val();
+
+                let inputMessage = document.querySelector('.input-message');
+                inputMessage.value = '';
+
+                $.ajax({
+                    url: "/sendMessage",
+                    method: "POST",
+                    dataType: "json",
+                    data: {
+                        sender : sender, 
+                        recipient : recipient, 
+                        message : message, 
+                    },
+
+                })
+                .done((res) => {
+                    polling();
+                    getScrollHeight();
+                    console.log('成功');
+                })
+                .fail((error) => {
+                    console.log('失敗！');
+                });
+            });
+        });
+
+        function getMessagesFisrt(request) {
+            sender = request.sender;
+            recipient = request.recipient;
+
+            $.ajax({
+                url: '/getMessages',
+                method: 'GET',
+                dataType: "json",
+                data: {
+                    sender : sender, 
+                    recipient : recipient, 
+                },
+            })
+            .done((res) => {
+                $('.message-display').html('');
+                talkRoom = res.talkRoom;
+                talkRoom.messages.forEach(function (message) {
+                    let selector;
+                    if(message.created_by == talkRoom.sender) {
+                        selector = "send";
+                    } else {
+                        selector = "recipient";
+                    }
+                    html = `
+                        <div class="message ${selector}">
+                            <p class="message-contents">${message.message}</p>
+                            <p class="send-at">${message.updated_at}</p>
+                        </div>
+                    `;
+                    $(".message-display").append(html);
+                    getScrollHeight();
+                });
+
+                // viewを渡すパターン
+                // $(".message-display").html(res.html);
+            })
+            .fail((error) => {
+                console.log('失敗！');
+            });
+        }
+
+        function getMessages(request) {
+            sender = request.sender;
+            recipient = request.recipient;
+
+            $.ajax({
+                url: '/getMessages',
+                method: 'GET',
+                dataType: "json",
+                data: {
+                    sender : sender, 
+                    recipient : recipient, 
+                },
+            })
+            .done((res) => {
+                $('.message-display').html('');
+                talkRoom = res.talkRoom;
+                talkRoom.messages.forEach(function (message) {
+                    let selector;
+                    if(message.created_by == talkRoom.sender) {
+                        selector = "send";
+                    } else {
+                        selector = "recipient";
+                    }
+                    html = `
+                        <div class="message ${selector}">
+                            <p class="message-contents">${message.message}</p>
+                            <p class="send-at">${message.updated_at}</p>
+                        </div>
+                    `;
+                    $(".message-display").append(html);
+                });
+
+                // viewを渡すパターン
+                // $(".message-display").html(res.html);
+            })
+            .fail((error) => {
+                console.log('失敗！');
+            });
+        }
+
+        // 以降 設定
+        window.addEventListener("DOMContentLoaded", function () {
+            let datas = setUpUser();
+            getMessagesFisrt(datas['data1']);
+        });
+
+        function polling() {
+            let datas = setUpUser();
+
+            // initPolling();
+
+            const MAX_POLLING_COUNT = 5 // ポーリング回数
+            let pollingInterval;
+            let pollingCount = 0;
+            // if(pollingCount < MAX_POLLING_COUNT) {
+            for(let i=0; i<MAX_POLLING_COUNT; i++) {
+                execPolling(datas);
+                pollingCount += 1;
+                console.log('ポーリング'+pollingCount+'回目');
+            }
+
+            initPolling(pollingInterval);
+
+
+            // ポーリング処理
+            function execPolling(datas) {
+                console.log(datas)
+                pollingInterval = setInterval(function() {
+                    getMessages(datas['data1']);
+                    getMessages(datas['data2']);
+                }, 2000);
+            }
+
+            // ポーリングの初期化
+            function initPolling(pollingInterval = null) {
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
+            }
+        }
+
+        function setUpUser() {
+            let queryString = window.location.search;
+            let urlParams = new URLSearchParams(queryString);
+            let sender = urlParams.get("sender");
+            let recipient = urlParams.get("recipient");
+            let data1 = {
+                'sender' : sender,
+                'recipient' : recipient
+            };
+            let data2 = {
+                'sender' : recipient,
+                'recipient' : sender
+            };
+            let datas = {
+                'data1' : data1,
+                'data2' : data2,
+            }
+
+            return datas;
+        }
+
+        function getScrollHeight() {
+            let elm = document.querySelector('.message-display');
+            elm.scrollTop = elm.scrollHeight;
+        }
+
+</script>
 </body>
 </html>

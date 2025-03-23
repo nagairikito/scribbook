@@ -32,9 +32,8 @@ Route::post('/deleteUserIcon', [AccountController::class, 'deleteIconImageFromSt
 // トーク
 Route::get('/talkRoomList/{id}', [TalkController::class, 'showTalkRoomList'])->name('talk_room_list');
 Route::get('/talkRoom', [TalkController::class, 'displayTalkRoom'])->name('display_talk_room');
-Route::get('/talkRoom/{sender}/{recipient}', [TalkController::class, 'displayTalkRoom'])->name('display_talk_room');
-Route::get('/sendMessage', [TalkController::class, 'sendMessage'])->name('create_send_message');
-Route::post('/sendMessage', [TalkController::class, 'sendMessage'])->name('send_message');
+// Route::get('/talkRoom/{sender}/{recipient}', [TalkController::class, 'displayTalkRoom'])->name('display_talk_room_has_url_param');
+// Route::get('/sendMessage', [TalkController::class, 'sendMessage'])->name('create_send_message');
 
 // ブログ関連
 Route::get('/topics', [BlogController::class, 'topics'])->name('topics');
@@ -52,3 +51,12 @@ Route::post('/getBlogPostedByFavoriteUserByUserId/{id}', [BlogController::class,
 Route::get('/favoriteBlogs/{id}', [BlogController::class, 'getFavoriteBlogs'])->name('favorite_blogs');
 Route::get('/myBlogs/{id}', [BlogController::class, 'showMYBlogs'])->name('my_blogs');
 Route::get('/BrowsingHistory/{id}', [BlogController::class, 'showBrowsingHistory'])->name('show_browsing_history');
+
+
+
+// API
+Route::post('/sendMessage', [TalkController::class, 'sendMessage'])->name('send_message');
+Route::get('/getLatestMessageBySender', [TalkController::class, 'getLatestMessageBySender'])->name('get_message');
+Route::get('/getMessages', [TalkController::class, 'getMessages'])->name('get_messages');
+Route::get('/getTalkRoomList', [TalkController::class, 'getTalkRoomList'])->name('get_talk_room_list');
+

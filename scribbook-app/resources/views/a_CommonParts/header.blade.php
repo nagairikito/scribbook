@@ -16,14 +16,18 @@
             <div class="header-search-bar">
                 <form action="{{ route('search') }}" method="GET" class="header-search-bar-wrapper">
                 @csrf
-                    <input class="search-textbox" type="search" name="keyword">
+                    @if(isset($keyword))
+                    <input class="search-textbox" type="search" name="keyword" value="{{$keyword ? $keyword : ''}}" placeholder="ブログ名・ユーザー名" required="required">
+                    @else
+                        <input class="search-textbox" type="search" name="keyword" placeholder="ブログ名・ユーザー名">
+                    @endif
                     <input class="search-button" type="submit" value="検索🔍">
                 </form>
             </div>
             <div class="header-nav">
                 <ul class="header-nav-list">
                     @if(Auth::user())
-                        <li><a href="{{ route('blog_posting_form') }}">投稿</a></li>
+                        <li><a href="{{ route('talk_room_list', Auth::id()) }}">トーク</a></li>
                         <li><a href="">通知</a></li>
                         <li><a href="{{ route('profile_top', ['id' => Auth::id()]) }}">アカウント</a></li>
                     @endif

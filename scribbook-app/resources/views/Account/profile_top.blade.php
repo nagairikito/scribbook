@@ -38,7 +38,6 @@
                                         </li>
                                     </ul>
                                 @endif
-
                                 <ul>
                                     <li><img src="{{ asset('storage/user_icon_images/' .$user[0]['icon_image']) }}"></li>
                                     <li>名前:　{{ $user[0]['name'] }}</li>

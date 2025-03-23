@@ -33,7 +33,6 @@ class TopPageController extends Controller
      */
     public function index() {
         $allBlogs = $this->blogService->getAllBlogs();
-
         return view('TopPage/toppage', ['allBlogs' => $allBlogs]);
     }
 }

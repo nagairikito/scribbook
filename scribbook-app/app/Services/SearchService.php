@@ -22,7 +22,7 @@ class SearchService extends Service
     public $blogRepository;
     public $searchRepository;
 
-    public function __construct(SearchRepository $searchRepository) {
+    public function __construct() {
 
         // Modelのインスタンス化
         $user = new User;

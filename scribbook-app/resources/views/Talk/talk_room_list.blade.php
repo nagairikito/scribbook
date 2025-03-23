@@ -8,7 +8,9 @@
     <link rel="stylesheet" href="{{ asset('css/a_CommonParts/main.css') }}">
     <link rel="stylesheet" href="{{ asset('css/Blog/topics.css') }}">
     <script src="{{ asset('js/a_CommonParts/getScreenSize.js') }}" defer></script>
-    <script src="{{ asset('js/Blog/topicsGetScreenSize.js') }}" defer></script>
+    <script src="https://code.jquery.com/jquery-3.4.1.js"></script>  <!-- JQuery-->
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
 
 
     <title>トークルームリスト</title>
@@ -22,36 +24,72 @@
                 <div class="main-contents">    
                     <div class="main-contents-wrapper">
                         <h1>トーク</h1>
-                        <ul class="">
-                            @if(count($talkRoomList) > 0)
-                                @foreach($talkRoomList as $talkRoom)
-                                    <li>
-                                        <a href="{{ route('display_talk_room', ['sender' => Auth::id(), 'recipient' => $talkRoom['user_id']]) }}">
-                                            <img class="" src="{{ asset('storage/user_icon_images/' .$talkRoom['icon_image']) }}">
-                                            <div class="">
-                                                <p>{{ $talkRoom['name'] }}</p>
-                                                    @if($talkRoom['latest_message']['attached_file_path'] == null)
-                                                        <p>{{ $talkRoom['latest_message']['message'] }}</p>
-                                                    @elseif($talkRoom['latest_message']['message'] == null)
-                                                        <p>画像を送信しました</p>
-                                                    @endif
-                                                <p>{{ $talkRoom['updated_at'] }}</p>    
-                                            </div>
-                                        </a>
-                                    </li>
-                                @endforeach
-                            
-                            @else
-                                <li>トークがありません</li>
-                            @endif
-                        </ul>
-                    </div>
-
+                        <ul class="talk-room-list">
+                        </div>
                 </div>
 
                 @include('a_CommonParts.advertise')
             </div>
         </main>
     @include('a_CommonParts.footer')
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            getTalkRoomList();
+        });
+        polling();
+        
+        $.ajaxSetup({
+            headers: { 'X-CSRF-TOKEN': $("[name='csrf-token']").attr("content") },
+        })
+
+        function polling() {
+            initPolling();
+
+            const MAX_POLLING_COUNT = 5 // ポーリング回数
+            let pollingInterval;
+            let pollingCount = 0;
+            // if(pollingCount < MAX_POLLING_COUNT) {
+            for(let i=0; i<MAX_POLLING_COUNT; i++) {
+                execPolling();
+                pollingCount += 1;
+                console.log('ポーリング'+pollingCount+'回目');
+            }
+
+            initPolling(pollingInterval);
+            console.log('ポーリング終了');
+
+
+            // ポーリング処理
+            function execPolling() {
+                pollingInterval = setInterval(function() {
+                    getTalkRoomList();
+                }, 2000);
+            }
+
+            // ポーリングの初期化
+            function initPolling(pollingInterval = null) {
+                if (pollingInterval) {
+                    clearInterval(pollingInterval);
+                }
+            }
+        }
+
+        function getTalkRoomList() {
+            $.ajax({
+                url: '/getTalkRoomList',
+                method: 'GET',
+                dataType: "json",
+            })
+            .done((res) => {
+                $('.talk-room-list').html('');
+                $('.talk-room-list').html(res.html);
+            })
+            .fail((error) => {
+                console.log('失敗！');
+            });
+        }
+
+</script>
 </body>
 </html>

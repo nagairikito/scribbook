@@ -17,7 +17,7 @@ class SearchController extends Controller
     public $accountService;
     public $blogService;
     public $searchService;
-    public function __construct(SearchRepository $searchRepository) {
+    public function __construct() {
         // Modelのインスタンス化
         $user = new User;
         $blog = new Article;
@@ -40,11 +40,15 @@ class SearchController extends Controller
      * @return $result
      */
     public function search(Request $request) {
+        if(isset($request['keyword']) && empty($request['keyword'])) {
+            return back();
+        }
         $inputData = [
             'keyword' => $request['keyword']
         ];
 
         $result = $this->searchService->search($inputData);
-        return view('Search/search', ['result' => $result]);
+        $keyword = $inputData['keyword'];
+        return view('Search/search', compact(['result', 'keyword']));
     }
 }
