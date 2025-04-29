@@ -1,0 +1,44 @@
+main {
+    width: 100%;
+}
+
+main .main-wrapper {
+    display: flex;
+    margin: 0 auto;
+}
+
+main .advertise-area {
+    /* width: 12.5%; */
+    width: 17.5%;
+    height: 100vh;
+
+    background-color: #8ef7ad;
+}
+
+main .nav {
+    width: 12.5%;
+    height: 100vh;
+
+    background-color: #8ef7ad;
+
+}
+
+main .nav li {
+    cursor: pointer;
+    margin-bottom: 5px; 
+}
+
+main .main-contents {
+    width: 70%;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+
+    background-color: #f3f7d2;
+
+}
+
+
+/* main .post-user, main .posted-at {
+    text-align: center;
+} */
