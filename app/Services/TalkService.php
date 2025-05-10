@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
 use App\Models\Talk;
 use App\Models\TalkRoom;
 use App\Repositories\TalkRepository;
 use App\Repositories\TalkRoomRepository;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TalkService extends Service
 {
@@ -21,6 +22,17 @@ class TalkService extends Service
         // Repositoryのインスタンス化
         $this->talkRepository = new TalkRepository($talk);
         $this->talkRoomRepository = new TalkRoomRepository($talkRoom);
+
+        try {
+            DB::beginTransaction();
+    
+            
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
 
     }
 
@@ -79,7 +91,6 @@ class TalkService extends Service
             }
         }
 
-
         $margedTalkRoomList = array_merge($talkRoomList1, $talkRoomList2);
         $talkRoomList = collect($margedTalkRoomList)->sortByDesc('updated_at')->toArray();
 
@@ -118,20 +129,43 @@ class TalkService extends Service
      * @return bool $result
      */
     public function sendMessage($inputData) {
-        $talkRoomId = $this->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
-        if($talkRoomId) {
-            $this->talkRoomRepository->updateTalkRoom($talkRoomId);
-        }
-        if($talkRoomId == null) {
-            $this->talkRoomRepository->createTalkRoom($inputData['sender'], $inputData['recipient']);
-            $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
-        }
-        $inputData['talk_room_id'] = $talkRoomId;
+        try {
+            DB::beginTransaction();
+    
+            $talkRoomId = $this->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
+            if($talkRoomId) {
+                $this->talkRoomRepository->updateTalkRoom($talkRoomId);
+            }
+            if($talkRoomId == null) {
+                $this->talkRoomRepository->createTalkRoom($inputData['sender'], $inputData['recipient']);
+                $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
+            }
+            $inputData['talk_room_id'] = $talkRoomId;
+    
+            $this->talkRepository->saveMessage($inputData);
+            $messages = $this->getAllMessageesByRoomId($inputData);
+    
+            $talkRoomId = $this->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
+            if($talkRoomId) {
+                $this->talkRoomRepository->updateTalkRoom($talkRoomId);
+            }
+            if($talkRoomId == null) {
+                $this->talkRoomRepository->createTalkRoom($inputData['sender'], $inputData['recipient']);
+                $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
+            }
+            $inputData['talk_room_id'] = $talkRoomId;
+    
+            $this->talkRepository->saveMessage($inputData);
+            $messages = $this->getAllMessageesByRoomId($inputData);
+            
+            DB::commit();
+            return $messages;
 
-        $this->talkRepository->saveMessage($inputData);
-        $messages = $this->getAllMessageesByRoomId($inputData);
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
 
-        return $messages;
 
     }
 

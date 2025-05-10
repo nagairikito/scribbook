@@ -5,9 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>登録完了のお知らせ</title>
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/a_CommonParts/header.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/a_CommonParts/main.css') }}">
-    <script src="{{ asset('js/a_CommonParts/getScreenSize.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/CommonParts/header.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/CommonParts/main.css') }}">
+    <script src="{{ asset('js/CommonParts/getScreenSize.js') }}" defer></script>
 
 </head>
 <body>

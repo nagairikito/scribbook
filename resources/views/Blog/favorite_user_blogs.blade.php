@@ -6,10 +6,10 @@
     <title>ScribBook</title>
 
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/a_CommonParts/main.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/Blog/topics.css') }}">
-    <script src="{{ asset('js/a_CommonParts/getScreenSize.js') }}" defer></script>
-    <script src="{{ asset('js/Blog/topicsGetScreenSize.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/CommonParts/main.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/topics.css') }}">
+    <script src="{{ asset('js/CommonParts/getScreenSize.js') }}" defer></script>
+    <script src="{{ asset('js/topicsGetScreenSize.js') }}" defer></script>
 
 
 </head>

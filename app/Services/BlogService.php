@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
+use App\Const\BlogConst;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleComment;
@@ -13,8 +13,8 @@ use App\Repositories\BlogCommentsRepository;
 use App\Repositories\BrowsingHistoryRepository;
 use App\Repositories\AccountRepository;
 use App\Repositories\FavoriteBlogRepository;
-
-use App\Const\BlogConst;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
 class BlogService extends Service
@@ -51,25 +51,33 @@ class BlogService extends Service
     public function postBlog($inputData) {
         $postBlogStatus = BlogConst::REGISTER_INITIAL_VALUE;
 
-        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-            $postBlogStatus = BlogConst::FAIL_REGISTER_USER_AUTHENTICATION;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+                $postBlogStatus = BlogConst::FAIL_REGISTER_USER_AUTHENTICATION;
+                return $postBlogStatus;
+            }
+    
+            $created_by = $this->accountRepository->getAccountById($inputData['user_id']);
+            if(!$created_by) {
+                $postBlogStatus = BlogConst::NOT_FOUND_REGISTER_USER_ID;
+                return $postBlogStatus;
+            }
+    
+            $checkPostBlog = $this->blogRepository->postBlog($inputData);
+            if($checkPostBlog) {
+                $postBlogStatus = BlogConst::SUCCESS_BLOG_REGISTERATION;
+                return $postBlogStatus;
+            }
+    
+            DB::commit();
             return $postBlogStatus;
-        }
 
-        $created_by = $this->accountRepository->getAccountById($inputData['user_id']);
-        if(!$created_by) {
-            $postBlogStatus = BlogConst::NOT_FOUND_REGISTER_USER_ID;
-            return $postBlogStatus;
-        }
-
-        $checkPostBlog = $this->blogRepository->postBlog($inputData);
-        if($checkPostBlog) {
-            $postBlogStatus = BlogConst::SUCCESS_BLOG_REGISTERATION;
-            return $postBlogStatus;
-        }
-
-        return $postBlogStatus;
-
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
     }
 
     /**
@@ -80,25 +88,33 @@ class BlogService extends Service
     public function editBlog($inputData) {
         $editBlogStatus = BlogConst::EDIT_INITIAL_VALUE;
 
-        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
-            $editBlogStatus = BlogConst::FAIL_EDIT_USER_AUTHENTICATION;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+                $editBlogStatus = BlogConst::FAIL_EDIT_USER_AUTHENTICATION;
+                return $editBlogStatus;
+            }
+    
+            $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
+            if(!$created_by) {
+                $editBlogStatus = BlogConst::NOT_FOUND_EDIT_USER_ID;
+                return $editBlogStatus;
+            }
+    
+            $checkEditBlog = $this->blogRepository->editBlog($inputData);
+            if($checkEditBlog) {
+                $editBlogStatus = BlogConst::SUCCESS_BLOG_EDITING;
+                return $editBlogStatus;
+            }
+    
+            DB::commit();
             return $editBlogStatus;
-        }
 
-        $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
-        if(!$created_by) {
-            $editBlogStatus = BlogConst::NOT_FOUND_EDIT_USER_ID;
-            return $editBlogStatus;
-        }
-
-        $checkEditBlog = $this->blogRepository->editBlog($inputData);
-        if($checkEditBlog) {
-            $editBlogStatus = BlogConst::SUCCESS_BLOG_EDITING;
-            return $editBlogStatus;
-        }
-
-        return $editBlogStatus;
-
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
     }
     
     /**
@@ -109,25 +125,33 @@ class BlogService extends Service
     public function deleteBlog($inputData) {
         $deleteBlogStatus = BlogConst::DELETE_INITIAL_VALUE;
 
-        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
-            $deleteBlogStatus = BlogConst::FAIL_DELETE_USER_AUTHENTICATION;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+                $deleteBlogStatus = BlogConst::FAIL_DELETE_USER_AUTHENTICATION;
+                return $deleteBlogStatus;
+            }
+    
+            $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
+            if(!$created_by) {
+                $deleteBlogStatus = BlogConst::NOT_FOUND_DELETE_USER_ID;
+                return $deleteBlogStatus;
+            }
+    
+            $checkDeleteBlog = $this->blogRepository->deleteBlog($inputData['id']);
+            if($checkDeleteBlog) {
+                $deleteBlogStatus = BlogConst::SUCCESS_BLOG_DELETING;
+                return $deleteBlogStatus;
+            }
+    
+            DB::commit();
             return $deleteBlogStatus;
-        }
 
-        $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
-        if(!$created_by) {
-            $deleteBlogStatus = BlogConst::NOT_FOUND_DELETE_USER_ID;
-            return $deleteBlogStatus;
-        }
-
-        $checkDeleteBlog = $this->blogRepository->deleteBlog($inputData['id']);
-        if($checkDeleteBlog) {
-            $deleteBlogStatus = BlogConst::SUCCESS_BLOG_DELETING;
-            return $deleteBlogStatus;
-        }
-
-        return $deleteBlogStatus;
-
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
     }
 
     /**
@@ -282,21 +306,30 @@ class BlogService extends Service
     public function postComment($inputData) {
         $postCommentStauts = false;
 
-        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+                return $postCommentStauts;
+            }
+    
+            $loginUser = $this->accountRepository->getAccountById($inputData['created_by']);
+            if(!$loginUser) {
+                return $postCommentStauts;
+            }
+    
+            $result = $this->blogCommentsRepository->postComment($inputData);
+            if($result) {
+                $postCommentStauts = true;
+            }
+    
+            DB::commit();
             return $postCommentStauts;
-        }
 
-        $loginUser = $this->accountRepository->getAccountById($inputData['created_by']);
-        if(!$loginUser) {
-            return $postCommentStauts;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-        $result = $this->blogCommentsRepository->postComment($inputData);
-        if($result) {
-            $postCommentStauts = true;
-        }
-
-        return $postCommentStauts;
     }
 
     /**
@@ -307,31 +340,40 @@ class BlogService extends Service
     public function registerFavoriteBlog($inputData) {
         $registerFavoriteBlogStatus = false;
 
-        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+                return $registerFavoriteBlogStatus;
+            }
+    
+            $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
+            if(!$targetUser) {
+                return $registerFavoriteBlogStatus;
+            }
+    
+            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
+            if(!$targetBlog) {
+                return $registerFavoriteBlogStatus;
+            }
+    
+            $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+            if($checkExsitsFavoriteBlog) {
+                return $registerFavoriteBlogStatus;
+            }
+    
+            $result = $this->favoriteBlogRepository->registerFavoriteBlog($inputData);
+            if($result == true) {
+                $registerFavoriteBlogStatus = true;
+            }
+        
+            DB::commit();
             return $registerFavoriteBlogStatus;
-        }
 
-        $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
-        if(!$targetUser) {
-            return $registerFavoriteBlogStatus;
-        }
-
-        $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
-        if(!$targetBlog) {
-            return $registerFavoriteBlogStatus;
-        }
-
-        $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
-        if($checkExsitsFavoriteBlog) {
-            return $registerFavoriteBlogStatus;
-        }
-
-        $result = $this->favoriteBlogRepository->registerFavoriteBlog($inputData);
-        if($result == true) {
-            $registerFavoriteBlogStatus = true;
-        }
-
-        return $registerFavoriteBlogStatus;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
     }
 
     /**
@@ -342,35 +384,44 @@ class BlogService extends Service
     public function deleteFavoriteBlog($inputData) {
         $deleteFavoriteBlogStatus = false;
 
-        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+                return $deleteFavoriteBlogStatus;
+            }
+    
+            $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
+            if(!$targetUser) {
+                return $deleteFavoriteBlogStatus;
+            }
+    
+            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
+            if(!$targetBlog) {
+                return $deleteFavoriteBlogStatus;
+            }
+    
+            $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+            if(!$checkExsitsFavoriteBlog) {
+                return $deleteFavoriteBlogStatus;
+            }
+    
+            $result = $this->favoriteBlogRepository->deleteFavoriteBlog($inputData);
+            if($result == true) {
+                $deleteFavoriteBlogStatus = true;
+            }
+    
+            DB::commit();
             return $deleteFavoriteBlogStatus;
-        }
 
-        $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
-        if(!$targetUser) {
-            return $deleteFavoriteBlogStatus;
-        }
-
-        $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
-        if(!$targetBlog) {
-            return $deleteFavoriteBlogStatus;
-        }
-
-        $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
-        if(!$checkExsitsFavoriteBlog) {
-            return $deleteFavoriteBlogStatus;
-        }
-
-        $result = $this->favoriteBlogRepository->deleteFavoriteBlog($inputData);
-        if($result == true) {
-            $deleteFavoriteBlogStatus = true;
-        }
-
-        return $deleteFavoriteBlogStatus;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }    
     }
 
     /**
-     * 閲覧履歴
+     * 閲覧履歴表示
      */
     public function showBrowsingHistory($inputData) {
         $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);

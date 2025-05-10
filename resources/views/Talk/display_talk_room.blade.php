@@ -5,12 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{{ asset('css/common.css') }}">
-    <link rel="stylesheet" href="{{ asset('css/a_CommonParts/main.css') }}">
-    <script src="{{ asset('js/a_CommonParts/getScreenSize.js') }}" defer></script>
+    <link rel="stylesheet" href="{{ asset('css/CommonParts/main.css') }}">
+    <script src="{{ asset('js/CommonParts/getScreenSize.js') }}" defer></script>
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script>  <!-- JQuery-->
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <link rel="stylesheet" href="{{ asset('css/Talk/talk.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/talk.css') }}">
 
 
 

@@ -2,15 +2,16 @@
 
 namespace App\Services;
 
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
+use App\Const\AccountConst;
 use App\Models\User;
 use App\Models\FavoriteUser;
 use App\Repositories\AccountRepository;
 use App\Repositories\FavoriteUserRepository;
-
-use App\Const\AccountConst;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
+
 
 class AccountService extends Service
 {
@@ -28,15 +29,25 @@ class AccountService extends Service
         $this->favoriteUserRepository = new FavoriteUserRepository($favoriteUser);
 
     }
-    
+
     /**
      * アカウント新規登録
      * @param $inputrequest
      * @return bool $result
      */
     public function registerAccount($inputData) {
-        $result = $this->accountRepository->registerAccount($inputData);
-        return $result;
+        try {
+            DB::beginTransaction();
+
+            $result = $this->accountRepository->registerAccount($inputData);
+            
+            DB::commit();
+            return $result;
+            
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }
     }
 
     /**
@@ -47,26 +58,35 @@ class AccountService extends Service
     public function login($inputData) {
         $loginStatus = AccountConst::LOGIN_INITIAL_VALUE;
 
-        $loginUserInfo = $this->accountRepository->login($inputData['login_id']);
-        if(empty($loginUserInfo)) {
-            $loginStatus = AccountConst::NOT_FOUND_LOGIN_ID;
+        try {
+            DB::beginTransaction();
+    
+            $loginUserInfo = $this->accountRepository->login($inputData['login_id']);
+            if(empty($loginUserInfo)) {
+                $loginStatus = AccountConst::NOT_FOUND_LOGIN_ID;
+                return $loginStatus;
+            }
+    
+            if(password_verify($inputData['password'], $loginUserInfo['password']) == false) {
+                $loginStatus = AccountConst::NOT_MATCH_LOGIN_PASSWORD;
+                return $loginStatus;
+            }
+    
+            $inputData = collect($inputData);
+            $credentials = $inputData->only('login_id', 'password');
+            $credentials = $credentials->toArray();
+            $loginUser = Auth::attempt($credentials);
+            if($loginUser) {
+                $loginStatus = AccountConst::SUCCESS_LOGIN;
+            }
+    
+            DB::commit();
             return $loginStatus;
+            
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-        if(password_verify($inputData['password'], $loginUserInfo['password']) == false) {
-            $loginStatus = AccountConst::NOT_MATCH_LOGIN_PASSWORD;
-            return $loginStatus;
-        }
-
-        $inputData = collect($inputData);
-        $credentials = $inputData->only('login_id', 'password');
-        $credentials = $credentials->toArray();
-        $loginUser = Auth::attempt($credentials);
-        if($loginUser) {
-            $loginStatus = AccountConst::SUCCESS_LOGIN;
-        }
-
-        return $loginStatus;
     }
 
     /**
@@ -75,19 +95,26 @@ class AccountService extends Service
      * @return $inputData
      */
     public function logout($inputData) {
-        if(!Auth::user() || Auth::id() != $inputData['id']) {
-            return false;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['id']) {
+                return false;
+            }
+    
+            Auth::logout();
+            if(session() != null) {
+                $inputData['session']->invalidate(); // セッションを削除
+                session()->regenerateToken(); // セッションの再作成    
+            }
+    
+            DB::commit();
+            return true;
+
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-
-        Auth::logout();
-        if(session() != null) {
-            $inputData['session']->invalidate(); // セッションを削除
-            session()->regenerateToken(); // セッションの再作成    
-        }
-
-        return true;
-
     }
 
     /**
@@ -127,63 +154,92 @@ class AccountService extends Service
     public function updateProfile($inputData) {
         $updateStatus = AccountConst::UPDATE_INITIAL_VALUE;
 
-        if(!Auth::user() || Auth::id() != $inputData['id']) {
-            $updateStatus = AccountConst::FAIL_UPDATE_USER_AUTHENTICATION;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['id']) {
+                $updateStatus = AccountConst::FAIL_UPDATE_USER_AUTHENTICATION;
+                return $updateStatus;
+            }
+    
+            $targetAccount = $this->accountRepository->getAccountById($inputData['id']);
+            if(!$targetAccount) {
+                $updateStatus = AccountConst::NOT_FOUND_UPDATE_USER_ID;
+                return $updateStatus;
+            }
+    
+            if($inputData['icon_image_file'] || $inputData['icon_image_file'] != null || $inputData['icon_image'] != $targetAccount[0]['icon_image']) {
+                $image_name = $this->upsertUserIconImageIntoStorage($inputData['icon_image_file'], $targetAccount[0]['icon_image']);
+                $inputData['icon_image'] = $image_name;
+            }
+            $checkUpdate = $this->accountRepository->updateProfile($inputData);
+            if($checkUpdate) {
+                $updateStatus = AccountConst::SUCCESS_ACCOUNT_UPDATING;
+            }
+    
+            DB::commit();
             return $updateStatus;
-        }
 
-        $targetAccount = $this->accountRepository->getAccountById($inputData['id']);
-        if(!$targetAccount) {
-            $updateStatus = AccountConst::NOT_FOUND_UPDATE_USER_ID;
-            return $updateStatus;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-        if($inputData['icon_image_file'] || $inputData['icon_image_file'] != null || $inputData['icon_image'] != $targetAccount[0]['icon_image']) {
-            $image_name = $this->upsertUserIconImageIntoStorage($inputData['icon_image_file'], $targetAccount[0]['icon_image']);
-            $inputData['icon_image'] = $image_name;
-        }
-        $checkUpdate = $this->accountRepository->updateProfile($inputData);
-        if($checkUpdate) {
-            $updateStatus = AccountConst::SUCCESS_ACCOUNT_UPDATING;
-        }
-
-        return $updateStatus;
-
     }
 
+    ///////////////////////////////////////////////////////////////     エラー発生時画像の削除
     /**
      * ユーザーアイコン更新,Storageに保存
      * @param $iconImageFile
      * @return $result
      */
     public function upsertUserIconImageIntoStorage($iconImageFile, $oldImageName) {
-        if($oldImageName && $oldImageName != null) {
-            $this->deleteIconImageFromStorage($oldImageName);
-        }
-
-        $newImageName = 'noImage.png';
-        if($iconImageFile && $iconImageFile!= null) {
-            $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
-            $newImageName = date('Ymd_His') . '_' . $originalName;
+        try {
+            DB::beginTransaction();
     
-            Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);    
+            if($oldImageName && $oldImageName != null) {
+                $this->deleteIconImageFromStorage($oldImageName);
+            }
+    
+            $newImageName = 'noImage.png';
+            if($iconImageFile && $iconImageFile!= null) {
+                $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
+                $newImageName = date('Ymd_His') . '_' . $originalName;
+        
+                Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);    
+            }
+    
+            DB::commit();
+            return $newImageName;
+
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-        return $newImageName;
     }
 
+    /////////////////////////////////////////////////////////////////////// エラー時画像の復元
     /**
      * ユーザーアイコン削除,Storageから削除
      * @param $iconImageFile
      * @return $result
      */
     public function deleteIconImageFromStorage($targetImageName) {
-        if($targetImageName != null && $targetImageName != 'noImage.png') {
-            $targetImageNameExists = Storage::disk('public')->exists('user_icon_images/'. $targetImageName);
-            if($targetImageNameExists) {
-                Storage::disk('public')->delete('user_icon_images/'. $targetImageName);
+        try {
+            DB::beginTransaction();
+    
+            if($targetImageName != null && $targetImageName != 'noImage.png') {
+                $targetImageNameExists = Storage::disk('public')->exists('user_icon_images/'. $targetImageName);
+                if($targetImageNameExists) {
+                    Storage::disk('public')->delete('user_icon_images/'. $targetImageName);
+                }
             }
+    
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
     }
 
     /**
@@ -194,25 +250,34 @@ class AccountService extends Service
     public function deleteAccount($inputData) {
         $deleteStatus = AccountConst::DELETE_INITIAL_VALUE;
 
-        if(!Auth::user() || Auth::id() != $inputData['id']) {
-            $deleteStatus = AccountConst::FAIL_DELETE_USER_AUTHENTICATION;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['id']) {
+                $deleteStatus = AccountConst::FAIL_DELETE_USER_AUTHENTICATION;
+                return $deleteStatus;
+            }
+    
+            $targetAccount = $this->accountRepository->getAccountById($inputData['id']);
+            if(!$targetAccount) {
+                $deleteStatus = AccountConst::NOT_FOUND_DELETE_USER_ID;
+                return $deleteStatus;
+            }
+    
+            $this->deleteIconImageFromStorage($targetAccount[0]['icon_image']);
+            $checkDelete = $this->accountRepository->deleteAccount($inputData);
+            if($checkDelete) {
+                $this->logout($inputData);
+                $deleteStatus = AccountConst::SUCCESS_ACCOUNT_DELETING;
+            }
+        
+            DB::commit();
             return $deleteStatus;
-        }
 
-        $targetAccount = $this->accountRepository->getAccountById($inputData['id']);
-        if(!$targetAccount) {
-            $deleteStatus = AccountConst::NOT_FOUND_DELETE_USER_ID;
-            return $deleteStatus;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-        $this->deleteIconImageFromStorage($targetAccount[0]['icon_image']);
-        $checkDelete = $this->accountRepository->deleteAccount($inputData);
-        if($checkDelete) {
-            $this->logout($inputData);
-            $deleteStatus = AccountConst::SUCCESS_ACCOUNT_DELETING;
-        }
-
-        return $deleteStatus;
     }
 
     /**
@@ -221,26 +286,38 @@ class AccountService extends Service
      * @return $result
      */
     public function registerFavoriteUser($inputData) {
-        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-            return false;
-        }
+        $resultFlag = false;
 
-        $loginUser = $this->accountRepository->existsAccountById($inputData['user_id']);
-        if(!$loginUser) {
-            Auth::logout();
-            return false;
-        }
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+                $resultFlag =  false;
+            }
+    
+            $loginUser = $this->accountRepository->existsAccountById($inputData['user_id']);
+            if(!$loginUser) {
+                Auth::logout();
+                $resultFlag = false;
+            }
+    
+            $targetAccount = $this->accountRepository->existsAccountById($inputData['favorite_user_id']);
+            if(!$targetAccount) {
+                $resultFlag = false;
+            }
+    
+            $result = $this->favoriteUserRepository->registerFavoriteUser($inputData);
+            if($result == true) {
+                $resultFlag = true;
+            }
+    
+            DB::commit();
+            return $resultFlag;
 
-        $targetAccount = $this->accountRepository->existsAccountById($inputData['favorite_user_id']);
-        if(!$targetAccount) {
-            return false;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-        $result = $this->favoriteUserRepository->registerFavoriteUser($inputData);
-        if($result == true) {
-            return true;
-        }
-        return false;
     }
 
     /**
@@ -249,21 +326,32 @@ class AccountService extends Service
      * @return $result
      */
     public function deleteFavoriteUser($inputData) {
-        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-            return false;
-        }
+        $resultFlag = false;
+        try {
+            DB::beginTransaction();
+    
+            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+                $resultFlag = false;
+            }
+    
+            $loginUser = $this->accountRepository->existsAccountById($inputData['user_id']);
+            if(!$loginUser) {
+                Auth::logout();
+                $resultFlag = false;
+            }
+    
+            $result = $this->favoriteUserRepository->deleteFavoriteUser($inputData);
+            if($result == true) {
+                $resultFlag = true;
+            }
+    
+            DB::commit();
+            return $resultFlag;
 
-        $loginUser = $this->accountRepository->existsAccountById($inputData['user_id']);
-        if(!$loginUser) {
-            Auth::logout();
-            return false;
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
         }
-
-        $result = $this->favoriteUserRepository->deleteFavoriteUser($inputData);
-        if($result == true) {
-            return true;
-        }
-        return false;
     }
 
 }
