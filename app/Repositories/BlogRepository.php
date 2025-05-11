@@ -18,6 +18,15 @@ class BlogRepository extends Repository
         $this->blog = new Article;
 
     }
+
+    /**
+     * ブログの存在確認
+     */
+    public function checkExistsTargetBlog($id) {
+        $result = $this->blog->first($id);
+        return $result;
+    }
+
     
     /**
      * ブログ登録

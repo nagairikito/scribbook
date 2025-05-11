@@ -7,7 +7,7 @@ main .main-wrapper {
     margin: 0 auto;
 }
 
-main .advertise-area {
+main .advertisement-area {
     /* width: 12.5%; */
     width: 17.5%;
     height: 100vh;
@@ -37,7 +37,6 @@ main .main-contents {
     background-color: #f3f7d2;
 
 }
-
 
 /* main .post-user, main .posted-at {
     text-align: center;

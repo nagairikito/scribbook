@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Article extends Model
+class Advertisement extends Model
 {
         /**
      * The attributes that are mass assignable.
@@ -12,11 +12,11 @@ class Article extends Model
      * @var list<string>
      */
     protected $fillable = [
-        'title',
-        'contents',
-        'image',
+        'advertisement_image_name',
+        'url',
         'created_by',
-        'view_count',
+        'blog_id',
+        'access_count',
     ];
 
 }

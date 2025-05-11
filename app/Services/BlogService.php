@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Const\BlogConst;
+use App\Models\Advertisement;
 use App\Models\User;
 use App\Models\Article;
 use App\Models\ArticleComment;
@@ -12,10 +13,12 @@ use App\Repositories\BlogRepository;
 use App\Repositories\BlogCommentsRepository;
 use App\Repositories\BrowsingHistoryRepository;
 use App\Repositories\AccountRepository;
+use App\Repositories\AdvertisementRepository;
 use App\Repositories\FavoriteBlogRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class BlogService extends Service
 {
@@ -24,6 +27,7 @@ class BlogService extends Service
     public $blogCommentsRepository;
     public $favoriteBlogRepository;
     public $BrowsingHistoryRepository;
+    public $advertisementRepository;
 
     public function __construct() {
 
@@ -33,6 +37,7 @@ class BlogService extends Service
         $blogComments = new ArticleComment;
         $favoriteBlog = new FavoriteBlog;
         $browsingHistory = new BrowsingHistory;
+        $advertisement = new Advertisement;
 
         // Repositryのインスタンス化
         $this->accountRepository = new AccountRepository($user);
@@ -40,6 +45,7 @@ class BlogService extends Service
         $this->blogCommentsRepository = new BlogCommentsRepository($blogComments);
         $this->favoriteBlogRepository = new FavoriteBlogRepository($favoriteBlog);
         $this->BrowsingHistoryRepository = new BrowsingHistoryRepository($browsingHistory);
+        $this->advertisementRepository = new AdvertisementRepository($advertisement);
 
     }
     
@@ -258,6 +264,17 @@ class BlogService extends Service
     }
 
     /**
+     * ブログに紐づく広告を取得
+     * @param $id
+     * @return $comments
+     */
+    public function getAdvertisementByBlogId($id) {
+        $advertisement = $this->advertisementRepository->getAdvertisementByBlogId($id);
+
+        return $advertisement;
+    }
+
+    /**
      * 対象ユーザーIDに紐づくお気に入り登録されたブログを全件取得
      * @param $id
      * @return $favoriteBlogs
@@ -434,5 +451,136 @@ class BlogService extends Service
 
     }
 
+    /**
+     * 広告の登録
+     */
+    public function registerAdvertisement($inputData) {
+        $flag = false;
+        // try {
+        //     DB::beginTransaction();
+
+
+            $targetUser = $this->accountRepository->getAccountById($inputData['created_by']);
+            if(!$targetUser) {
+                return $flag;
+            }
+
+            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
+            $RegisteredAdvertisementCount = $this->advertisementRepository->checkRegisteredAdvertisement($inputData['blog_id']);
+
+            if(!$targetBlog || $RegisteredAdvertisementCount > 0) {
+                return $flag;
+            }
+
+            if($inputData['advertisement_image_file'] || $inputData['advertisement_image_file'] != null) {
+                $image_name = $this->upsertUserAdvertisementImageIntoStorage($inputData['advertisement_image_file'], null);
+                $inputData['advertisement_image_name'] = $image_name;
+                $flag = $this->advertisementRepository->registerAdvertisement($inputData);
+            }
+
+
+            // DB::commit();
+            return $flag;
+
+        // } catch (\Exception $e) {
+        //     report($e);
+        //     session()->flash('flash_message', 'エラーが発生しました');
+        // }    
+    }
+
+    /**
+     * 広告の削除
+     */
+    public function deleteAdvertisement($inputData) {
+        $flag = false;
+        // try {
+        //     DB::beginTransaction();
+
+
+            $targetUser = $this->accountRepository->getAccountById($inputData['created_by']);
+            if(!$targetUser || Auth::id() != $inputData['created_by']) {
+                return $flag;
+            }
+
+            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
+            $RegisteredAdvertisementCount = $this->advertisementRepository->checkRegisteredAdvertisement($inputData['blog_id']);
+
+            if(!$targetBlog || $RegisteredAdvertisementCount == 0) {
+                return $flag;
+            }
+
+            $targetAdvertisement = $this->advertisementRepository->getAdvertisementById($inputData['id']);
+
+            if($inputData['advertisement_image_name'] && 
+                $inputData['advertisement_image_name'] != null &&
+                count($targetAdvertisement) != 0) {
+                    $this->deleteAdvertisementImageFromStorage($targetAdvertisement[0]['advertisement_image_name']);
+                    $this->advertisementRepository->deleteAdvertisement($targetAdvertisement[0]['id']);
+                    $flag = true;
+            }
+
+            // DB::commit();
+            return $flag;
+
+        // } catch (\Exception $e) {
+        //     report($e);
+        //     session()->flash('flash_message', 'エラーが発生しました');
+        // }    
+    }
+
+    /**
+     * ユーザーアイコン更新,Storageに保存
+     * @param $iconImageFile
+     * @return $result
+     */
+    public function upsertUserAdvertisementImageIntoStorage($iconImageFile, $oldImageName) {
+        try {
+            DB::beginTransaction();
+    
+            if($oldImageName && $oldImageName != null) {
+                $this->deleteAdvertisementImageFromStorage($oldImageName);
+            }
+
+            $newImageName = 'noImage.png';
+            if($iconImageFile && $iconImageFile!= null) {
+                $originalName = $iconImageFile->getClientOriginalName();
+                $newImageName = date('Ymd_His') . '_' . $originalName;
+        
+                // Storage::disk('public')->putFileAs('advertisement_image_file', $iconImageFile->file('advertisement_image_file'), $newImageName);    
+                Storage::disk('public')->putFileAs('advertisement_images', $iconImageFile, $newImageName);    
+            }
+    
+            DB::commit();
+            return $newImageName;
+
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }
+    }
+
+    /**
+     * ユーザーアイコン削除,Storageから削除
+     * @param $iconImageFile
+     * @return $result
+     */
+    public function deleteAdvertisementImageFromStorage($targetImageName) {
+        try {
+            DB::beginTransaction();
+
+            if($targetImageName != null && $targetImageName != 'noImage.png') {
+                $targetImageNameExists = Storage::disk('public')->exists('advertisement_images/'. $targetImageName);
+                if($targetImageNameExists) {
+                    Storage::disk('public')->delete('advertisement_images/'. $targetImageName);
+                }
+            }
+    
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }
+    }
 
 }

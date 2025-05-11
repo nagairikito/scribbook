@@ -49,6 +49,6 @@ class SearchController extends Controller
 
         $result = $this->searchService->search($inputData);
         $keyword = $inputData['keyword'];
-        return view('Search/search', compact(['result', 'keyword']));
+        return view('search', compact(['result', 'keyword']));
     }
 }
