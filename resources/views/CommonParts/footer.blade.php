@@ -1,4 +1,4 @@
-    <footer id="footer">
+    <footer>
         <div class="footer-wrapper">
             <div class="footer-log">
                 <div class="footer-logo-wrapper">mark</div>

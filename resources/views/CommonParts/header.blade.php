@@ -1,4 +1,4 @@
-    <header id="header">
+    <header>
         <div class="header-wrapper">
             <div class="header-logo">
                 <div class="header-logo-wrapper"><a href="{{ route('toppage') }}">mark</a></div>
@@ -7,25 +7,31 @@
                 <form action="{{ route('search') }}" method="GET" class="header-search-bar-wrapper">
                 @csrf
                     @if(isset($keyword))
-                    <input class="search-textbox" type="search" name="keyword" value="{{$keyword ? $keyword : ''}}" placeholder="ブログ名・ユーザー名" required="required">
+                    <input class="search-textbox" type="search" aria-label="Search" name="keyword" value="{{$keyword ? $keyword : ''}}" placeholder="ブログ名・ユーザー名" required="required">
                     @else
-                        <input class="search-textbox" type="search" name="keyword" placeholder="ブログ名・ユーザー名">
+                        <input class="search-textbox" type="search" aria-label="Search" name="keyword" placeholder="ブログ名・ユーザー名">
                     @endif
-                    <input class="search-button" type="submit" value="検索🔍">
+                    <!-- <input class="search-button" type="submit" value="検索" class="btn btn-default"> -->
+                    <button class="" type="submit">検索 <i class="bi bi-search"></i></button>
                 </form>
             </div>
             <div class="header-nav">
-                <ul class="header-nav-list">
+                <div class="header-nav-list">
                     @if(Auth::user())
-                        <li><a href="{{ route('talk_room_list', Auth::id()) }}">トーク</a></li>
-                        <li><a href="">通知</a></li>
-                        <li><a href="{{ route('profile_top', ['id' => Auth::id()]) }}">アカウント</a></li>
+                        <div><a href="{{ route('blog_posting_form') }}" class="fos-1_15rem"><i class="bi bi-send-plus mr-5p fos-1_15rem"></i>投稿</a></div>
+                        <div><a href="{{ route('talk_room_list', Auth::id()) }}" class="fos-1_15rem"><i class="bi bi-envelope mr-5p fos-1_15rem"></i>トーク</a></div>
+                        <!-- <div><a href=""><i class="bi bi-bell"></i>通知</a></div> -->
+                        <div>
+                            <a class="header-user-icon-href" href="{{ route('profile_top', ['id' => Auth::id()]) }}">
+                                <img class="header-user-icon-image" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}">
+                            </a>
+                        </div>
                     @endif
                     @if(!Auth::user())
-                        <li><a href="{{ route('account_registeration_form') }}">新規作成</a></li>
-                        <li><a href="{{ route('login_form') }}">ログイン</a></li>
+                        <div><a href="{{ route('account_registeration_form') }}" class="fos-1_15rem"><i class="bi bi-person-plus mr-5p fos-1_3rem"></i>新規作成</a></div>
+                        <div><a href="{{ route('login_form') }}" class="fos-1_15rem"><i class="bi bi-box-arrow-in-left mr-5p fos-1_3rem"></i>ログイン</a></div>
                     @endif
-                </ul>
+                </div>
             </div>
         </div>
     </header>

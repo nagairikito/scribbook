@@ -37,7 +37,8 @@ class TalkRoomController extends Controller
      */
     public function showTalkRoomList(Request $request) {
         $talkRoomList = [];
-        return view('talk_room_list', compact('talkRoomList'));
+        // return view('talk_room_list', compact('talkRoomList'));
+        return view('talk_room_list_blade', compact('talkRoomList'));
     }
 
     /**

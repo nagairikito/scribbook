@@ -3,6 +3,7 @@
 @section('head')
     @parent
     <link rel="stylesheet" href="{{ asset('css/blogUnit.css') }}">
+    <script src="{{ asset('js/talkRoomList.js') }}" defer></script>
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script> <!-- JQuery-->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>トークルームリスト</title>
@@ -11,7 +12,15 @@
 @section('contents')
     <div class="main-contents">
         <h1>トーク</h1>
-        <ul class="talk-room-list"></ul>
+        <!-- <ul class="talk-room-list"></ul> -->
+        <ul class="talk-room-list1" id="test1">
+            <p>test</p>
+            <p>test</p>
+        </ul>
+        <ul class="talk-room-list2" id="test2">
+            <p>test</p>
+            <p>test</p>
+        </ul>
     </div>
 @endsection
 

@@ -1,5 +1,6 @@
 main {
     width: 100%;
+    min-height: 100vh;
 }
 
 main .main-wrapper {
@@ -8,34 +9,70 @@ main .main-wrapper {
 }
 
 main .advertisement-area {
+    /* width: 17.5%; */
+    width: 17.5vw;
+    min-height: 100vh;
+    background-color: #f2f5db;
+}
+
+main nav {
     /* width: 12.5%; */
-    width: 17.5%;
-    height: 100vh;
-
-    background-color: #8ef7ad;
+    min-width: 12.5vw;
+    min-height: calc(100vh - 50px);
+    background-color: #f0f5ca;
 }
 
-main .nav {
-    width: 12.5%;
-    height: 100vh;
-
-    background-color: #8ef7ad;
-
+main nav .nav-wrapper {
+    /* min-width: 12.5vw; */
+    min-width: inherit;
+    min-height: calc(100vh - 7vh - 30px);
+    height: calc(100vh - 7vh - 50px);
+    position: fixed;
+    padding: 30px 0 0 20px;
+    margin: 10px 0;
+    border-right: 0.1px solid #bebebe;
+    overflow-y: scroll;
+    /*スクロールバー非表示（IE・Edge）*/
+    -ms-overflow-style: none;
+    /*スクロールバー非表示（Firefox）*/
+    scrollbar-width: none;
+}
+/*スクロールバー非表示（Chrome・Safari）*/
+main nav .nav-wrapper::-webkit-scrollbar{
+    display:none;
 }
 
-main .nav li {
+main nav .nav-wrapper div {
     cursor: pointer;
-    margin-bottom: 5px; 
+    margin-bottom: 10px; 
+}
+
+main nav .nav-wrapper .post-blog-button {
+    display: inline-block;
+    cursor: pointer;
+    width: 100px;
+    height: 70px;
+    border: 1px solid #888888;
+    border-radius: 5px;
 }
 
 main .main-contents {
-    width: 70%;
+    /* width: 70%; */
+    width: 70vw;
     padding: 10px;
     display: flex;
     flex-direction: column;
+    background-color: #f2f5db;
+}
 
-    background-color: #f3f7d2;
+.advertisement_image{
+    width: 90%;
+}
 
+.advertisement_image > img ,
+.adv_regster_frame {
+    width: 90%;
+    border: 0.5px solid #d3d3d3;
 }
 
 /* main .post-user, main .posted-at {

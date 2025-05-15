@@ -1,0 +1,136 @@
+.profile-top .profile-card {
+    border: 1px solid #888888;
+    padding: 15px 30px 30px 30px;
+}
+
+.profile-top .profile-button-list {
+    display: flex;
+    justify-content: end;
+}
+
+.profile-top .profile-button-list > div {
+    margin-right: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-top .profile-contents {
+    display: flex;
+    flex-grow: 1;
+    padding-top: 30px;
+}
+
+.profile-top .profile-contents .left-contents {
+    flex-grow: 1;
+    display: flex;
+    justify-content: center;
+}
+
+.profile-top .profile-contents .left-contents > div {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+
+.profile-top .profile-image-frame {
+    margin-bottom: 30px;
+}
+
+.profile-top .profile-icon {
+    width: 200px;
+    height: 200px;
+    border-radius: 50%;
+}
+
+.profile-top .profile-contents .right-contents {
+    flex-grow: 2;
+    padding: 20px 50px 0 0;
+}
+
+.profile-top .profile-contents .right-contents > div {
+    display: flex;
+}
+
+.profile-top .profile-contents .right-contents div > p:first-child {
+    text-align: right;
+    width: 100px;
+    margin-right: 50px;
+}
+
+.profile-top .word-wrap {
+    line-break: anywhere;
+    width: 80%;
+}
+
+
+
+.profile-top .open-edit-profile-modal, 
+.profile-top .open-privacy-setting-modal, 
+.profile-top .open-favorite-user-modal, 
+.profile-top .favorite-user-button,
+.profile-top .message-button {
+    cursor: pointer;
+    border: 2px solid #888888;
+    border-radius: 7.5px;
+    width: 150px;
+    height: 30px;
+}
+
+.profile-top .close-edit-profile-modal, .profile-top .close-privacy-setting-modal {
+    cursor: pointer;
+}
+
+.profile-top .logout-button {
+    cursor: pointer;
+    border-radius: 7.5px;
+    width: 150px;
+    height: 30px;
+    background-color: #e90909;
+}
+
+
+
+
+/* モーダル */
+.profile-top .modal.close {
+    visibility: hidden;
+}
+
+.profile-top .modal.open{
+    visibility: visible;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.profile-top .modal-contents {
+    z-index: 1;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    width: 850px;
+    height: 800px;
+    background-color: white;
+}
+
+.profile-top .modal-background {
+    background-color: gray;
+    position: absolute;
+    opacity: 0.5;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+}
+
+.profile-top .modal-contents.edit-profile.display-none, 
+.profile-top .modal-contents.privacy-setting.display-none,
+.profile-top .modal-contents.favorite-user.display-none {
+    visibility: hidden;
+}
