@@ -53,7 +53,7 @@ class BlogEditingController extends Controller
      * @param $request
      * @return view
      */
-    public function editBlog(BlogPostingRequest $request) {
+    public function editBlog(Request $request) {
         $inputData = [
             'id' => $request['blog_id'],
             'title' => $request['title'],
@@ -63,18 +63,9 @@ class BlogEditingController extends Controller
 
         $result = $this->blogService->editBlog($inputData);
 
-        switch($result) {
-            case BlogConst::FAIL_EDIT_USER_AUTHENTICATION;
-                return back()->with('error_edit_blog', 'セッションが切れています');
-
-            case BlogConst::NOT_FOUND_EDIT_USER_ID;
-                return back()->with('error_edit_blog', 'ブログを更新できません');
-
-            case BlogConst::SUCCESS_BLOG_EDITING;
-                return redirect(route('profile_top', ['id' => Auth::id()]))->with('success_edit_blog', 'ブログを更新しました');
-
-            default;
-                return back()->with('error_edit_blog', '予期せぬエラーが発生しました');
+        if($result) {
+            return redirect(route('profile_top', ['id' => Auth::id()]))->with('success_edit_blog', 'ブログを更新しました');
         }
+        return back()->with('error_edit_blog', '予期せぬエラーが発生しました');
     }
 }

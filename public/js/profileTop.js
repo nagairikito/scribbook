@@ -1,7 +1,7 @@
-let modal = document.querySelector('.modal');
-let modalEditProfile = document.querySelector('.modal-contents.edit-profile');
-let modalPrivacySetting = document.querySelector('.modal-contents.privacy-setting');
-let modalFavoriteUser = document.querySelector('.modal-contents.favorite-user');
+let modal = document.getElementById("modal");
+let modalEditProfile = document.getElementById("profile-editing-modal");
+let modalPrivacySetting = document.getElementById("privacy-setting-modal");
+let modalFavoriteUser = document.getElementById("favorite-user-modal");
 let iconImage = document.getElementsByName('icon_image');
 
 

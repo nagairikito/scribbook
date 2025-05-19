@@ -1,5 +1,6 @@
 main {
-    width: 100%;
+    /* width: 100%; */
+    min-width: 100vw;
     min-height: 100vh;
 }
 
@@ -23,8 +24,8 @@ main nav {
 }
 
 main nav .nav-wrapper {
-    /* min-width: 12.5vw; */
-    min-width: inherit;
+    min-width: 12%;
+    /* min-width: inherit; */
     min-height: calc(100vh - 7vh - 30px);
     height: calc(100vh - 7vh - 50px);
     position: fixed;
@@ -59,6 +60,7 @@ main nav .nav-wrapper .post-blog-button {
 main .main-contents {
     /* width: 70%; */
     width: 70vw;
+    max-width: 70vw;
     padding: 10px;
     display: flex;
     flex-direction: column;

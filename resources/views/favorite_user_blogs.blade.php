@@ -3,7 +3,7 @@
 @section('head')
     @parent
     <link rel="stylesheet" href="{{ asset('css/blogUnit.css') }}">
-    <script src="{{ asset('js/topicsGetScreenSize.js') }}" defer></script>
+    <script src="{{ asset('js/blogUnitGetScreenSize.js') }}" defer></script>
     <title>お気に入りユーザーのブログ</title>
 @endsection
 

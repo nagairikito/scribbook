@@ -14,14 +14,6 @@
     font-size: 1.75rem;
 }
 
-.ml-minus1_5p {
-    margin-left: -1.5px;
-}
-
-.ml-minus3p {
-    margin-left: -3px;
-}
-
 .mr-5p {
     margin-right: 5px;
 }
@@ -52,4 +44,21 @@
 
 .mb-15p {
     margin-bottom: 15px;
+}
+
+.ml-minus1_5p {
+    margin-left: -1.5px;
+}
+
+.ml-minus3p {
+    margin-left: -3px;
+}
+
+.ml-15p {
+    margin-left: 15px;
+}
+
+.display-center {
+    display: flex;
+    justify-content: center;
 }

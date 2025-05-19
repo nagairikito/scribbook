@@ -2,6 +2,7 @@
 
 @section('head')
     @parent
+    <script src="{{ asset('js/blogEditing.js') }}" defer></script>
     <title>編集フォーム_{{ $blog[0]['title'] }}</title>
 @endsection
 
@@ -12,7 +13,7 @@
             @if(session('success_delete_blog'))
                 <p>{{ session('success_delete_blog') }}</p>
             @endif
-            <form action="{{ route('edit_blog') }}" method="POST">
+            <form id="blog-editing-form" action="{{ route('edit_blog') }}" method="POST">
             @csrf
                 <h2>タイトル</h2>
                 <input type="text" name="title" value="{{ $blog[0]['title'] }}">
@@ -20,7 +21,8 @@
                     <p class="error-message">{{ $errors->first('title') }}</p>
                 @endif
                 <h2>コンテンツ</h2>
-                <textarea name="contents" cols="150" rows="30">{{ $blog[0]['contents'] }}</textarea>
+                <textarea id="replacement-contents" name="contents" style="display: none;"></textarea>
+                <div id="original-contents" contenteditable="true">{!! $blog[0]['contents'] !!}</div>
                 @if($errors->has('contents'))
                     <p class="error-message">{{ $errors->first('contents') }}</p>
                 @endif

@@ -1,0 +1,53 @@
+#login-form .main-contents-wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+#login-form .login-form-area {
+    position: absolute;
+    left: 50%;
+    top: 35%;
+    transform: translate(-50%, -50%);
+
+    display: flex;
+    flex-direction: column;
+}
+
+#login-form .login-form-area > div {
+    margin-bottom: 30px;
+}
+
+#login-form .login-form-area .app-logo-area {
+    margin: 0 auto 30px auto;
+}
+
+#login-form .login-form-area .app-logo {
+    width: 150px;
+    height: 100px;
+}
+
+#login-form .login-form-area .login-button-area {
+    margin: 0 auto 30px auto;
+}
+
+#login-form .login-form-area .to-registration-form {
+    margin: 0 auto ;
+}
+
+#login-form .login-form-area > div > p {
+    margin: 0;
+}
+
+#login-form .input-box {
+    width: 300px;
+    height: 30px;
+}
+
+#login-form .login-button {
+    width: 150px;
+    height: 35px;
+    border-radius: 20px;
+    cursor: pointer;
+    background-color: #13e201;
+}

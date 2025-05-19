@@ -1,0 +1,87 @@
+.talk-room-list {
+    width: 100%;
+}
+
+.talk-room-list-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.talk-room-list-wrapper > .talk-room-unit {
+    padding: 10px 0;
+    border-bottom: 1px solid #888888;
+}
+
+.talk-room-list-wrapper > .talk-room-unit:first-child {
+    border-top: 1px solid #888888;
+}
+
+/* .talk-room-unit {
+    padding: 10px 0;
+    border-bottom: 1px solid #888888;
+}
+
+.talk-room-unit:first {
+    border-top: 1px solid #888888;
+} */
+
+.talk-room-unit-wrapper {
+    width: 80%;
+    display: flex;
+    margin: auto;
+}
+
+.user-icon-wrapper {
+    width: 10%;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.user-icon {
+    width: 100px;
+    height: 100px;
+    border: 1px solid #888888;
+    border-radius: 50%;
+    margin-right: 30px;
+}
+
+.contents {
+    width: 90%;
+    display: flex;
+    flex-direction: column;
+}
+
+.top,
+.bottom {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.top {
+    height: 30%;
+    margin-top: 10px;
+}
+
+.top > p:first-child {
+    margin-bottom: 0;
+    font-weight: bold;
+}
+
+.unread-messege-count {
+    width: 25px;
+    height: 25px;
+    border: 1px solid #888888;
+    border-radius: 50%;
+    text-align: center;
+}
+
+.bottom {
+    height: 50%;
+}
+
+.bottom > p:first-child {
+    margin-top: 0;
+}

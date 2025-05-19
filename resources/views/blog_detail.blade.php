@@ -46,9 +46,9 @@
 
             @endif
 
-            <p>投稿者：　{{ $blog[0]['name'] }}</p>
-            <p>投稿日時：　{{ $blog[0]['updated_at'] }}</p>
-            <p>{{ $blog[0]['contents'] }}</p>
+            <div>投稿者：　{{ $blog[0]['name'] }}</div>
+            <div>投稿日時：　{{ $blog[0]['updated_at'] }}</div>
+            <div>{!! $blog[0]['contents'] !!}</div>
 
         </div>
 
@@ -75,9 +75,9 @@
                     @foreach($comments as $comment)
                     <li>
                         <div class="profile"><img src="{{ asset('storage/user_icon_images/' . $comment['icon_image']) }}"></div>
-                        <p>{{ $comment['name'] }}</p>
-                        <p>{{ $comment['created_at'] }}</p>
-                        <p>{{ $comment['comment'] }}</p>
+                        <div>{{ $comment['name'] }}</div>
+                        <div>{{ $comment['created_at'] }}</div>
+                        <div>{{ $comment['comment'] }}</div>
                     </li>
                     @endforeach
                 </ul>

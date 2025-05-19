@@ -49,19 +49,10 @@ class BlogPostingController extends Controller
 
         $result = $this->blogService->postBlog($inputData);
 
-        switch($result) {
-            case BlogConst::FAIL_REGISTER_USER_AUTHENTICATION:
-                return back()->with('error_post_blog', 'セッションが切れています');
-
-            case BlogConst::NOT_FOUND_REGISTER_USER_ID:
-                return back()->with('error_post_blog', '投稿できませんでした');
-
-            case BlogConst::SUCCESS_BLOG_REGISTERATION:
-                return redirect(route('toppage'))->with('success_post_blog', 'ブログを投稿しました');
-
-            default:
-                return back()->with('error_post_blog', '予期せぬエラーが発生しました');
+        if($result) {
+            return redirect(route('toppage'))->with('success_post_blog', 'ブログを投稿しました');
         }
+        return back()->with('error_post_blog', '予期せぬエラーが発生しました');
 
     }
 }

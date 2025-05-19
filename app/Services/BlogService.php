@@ -55,30 +55,29 @@ class BlogService extends Service
      * @return bool $blogPostStatus
      */
     public function postBlog($inputData) {
-        $postBlogStatus = BlogConst::REGISTER_INITIAL_VALUE;
+        $postFlag = false;
+
+        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+            return $postFlag;
+        }
+
+        $created_by = $this->accountRepository->getAccountById($inputData['user_id']);
+        if(!$created_by) {
+            return $postFlag;
+        }
+    
+        // $inputData['contents'] = html_entity_decode($inputData['contents']);
 
         try {
             DB::beginTransaction();
-    
-            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-                $postBlogStatus = BlogConst::FAIL_REGISTER_USER_AUTHENTICATION;
-                return $postBlogStatus;
-            }
-    
-            $created_by = $this->accountRepository->getAccountById($inputData['user_id']);
-            if(!$created_by) {
-                $postBlogStatus = BlogConst::NOT_FOUND_REGISTER_USER_ID;
-                return $postBlogStatus;
-            }
-    
+
             $checkPostBlog = $this->blogRepository->postBlog($inputData);
             if($checkPostBlog) {
-                $postBlogStatus = BlogConst::SUCCESS_BLOG_REGISTERATION;
-                return $postBlogStatus;
+                $postFlag = true;
             }
     
             DB::commit();
-            return $postBlogStatus;
+            return $postFlag;
 
         } catch (\Exception $e) {
             report($e);
@@ -92,30 +91,27 @@ class BlogService extends Service
      * @return $result
      */
     public function editBlog($inputData) {
-        $editBlogStatus = BlogConst::EDIT_INITIAL_VALUE;
+        $editBlogFlag = false;
 
+        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+            return $editBlogFlag;
+        }
+
+        $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
+        if(!$created_by) {
+            return $editBlogFlag;
+        }
+    
         try {
             DB::beginTransaction();
     
-            if(!Auth::user() || Auth::id() != $inputData['created_by']) {
-                $editBlogStatus = BlogConst::FAIL_EDIT_USER_AUTHENTICATION;
-                return $editBlogStatus;
-            }
-    
-            $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
-            if(!$created_by) {
-                $editBlogStatus = BlogConst::NOT_FOUND_EDIT_USER_ID;
-                return $editBlogStatus;
-            }
-    
             $checkEditBlog = $this->blogRepository->editBlog($inputData);
             if($checkEditBlog) {
-                $editBlogStatus = BlogConst::SUCCESS_BLOG_EDITING;
-                return $editBlogStatus;
+                $editBlogFlag = true;
             }
     
             DB::commit();
-            return $editBlogStatus;
+            return $editBlogFlag;
 
         } catch (\Exception $e) {
             report($e);
@@ -232,6 +228,7 @@ class BlogService extends Service
      */
     public function blogDetail($id) {
         $blog = $this->blogRepository->blogDetail($id);
+        $blog[0]['contents'] = html_entity_decode($blog[0]['contents']);
 
         // 閲覧処理（閲覧数増加、閲覧履歴の登録）
         $this->blogRepository->increaseViewCount($id);
@@ -294,7 +291,7 @@ class BlogService extends Service
     }
 
     /**
-     * ユーザーIDとブログIDをもとに対象のブログがお気に入り登録されているかを判定
+     * ユーザーIDとブログIDをもとに対象のユーザーが対象のブログがお気に入り登録しているかを判定
      * @param $user_id, $blog_id
      * @return $result
      */

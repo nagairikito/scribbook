@@ -1,0 +1,4 @@
+#blog-posting .blog-posting-form-wrapper {
+    display: flex;
+    justify-content: space-between;
+}

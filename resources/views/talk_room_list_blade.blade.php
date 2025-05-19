@@ -11,7 +11,7 @@
     <link rel="stylesheet" href="{{ asset('css/CommonParts/main.css') }}">
     <script src="{{ asset('js/CommonParts/getScreenSize.js') }}" defer></script>
     <link rel="stylesheet" href="{{ asset('css/blogUnit.css') }}">
-    <script src="{{ asset('js/talkRoomList.js') }}" defer></script>
+    <!-- <script src="{{ asset('js/talkRoomList.js') }}" defer></script> -->
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script> <!-- JQuery-->
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>トークルームリスト</title>
@@ -35,8 +35,10 @@
     @include('CommonParts.footer')
 
 <script defer>
+    let replacementResHTML;
+
     document.addEventListener("DOMContentLoaded", function() {
-        getTalkRoomList();
+        getTalkRoomList(true);
     });
     polling();
 
@@ -47,54 +49,49 @@
     })
 
     function polling() {
-        initPolling();
-
-        const MAX_POLLING_COUNT = 5 // ポーリング回数
-        let pollingInterval;
-        let pollingCount = 0;
-        // if(pollingCount < MAX_POLLING_COUNT) {
-        for (let i = 0; pollingCount < MAX_POLLING_COUNT; i++) {
-            execPolling();
-            pollingCount += 1;
-            // console.log('ポーリング'+pollingCount+'回目');
-            if (i == 4) {
-                initPolling(pollingInterval);
-                console.log('ポーリング終了');
-            }
-        }
-
-        // initPolling(pollingInterval);
-        // console.log('ポーリング終了');
-
-
-        // ポーリング処理
-        function execPolling() {
-            pollingInterval = setInterval(function() {
-                getTalkRoomList();
-            }, 2000);
-        }
-
-        // ポーリングの初期化
-        function initPolling(pollingInterval = null) {
-            if (pollingInterval) {
-                clearInterval(pollingInterval);
-            }
-        }
+        pollingInterval = setInterval(function() {
+            getTalkRoomList(false);
+        }, 2000);
     }
 
-    function getTalkRoomList() {
+    function getTalkRoomList(firstFlag) {
         $.ajax({
                 url: '/getTalkRoomList',
                 method: 'GET',
                 dataType: "json",
             })
             .done((res) => {
+                html = parse(res.html);
+
+                if(firstFlag == true) {
+                    replacementResHTML = html
+                    $('.talk-room-list').html(html);
+                }
+
+                MatchConfirmationFlag = equalFlag(html)
+
+                if(MatchConfirmationFlag == true) {
+                    return;
+                }
+
                 $('.talk-room-list').html('');
-                $('.talk-room-list').html(res.html);
+                $('.talk-room-list').html(html);
+                replacementResHTML = html;
             })
             .fail((error) => {
                 console.log('失敗！');
             });
+    }
+
+    function equalFlag(data) {
+        return replacementResHTML.isEqualNode(data);
+    }
+
+    function parse(htmlStr) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(htmlStr, 'text/html');
+        const newNode = doc.body.firstChild;
+        return newNode;
     }
 </script>
 </body>

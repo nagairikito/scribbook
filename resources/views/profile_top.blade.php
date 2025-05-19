@@ -3,12 +3,14 @@
 @section('head')
     @parent
     <link rel="stylesheet" href="{{ asset('css/profileTop.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/blogUnit.css') }}">
     <script src="{{ asset('js/profileTop.js') }}" defer></script>
+    <script src="{{ asset('js/blogUnitGetScreenSize.js') }}" defer></script>
     <title>プロフィール</title>
 @endsection
 
 @section('contents')
-    <div class="main-contents profile-top">
+    <div id="profile-top" class="main-contents profile-top">
         <div class="main-contents-wrapper">
             <h1>プロフィール</h1>
             <div class="profile">
@@ -74,7 +76,7 @@
                             </div>
                             <div>
                                 <p>ユーザーID<p>
-                                <p class="word-wrap">{{ $user[0]['id'] }}（ログインIDとは異なります）<p>
+                                <p class="word-wrap">{{ $user[0]['id'] }}<span class="user-id-attention">※ログインIDとは異なります</span><p>
                             </div>
                             <div>
                                 <p>概要欄</p>
@@ -84,143 +86,174 @@
                     </div>
 
                 </div>
+
+                <div class="blog-list">
+                    <h2>ブログ一覧</h2>
+                    @if(count($blogs) > 0)
+                    <ul class="blog-list-wrapper">
+                        @foreach($blogs as $blog)
+                        <li class="blog-unit">
+                            <a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">
+                                <p class="title">{{ $blog['title'] }}</p>
+                                <p class="blog-contents">{{ $blog['contents'] }}</p>
+                                <p class="posted-at">{{ $blog['updated_at'] }}</td>
+                            </a>
+                        </li>
+                        @endforeach
+                    </ul>
+                    @else
+                    <p>投稿がありません</p>
+                    @endif
+                </div>
             </div>
-
-            <h2>ブログ一覧</h2>
-            @if(count($blogs) > 0)
-            <table border="0">
-                @foreach($blogs as $blog)
-                <tr key="{{ $blog['id'] }}">
-                    <td><a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">{{ $blog['title'] }}</a></td>
-                    <td><a>{{ $blog['updated_at'] }}</a></td>
-                </tr>
-                @endforeach
-            </table>
-            @else
-            <p>投稿がありません</p>
-            @endif
-
         </div>
 
         @if(Auth::user() && Auth::id() == $user[0]['id'])
         <!-- モーダル -->
-        <div class="modal close">
+        <div id="modal" class="modal close">
             <div class="modal-wrapper">
 
                 <!-- プロフィール編集モーダル -->
-                <div class="modal-contents edit-profile display-none">
-                    <form action="{{ route('update_profile') }}" method="POST" enctype="multipart/form-data">
-                        @csrf
-                        <div>
-                            <div class="close-edit-profile-modal" onclick="closeModal(EDIT_PROFILE)">✕</div>
-                            <div><input type="submit" value="保存"></div>
-                        </div>
-                        <div>
-                            @if(session('error_update'))
-                            <p class="error-message">{{ session('error_update') }}</p>
-                            @endif
-                        </div>
-                        <div>
-
-                            <div>
-                                <img src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}" style="width: 200px; height: 200px;">
-                                <i onclick="initUserIcon()">✕</i>
-                                <input type="file" name="icon_image_file">
-                                <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
+                <div id="profile-editing-modal" class="modal-contents edit-profile display-none">
+                    <div class="profile-editing-modal-wrapper">
+                        <form action="{{ route('update_profile') }}" class="profile-editing-form-area" method="POST" enctype="multipart/form-data">
+                            @csrf
+                            <div class="profile-editing-control-buttons">
+                                <div class="close-edit-profile-modal" onclick="closeModal(EDIT_PROFILE)">✕</div>
+                                <div class="profile-updating-button-wrapper"><input type="submit" class="profile-updating-button" value="保存"></div>
                             </div>
-                            <div>
-                                <p>名前:</p>
-                                <input type="text" name="name" value="{{ Auth::user()->name }}">
-                                @if($errors->has('name'))
-                                <p class="error-message">{{ $errors->first('name') }}</p>
+                            <div class="profile-editing-contents-area">
+                                @if(session('error_update'))
+                                    <div>
+                                        <p class="error-message">{{ session('error_update') }}</p>
+                                    </div>
                                 @endif
+                                <div class="profile-editing-input-area">
+                                    <div class="profile-editing-user-icon-area">
+                                        <!-- <div class="profile-editing-user-icon-area-wrapper"> -->
+                                            <img src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}" class="profile-editing-user-icon">
+                                            <div class="display-center">
+                                                <input class="user-icon-choice-button" type="file" name="icon_image_file">
+                                            </div>
+                                            <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
+                                        <!-- </div> -->
+                                    </div>
+                                    <div>
+                                        <p>ユーザーID<span class="user-id-attention">※ログインIDとは異なります、ユーザーIDは変更できません</span></p>
+                                        <p class="user-id-value">{{ Auth::user()->id }}</p>
+                                    </div>
+                                    <div>
+                                        <p>名前</p>
+                                        <input type="text" class="input-box" name="name" value="{{ Auth::user()->name }}">
+                                        @if($errors->has('name'))
+                                        <p class="error-message">{{ $errors->first('name') }}</p>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p>概要欄</p>
+                                        <textarea name="discription" cols="70" rows="15" style="resize: none;">{{ Auth::user()->discription }}</textarea>
+                                        @if($errors->has('discription'))
+                                        <p class="error-message">{{ $errors->first('discription') }}</p>
+                                        @endif
+                                    </div>
+                                    <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                    <input type="hidden" name="login_id" value="{{ Auth::user()->login_id }}">
+                                    <input type="hidden" name="password" value="{{ Auth::user()->password }}">
+                                    <input type="hidden" name="password_confirmation" value="{{ Auth::user()->password }}">
+                                </div>
                             </div>
-                            <div>
-                                <p>ユーザーID:</p>
-                                <p>{{ Auth::user()->id }}（ログインIDとは異なります、ユーザーIDは変更できません）</p>
-                            </div>
-                            <div>
-                                <p>概要欄:</p>
-                                <textarea name="discription" cols="70" rows="15">{{ Auth::user()->discription }}</textarea>
-                                @if($errors->has('discription'))
-                                <p class="error-message">{{ $errors->first('discription') }}</p>
-                                @endif
-                            </div>
-                            <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                            <input type="hidden" name="login_id" value="{{ Auth::user()->login_id }}">
-                            <input type="hidden" name="password" value="{{ Auth::user()->password }}">
-                            <input type="hidden" name="password_confirmation" value="{{ Auth::user()->password }}">
-                        </div>
-                    </form>
-                    <form action="{{ route('delete_account') }}">
-                        @csrf
-                        <input type="hidden" name="id" value="{{ Auth::id() }}">
-                        <input type="submit" value="アカウント削除">
-                    </form>
+                        </form>
+                        <form action="{{ route('delete_account') }}" class="account-deleting-button-area">
+                            @csrf
+                            <input type="hidden" name="id" value="{{ Auth::id() }}">
+                            <input type="submit" class="account-deleting-button" value="アカウント削除">
+                        </form>
+                    </div>
                 </div>
 
                 <!-- プライバシー設定モーダル -->
-                <div class="modal-contents privacy-setting display-none">
-                    <form action="{{ route('update_profile') }}" method="POST">
-                        @csrf
-                        <div>
-                            <div class="close-privacy-setting-modal" onclick="closeModal(PRIVACY_SETTING)">✕</div>
-                            <div><input type="submit" value="保存"></div>
-                        </div>
-                        <div>
-                            <div>
-                                <p>現在のログインID:</p>
-                                <p>{{ Auth::user()->login_id }}</p>
+                <div id="privacy-setting-modal" class="modal-contents privacy-setting display-none">
+                    <div class="privacy-setting-modal-wrapper">
+                        <form action="{{ route('update_profile') }}" class="privacy-setting-form-area" method="POST">
+                            @csrf
+                            <div class="privacy-setting-control-buttons">
+                                <div class="close-privacy-setting-modal" onclick="closeModal(PRIVACY_SETTING)">✕</div>
+                                <div class="privacy-setting-updating-button-wrapper"><input type="submit" class="privacy-setting-updating-button" value="保存"></div>
                             </div>
-                            <div>
-                                <p>新しいログインID:</p>
-                                <input type="text" name="login_id">
-                                @if($errors->has('login_id'))
-                                <p class="error-message">{{ $errors->first('login_id') }}</p>
-                                @endif
-                                <p>※ログインIDのみ変更したい場合は新しいパスワードと確認用パスワードに現在のパスワードを入力してください</p>
+                            <div class="privacy-setting-contents-area">
+                                <div class="privacy-setting-input-area">
+                                    <div>
+                                        <p>現在のログインID:</p>
+                                        <p class="login-id-value">{{ Auth::user()->login_id }}</p>
+                                    </div>
+                                    <div>
+                                        <p>新しいログインID:</p>
+                                        <input type="text" class="input-box" name="login_id">
+                                        @if($errors->has('login_id'))
+                                        <p class="error-message">{{ $errors->first('login_id') }}</p>
+                                        @endif
+                                        <p class="password-attention">※ログインIDのみ変更したい場合は新しいパスワードと確認用パスワードに現在のパスワードを入力してください</p>
+                                    </div>
+                                    <div>
+                                        <p>新しいパスワード:</p>
+                                        <input type="password" class="input-box" name="password">
+                                        @if($errors->has('password'))
+                                        <p class="error-message">{{ $errors->first('password') }}</p>
+                                        @endif
+                                    </div>
+                                    <div>
+                                        <p>確認用パスワード:</p>
+                                        <input type="password" class="input-box" name="password_confirmation">
+                                    </div>
+                                    <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                    <input type="hidden" name="name" value="{{ Auth::user()->name }}">
+                                    <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
+                                    <input type="hidden" name="discription" value="{{ Auth::user()->discription }}">
+                                </div>
                             </div>
-                            <div>
-                                <p>新しいパスワード:</p>
-                                <input type="password" name="password">
-                                @if($errors->has('password'))
-                                <p class="error-message">{{ $errors->first('password') }}</p>
-                                @endif
-                            </div>
-                            <div>
-                                <p>確認用パスワード:</p>
-                                <input type="password" name="password_confirmation">
-                            </div>
-                            <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                            <input type="hidden" name="name" value="{{ Auth::user()->name }}">
-                            <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
-                            <input type="hidden" name="discription" value="{{ Auth::user()->discription }}">
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
 
                 <!-- お気に入りユーザーモーダル -->
-                <div class="modal-contents favorite-user display-none">
-                    <div class="close-privacy-setting-modal" onclick="closeModal(FAVORITE_USER)">✕</div>
-                    @if(count($user[0]['favorite_users']) > 0)
-                    <div>
-                        @foreach($user[0]['favorite_users'] as $favorite_user)
-                        <div>
-                            <div><a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}"><img src="{{ asset('storage/user_icon_images/' . $favorite_user['icon_image']) }}"></a></div>
-                            <div><a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}"></a>{{ $favorite_user['name'] }}</div>
-                            <form action="{{ route('delete_favorite_user') }}">
-                                @csrf
-                                <input type="submit" value="お気に入り登録解除">
-                                <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                <input type="hidden" name="target_favorite_user_id" value="{{ $favorite_user['id'] }}">
-                                <input type="hidden" name="page_type" value="my_favorite_users">
-                            </form>
+                <div id="favorite-user-modal" class="modal-contents favorite-user display-none">
+                    <div class="favorite-user-modal-wrapper">
+                        <div class="favorite-user-control-buttons">
+                            <div class="close-favorite-user-modal" onclick="closeModal(FAVORITE_USER)">✕</div>
                         </div>
-                        @endforeach
+                        @if(count($user[0]['favorite_users']) > 0)
+                        <div class="favorite-user-list">
+                            <div class="favorite-user-list-wrapper">
+                                @foreach($user[0]['favorite_users'] as $favorite_user)
+                                <div class="favorite-user-unit">
+                                    <div class="left">
+                                        <a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}">
+                                            <img class="favorite-user-icon" src="{{ asset('storage/user_icon_images/' . $favorite_user['icon_image']) }}">
+                                        </a>
+                                    </div>
+                                    <div class="center">
+                                        <div class="favorite-user-name"><a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}"></a>{{ $favorite_user['name'] }}</div>
+                                        <a href="{{ route('display_talk_room', ['sender' => Auth::id(), 'recipient' => $favorite_user['id']]) }}">
+                                            <i class="bi bi-chat-dots fos-1_75rem ml-15p"></i>
+                                        </a>
+                                    </div>
+                                    <div class="right">
+                                        <form action="{{ route('delete_favorite_user') }}" class="delete-favorite-user-button-wrapper">
+                                            @csrf
+                                            <input type="submit" class="delete-favorite-user-button" value="お気に入り登録解除">
+                                            <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                            <input type="hidden" name="target_favorite_user_id" value="{{ $favorite_user['id'] }}">
+                                            <input type="hidden" name="page_type" value="my_favorite_users">
+                                        </form>
+                                    </div>
+                                </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        @else
+                        <p>お気に入り登録されているユーザーがいません</p>
+                        @endif
                     </div>
-                    @else
-                    <p>お気に入り登録されているユーザーがいません</p>
-                    @endif
                 </div>
 
                 <!-- モーダル背景 -->
