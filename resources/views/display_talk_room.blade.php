@@ -24,9 +24,12 @@
                 <form>
                     @csrf
                     <input type="text" class="input-message" name="message">
+                    <!-- <textarea name="message" class="input-message" rows="2" cols="100"></textarea> -->
                     <input type="hidden" name="sender" value="{{ Auth::id() }}">
                     <input type="hidden" name="recipient" value="{{ $talkRoom['recipient'] }}">
-                    <input type="submit" class="send" value="送信">
+                    <label for="message-send-button" class="message-send-button-wrapper"><i class="bi bi-send message-send-button"></i></label>
+                    <button id="message-send-button" class="hidden-message-send-button" type="submit" style="display: none;"></button>
+                    <!-- <button id="message-send-button" type="submit" style="display: none;"></button> -->
 
                 </form>
             </div>
@@ -45,9 +48,9 @@
                 },
             })
 
-            $('.send').on('click', function(e) {
+            $('.hidden-message-send-button').on('click', function(e) {
                 e.preventDefault();
-
+console.log("test")
                 sender = $('input[name="sender"]').val();
                 recipient = $('input[name="recipient"]').val();
                 message = $('input[name="message"]').val();

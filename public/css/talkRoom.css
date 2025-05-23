@@ -64,3 +64,19 @@
 /* .send-at {
     width: 50px;
 } */
+
+.message-send-button-wrapper {
+    position: relative;
+}
+
+.message-send-button {
+    position: absolute;
+    top: -5px;
+    left: 0;
+    font-size: 1.5rem;
+    cursor: pointer;
+}
+
+.message-send-button::before {
+    transform: rotate(45deg);
+}

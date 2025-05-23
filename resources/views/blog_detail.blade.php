@@ -46,14 +46,18 @@
                                     @if($blog[0]['favorite_flag'] == false)
                                     <form action="{{ route('register_favorite_blog') }}" class="" method="POST">
                                         @csrf
-                                        <button class="favo-on-button-frame" type="submit"><i class="bi bi-heart fos-1_75rem favo-on-button"></i></button>
+                                        <!-- <button class="favo-on-button-frame" type="submit"><i class="bi bi-heart fos-1_75rem favo-on-button"></i></button> -->
+                                        <label for="favo-on-submit-button" class="favo-on-button-frame"><i class="bi bi-heart fos-1_75rem favo-on-button"></i></label>
+                                        <button id="favo-on-submit-button" type="submit" style="display: none;"></button>
                                         <input type="hidden" name="blog_id" value="{{ $blog[0]['id'] }}">
                                         <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
                                     </form>
                                     @else
                                     <form action="{{ route('delete_favorite_blog') }}" method="POST">
                                         @csrf
-                                        <button class="favo-off-button-frame" type="submit"><i class="bi bi-heart-fill fos-1_75rem favo-off-button"></i></button>
+                                        <!-- <button class="favo-off-button-frame" type="submit"><i class="bi bi-heart-fill fos-1_75rem favo-off-button"></i></button> -->
+                                        <label for="favo-off-submit-button" class="favo-off-button-frame"><i class="bi bi-heart-fill fos-1_75rem favo-off-button"></i></label>
+                                        <button id="favo-off-submit-button" type="submit" style="display: none;"></button>
                                         <input type="hidden" name="blog_id" value="{{ $blog[0]['id'] }}">
                                         <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
                                     </form>
@@ -76,8 +80,8 @@
                     <form action="{{ route('post_comment') }}" class="comment-input-box-area" method="POST">
                         @csrf
                         <input type="text" name="comment" class="comment-input-box" placeholder="コメント...">
-                        <!-- <input type="submit" class="submit-button" value="送信"> -->
-                        <button type="submit" class="comment-submit-button-frame"><i class="bi bi-send comment-send-button"></i></button>
+                        <label for="comment-submit-button" class="comment-send-button-wrapper"><i class="bi bi-send comment-send-button"></i></label>
+                        <button id="comment-submit-button" type="submit" style="display: none;"></button>
 
                         <input type="hidden" name="target_blog" value="{{ $blog[0]['id'] }}">
                         <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">

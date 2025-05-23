@@ -24,14 +24,23 @@
 
 #blog-detail .edit-button-area,
 #blog-detail .delete-button-area {
-    margin-right: 10px;    
+    margin-right: 10px;
 }
 
 #blog-detail .edit-button,
 #blog-detail .delete-button {
     width: 70px;
     height: 30px;
-    border-radius: 5px;    
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+#blog-detail .edit-button {
+    background-color: aquamarine;
+}
+
+#blog-detail .delete-button {
+    background-color: #ff2929;
 }
 
 #blog-detail .head-contents {
@@ -51,20 +60,16 @@
     text-align: center;
 }
 
-#blog-detail .favo-on-button-frame, 
+/* #blog-detail .favo-on-button-frame, 
 #blog-detail .favo-off-button-frame {
     position: relative;
-    width: 25px;
-    height: 25px;
-    background-color: initial;
-    border: initial;
-}
+} */
 
 #blog-detail .favo-on-button, 
 #blog-detail .favo-off-button {
-    position: absolute;
+    /* position: absolute;
     top: 0;
-    left: -0.5px;
+    left: -0.5px; */
     cursor: pointer;
 }
 
@@ -99,16 +104,23 @@
     font-weight: initial;
 }
 
-#blog-detail .comment-input-box-area .comment-submit-button-frame {
-    width: 20px;
-    height: 20px;
-    background-color: initial;
-    /* border: initial; */
+#blog-detail .comment-input-box {
+    width: 50%;
+    height: 25px;
+}
+
+#blog-detail .comment-send-button-wrapper {
+    position: relative;
 }
 
 #blog-detail .comment-send-button {
+    position: absolute;
+    top: -5px;
+    left: 0;
     font-size: 1.5rem;
+    cursor: pointer;
 }
+
 #blog-detail .comment-send-button::before {
     transform: rotate(45deg);
 }
