@@ -1,32 +1,40 @@
-.message-display-header {
+#talk-room .message-display-header {
     display: flex;
     align-items: center;
-    
 }
 
-.return-btn {
-    margin-right: 15px;
+#talk-room .contents {
+    display: flex;
+    flex-direction: column;
 }
 
-.message-display {
-    padding: 2.5%;
+#talk-room .message-display-wrapper {
     width: 100%;
-    height: 40%;
-    background-color: #e60e0e;
+    min-height: 90vh;
+    /* background-color: #e9feff; */
+    background-color: rgba(148, 251, 255, 0.3);
+}
+
+#talk-room .message-display {
+    width: 100%;
+    min-height: 90vh;
+    padding: 2.5%;
     display: flex;
     flex-direction: column;
     overflow-y: scroll;
 }
 
 .message-send-textbox {
-    background-color: #9ddda2;
+    background-color: #dbfbff;
     position: sticky;
+    height: 40px;
     bottom: 0px;
 }
 
 .message {
     display: flex;
     max-width: 80%;
+    line-break: anywhere;
 }
 
 .send {

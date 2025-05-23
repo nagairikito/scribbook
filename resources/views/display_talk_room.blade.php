@@ -4,29 +4,32 @@
     @parent
     <script src="https://code.jquery.com/jquery-3.4.1.js"></script> <!-- JQuery-->
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <link rel="stylesheet" href="{{ asset('css/talk.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/talkRoom.css') }}">
     <title>トークルーム｜{{ $talkRoom['recipient_name'] }}</title>
 @endsection
 
 @section('contents')
-    <div class="main-contents">
+    <div id="talk-room" class="main-contents">
         <div class="message-display-header">
-            <a class="return-btn" href="{{ route('talk_room_list', ['id' => Auth::id()]) }}">⇦</a>
+            <a class="return-btn-wrapper mr-15p" href="{{ route('talk_room_list', ['id' => Auth::id()]) }}"><i class="bi bi-chevron-left fos-1_5rem"></i></a>
             <p>{{ $talkRoom['recipient_name'] }}</p>
         </div>
+        <div class="contents">
+            <div class="message-display-wrapper">
+                <div class="message-display">
+                </div>
+            </div>
 
-        <div class="message-display">
-        </div>
+            <div class="message-send-textbox">
+                <form>
+                    @csrf
+                    <input type="text" class="input-message" name="message">
+                    <input type="hidden" name="sender" value="{{ Auth::id() }}">
+                    <input type="hidden" name="recipient" value="{{ $talkRoom['recipient'] }}">
+                    <input type="submit" class="send" value="送信">
 
-        <div class="message-send-textbox">
-            <form>
-                @csrf
-                <input type="text" class="input-message" name="message">
-                <input type="hidden" name="sender" value="{{ Auth::id() }}">
-                <input type="hidden" name="recipient" value="{{ $talkRoom['recipient'] }}">
-                <input type="submit" class="send" value="送信">
-
-            </form>
+                </form>
+            </div>
         </div>
     </div>
 @endsection

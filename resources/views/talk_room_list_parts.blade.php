@@ -13,13 +13,19 @@
                                 <div class="unread-messege-count">2</div>
                             </div>
                         </div>
-                        <div class="bottom">
+                        <div id="bottom" class="bottom">
                             @if($talkRoom['latest_message']['message'] != null && $talkRoom['latest_message']['attached_file_path'] == null)
-                                <p>{{ $talkRoom['latest_message']['message'] }}</p>
-                                <p>{{ $talkRoom['updated_at'] }}</p>    
+                                <div class="message-wrapper">
+                                    <p class="message">{{ $talkRoom['latest_message']['message'] }}</p>
+                                </div>
+                                <div class="send-time-wrapper">
+                                    <p class="send-time">{{ $talkRoom['updated_at'] }}</p>
+                                </div>    
                             @elseif($talkRoom['latest_message']['message'] == null && $talkRoom['latest_message']['attached_file_path'] != null)
                                 <p>画像を送信しました</p>
-                                <p>{{ $talkRoom['updated_at'] }}</p>    
+                                <div>
+                                    <p>{{ $talkRoom['updated_at'] }}</p>
+                                </div>    
                             @else
                                 <p></p>
                             @endif
@@ -33,3 +39,4 @@
         <div></div>
     @endif
 </div>
+

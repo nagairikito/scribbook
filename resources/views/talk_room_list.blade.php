@@ -111,5 +111,11 @@
         const newNode = doc.body.firstChild;
         return newNode;
     }
+
+    //メッセージ要素の幅取得/格納
+        let talkRoomListWidth = document.querySelector(".talk-room-list").clientWidth;
+        messageAreaWidth = talkRoomListWidth * 0.9 * 0.9 * 0.9 - 50
+        console.log(messageAreaWidth)
+
 </script>
 @endsection
