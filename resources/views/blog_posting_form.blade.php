@@ -36,7 +36,14 @@
                 </form>
                 <div>
                     <div class="tool-list">
-                        <button onclick="addImage()">画像追加</button>
+                        <div>
+                            <button onclick="addImage()">画像追加</button>
+                        </div>
+                        <div>
+                            <button id="color-selector-button" onclick="showColorSelector()">文字色</button>
+                            <!-- <input type="color" id="color-selector" name="color" style="display: none;" value="#888888"> -->
+                            <input type="color" id="color-selector" name="color" style="display: none;" value="#ffffff" onchange="upateColor(this.value)">
+                        </div>
                     </div>
                     <div class="tool-setting">
                         <div class="tool-setting-field"></div>

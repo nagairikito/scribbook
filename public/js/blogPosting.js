@@ -7,6 +7,7 @@ const div = document.createElement("div");
 div.appendChild(inputData.childNodes[0]);
 inputData.prepend(div);
 
+//入力１行目にdivタグをつける処理
 inputData.addEventListener('input', function (e) {
     // console.log('内容が変更されました: ', this.innerHTML);
     // count = this.childNodes.length;
@@ -17,17 +18,24 @@ inputData.addEventListener('input', function (e) {
     console.log(nodes);
 });
 
+//入力内容をテキストエリアにコピー（inputで送信できないため）
 blogPostingForm.addEventListener('submit', function() {
     const originalContents = document.getElementById("original-contents");
     const replacementContents = document.getElementById("replacement-contents");
     replacementContents.value = originalContents.innerHTML;
 })
 
+//画像追加
 function addImage() {
     let toolSettingField = document.querySelector('.tool-setting-field');
 
     const parentElement = document.createElement("div");
     parentElement.classList.add("parent-elm");
+
+    const deleteButton = document.createElement("button");
+    deleteButton.setAttribute('onclick', 'deleteImage(this)')
+    deleteButton.textContent = "削除";
+    parentElement.appendChild(deleteButton);
 
     const transitionButton = document.createElement("button");
     transitionButton.textContent = "移動";
@@ -40,9 +48,13 @@ function addImage() {
     toolSettingField.appendChild(parentElement);
 }
 
+function deleteImage(target) {
+    target.remove();
+}
 
 
-console.log(document.querySelectorAll("#original-contents > div > img"))
+
+// console.log(document.querySelectorAll("#original-contents > div > img"))
 // document.querySelectorAll("#original-contents > div > img").draggable = true;
 // document.querySelector("#original-contents > div > img").addEventListener("dragstart", onDragStart);
 
@@ -100,4 +112,52 @@ console.log(document.querySelectorAll("#original-contents > div > img"))
 //     event.preventDefault();
 // }
 
+//文字色押下で色選択を表示
+// function showColorSelector() {
+//     const colorSelector = document.getElementById("color-selector").click();
+//     const colorSelectorButton = document.getElementById("color-selector-button");
+//     // colorSelectorButton.appendChild(colorSelector);
+//     console.log(colorSelector);
+//     console.log(colorSelectorButton);
+// }
 
+function showColorSelector() {
+    const colorSelector = document.getElementById("color-selector");
+    colorSelector.style.display = colorSelector.style.display === 'none' ? 'block' : 'none';
+}
+
+function updateColor(color) {
+    document.getElementById('selectedColor').textContent = color;
+}
+
+
+// document.onselectionchange = function() {
+//   var cpytxt = window.getSelection();
+//   console.log(cpytxt);
+// }
+let test = document.getElementById("original-contents");
+
+// var cpytxt = document.getSelection();
+// console.log(cpytxt.getRangeAt(0));
+
+document.addEventListener('mouseup', function (ev) {
+    const selection = document.getSelection();
+
+    if(!selection.rangeCount) {
+        return;
+    }
+
+    const range = selection.getRangeAt(0);
+
+    if(range.collapsed) {
+        return;
+    }
+
+    const span = document.createElement("span");
+    span.style.backgroundColor = "yellow";
+    span.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(span);
+
+}, false);

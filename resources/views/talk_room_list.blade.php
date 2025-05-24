@@ -102,6 +102,7 @@
     }
 
     function equalFlag(data) {
+        console.log(data);
         return replacementResHTML.isEqualNode(data);
     }
 
