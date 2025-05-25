@@ -2,6 +2,12 @@ const blogPostingForm = document.getElementById("blog-posting-form");
 // let image = '<img src="http://localhost/storage/blog_contents_images/noImage.png">';
 const inputData = document.getElementById('original-contents');
 
+//選択された画像
+let selectedImage = null;
+
+//設定された画像サイズ
+let imageSize = 300;
+
 //コンテンツの最初の行にdivタグ付与
 const div = document.createElement("div");
 div.appendChild(inputData.childNodes[0]);
@@ -29,97 +35,185 @@ blogPostingForm.addEventListener('submit', function() {
 function addImage() {
     let toolSettingField = document.querySelector('.tool-setting-field');
 
+    const importImageAreas = document.querySelectorAll('.import-image-area');
+
+    adjustImportImageArea(importImageAreas);
+
     const parentElement = document.createElement("div");
-    parentElement.classList.add("parent-elm");
+    parentElement.classList.add("import-image-area");
+    parentElement.classList.add(`no${importImageAreas.length + 1}`);
 
     const deleteButton = document.createElement("button");
-    deleteButton.setAttribute('onclick', 'deleteImage(this)')
+    deleteButton.setAttribute('onclick', `deleteToolbarFieldImage(".import-image-area.no${importImageAreas.length + 1}")`);
     deleteButton.textContent = "削除";
     parentElement.appendChild(deleteButton);
 
-    const transitionButton = document.createElement("button");
-    transitionButton.textContent = "移動";
-    parentElement.appendChild(transitionButton);
+    // const transitionButton = document.createElement("button");
+    // transitionButton.textContent = "移動";
+    // parentElement.appendChild(transitionButton);
 
-    const inputImageField = document.createElement("input");
-    inputImageField.type = "file";
-    parentElement.appendChild(inputImageField);
+    const inputImageButton = document.createElement("input");
+    inputImageButton.type = "file";
+    inputImageButton.classList.add("import-image-button");
+    inputImageButton.classList.add(`no${importImageAreas.length + 1}`);
+    inputImageButton.setAttribute("onchange", "showInputImage(this)")
+    parentElement.appendChild(inputImageButton);
 
     toolSettingField.appendChild(parentElement);
 }
 
-function deleteImage(target) {
-    target.remove();
+//画像インポートパーツ増減時のclass名の調整
+function adjustImportImageArea(importImageAreas) {
+    imageCount = 1
+    importImageAreas.forEach((importImageArea) => {
+        targetClass = importImageArea.classList[1];
+        importImageArea.classList.remove(targetClass);
+        importImageArea.classList.add(`no${imageCount}`);
+        imageCount += 1;
+    });
+}
+
+//インポートした画像をフィールドに表示
+function showInputImage(data) {
+    const imageNo = data.classList[1];
+    const file = data.files[0];
+    if(!file) return;
+    
+    const reader = new FileReader();
+
+    reader.addEventListener('error', () => {
+        return;
+    });
+    reader.addEventListener('load', (e) => {
+        let img = document.createElement("img");
+        img.src = e.target.result;
+        img.classList.add("import-image");
+        img.setAttribute("style", "width: 300px;");
+
+        let inputImageField = document.querySelector(`.import-image-area.${imageNo}`);
+        data.remove();
+        inputImageField.appendChild(img);
+    });
+    reader.readAsDataURL(file);
+
+}
+
+//画像サイズをセット
+function setImageSize(value) {
+    console.log(value);
+    // var regexp = new RegExp(/^[0-9]+(\.[0-9]+)?$/);
+    // return regexp.test(val);
+    imageSize = value;
+    test();
+}
+function test() {
+    console.log(imageSize)
+}
+
+//画像サイズを適用する
+function adoptImageSize() {
+    // if(imageSize == null || imageSize == "" || imageSize == [] || imageSize === "undefined") {
+    //     return;
+    // }
+    console.log(selectedImage)
+    // selectedImage.style = `width: ${imageSize};`
+    selectedImage.setAttribute("style", `width: ${imageSize}px;`);
+        console.log(selectedImage)
+
+}
+
+//選択画像をセット
+function setSelectedImage(target) {
+    targetImage = document.querySelector(target);
+    selectedImage = targetImage;
+}
+
+//ツールバーフィールド画像削除
+function deleteToolbarFieldImage(target) {
+    targetImage = document.querySelector(target);
+    targetImage.remove();
+
+    const importImageAreas = document.querySelectorAll('.import-image-area');
+    adjustImportImageArea(importImageAreas);
 }
 
 
 
-// console.log(document.querySelectorAll("#original-contents > div > img"))
-// document.querySelectorAll("#original-contents > div > img").draggable = true;
-// document.querySelector("#original-contents > div > img").addEventListener("dragstart", onDragStart);
+//画像のドラッグアンドドロップ処理
 
-// document.querySelectorAll(".box.drop").forEach((element) => {
-//     element.addEventListener("drop", onDrop);
-//     element.addEventListener("dragover", onDragover);
-//     element.addEventListener("dragenter", onDragenter);
-//     element.addEventListener("dragleave", onDragleave);
-// });
+//通常のドラッグアンドドロップ無効化
+document.addEventListener('dragover', (e) => {
+    e.preventDefault();
+});
+document.addEventListener('drop', (e) => {
+    e.preventDefault();
+});
 
-// /**
-//  * ドラッグ処理
-//  * @param {Event} event 
-//  */
-// function onDragStart(event) {
-//     console.log("test");
-//     event.dataTransfer.setData("text", event.currentTarget.id);
-// }
+//ブログ作成フィールドにドラッグしたときの挙動
+var blogEditField = document.getElementById("original-contents");
 
-// /**
-//  * ドロップ処理
-//  * @param {Event} event 
-//  */
-// function onDrop(event) {
-//     event.currentTarget.classList.remove("dragging");
-//     const boxs = [...document.querySelectorAll(".box")];
-//     if (boxs.indexOf(event.currentTarget) === 0) {
-//         event.currentTarget.before(document.getElementById(event.dataTransfer.getData("text")));
-//     } else {
-//         event.currentTarget.after(document.getElementById(event.dataTransfer.getData("text")));
-//     }
-// }
+// document.addEventListener('drop', (e) => {
+blogEditField.addEventListener('drop', (e) => {
+    let targetPoint = window.getSelection();
+    // if(targetPoint.anchorNode === null) {
+    //     return;
+    // }
+    e.preventDefault();
 
-// /**
-//  * 操作が要素上に入ってきたとき
-//  * @param {Event} event 
-//  */
-// function onDragenter(event) {
-//     event.currentTarget.classList.toggle("dragging");
-// }
+    //ファイルを取得
+    var file = e.dataTransfer.files[0];
+    if(!file || !file.type.match('image.*')) {
+        return;
+    }
 
-// /**
-//  * 操作が要素上から出たとき
-//  * @param {Event} event 
-//  */
-// function onDragleave(event) {
-//     event.currentTarget.classList.toggle("dragging");
-// }
+    var reader = new FileReader();
+    reader.addEventListener('error', () => {
+        return;
+    });
+    reader.addEventListener('load', (e) => {
+        //ブログ編集フィールドのカーソル位置に画像を挿入
 
-// /**
-//  * 操作が要素上を通過してるとき
-//  * @param {Event} event 
-//  */
-// function onDragover(event) {
-//     event.preventDefault();
-// }
+        //クラス名「contents-image-area」の数を取得し再命名
+        let contentsImageFields = document.querySelectorAll('.contents-image-area');
 
-//文字色押下で色選択を表示
-// function showColorSelector() {
-//     const colorSelector = document.getElementById("color-selector").click();
-//     const colorSelectorButton = document.getElementById("color-selector-button");
-//     // colorSelectorButton.appendChild(colorSelector);
-//     console.log(colorSelector);
-//     console.log(colorSelectorButton);
-// }
+        let contentsImageField = document.createElement("div");
+        contentsImageField.classList.add("contents-image-area");
+        contentsImageField.classList.add(`no${contentsImageFields.length + 1}`);
+        contentsImageField.setAttribute("style", "display: flex; flex-direction: column;");
+        contentsImageField.setAttribute("contenteditable", false);
+
+        let contentsImageFieldButtons = document.createElement("div");
+        contentsImageFieldButtons.classList.add("contents-image-area-buttons");
+
+        contentsImageField.appendChild(contentsImageFieldButtons);
+
+        let deleteButton = document.createElement("button");
+        deleteButton.setAttribute("onclick", `deleteImage(".contents-image-area.no${contentsImageFields.length + 1}")`);
+        deleteButton.textContent = "✕";
+
+        let selectButton = document.createElement("input");
+        selectButton.type = "radio";
+        selectButton.name = "contents-image";
+        selectButton.setAttribute("onclick", `setSelectedImage(".contents-image.no${contentsImageFields.length + 1}")`);
+
+        contentsImageFieldButtons.appendChild(deleteButton);
+        contentsImageFieldButtons.appendChild(selectButton);
+
+        let img = document.createElement("img");
+        img.src = e.target.result;
+        img.classList.add("contents-image"),
+        img.classList.add(`no${contentsImageFields.length + 1}`),
+        img.setAttribute("style", "width: 300px;");
+
+        contentsImageField.appendChild(img);
+
+        let range = targetPoint.getRangeAt(0);
+        range.insertNode(contentsImageField);
+        // range.setStartAfter();
+    });
+    reader.readAsDataURL(file);
+})
+
 
 function showColorSelector() {
     const colorSelector = document.getElementById("color-selector");
@@ -131,33 +225,24 @@ function updateColor(color) {
 }
 
 
-// document.onselectionchange = function() {
-//   var cpytxt = window.getSelection();
-//   console.log(cpytxt);
-// }
-let test = document.getElementById("original-contents");
+// document.addEventListener('mouseup', function (ev) {
+//     const selection = document.getSelection();
 
-// var cpytxt = document.getSelection();
-// console.log(cpytxt.getRangeAt(0));
+//     if(!selection.rangeCount) {
+//         return;
+//     }
 
-document.addEventListener('mouseup', function (ev) {
-    const selection = document.getSelection();
+//     const range = selection.getRangeAt(0);
 
-    if(!selection.rangeCount) {
-        return;
-    }
+//     if(range.collapsed) {
+//         return;
+//     }
 
-    const range = selection.getRangeAt(0);
+//     const span = document.createElement("span");
+//     span.style.backgroundColor = "yellow";
+//     span.textContent = range.toString();
 
-    if(range.collapsed) {
-        return;
-    }
+//     range.deleteContents();
+//     range.insertNode(span);
 
-    const span = document.createElement("span");
-    span.style.backgroundColor = "yellow";
-    span.textContent = range.toString();
-
-    range.deleteContents();
-    range.insertNode(span);
-
-}, false);
+// }, false);
