@@ -37,24 +37,29 @@
                 <div>
                     <div class="tool-list">
                         <div>
-                            <button onclick="">文字サイズ</button>
+                            <button onclick="adoptFontSize()">文字サイズ</button>
+                            <input type="number" min="1" max="100" onchange="setFontSize(this.value)">
                         </div>
                         <div>
-                            <button onclick="">斜体</button>
+                            <button onclick="adoptFontStyleItaric()">斜体</button>
                         </div>
                         <div>
-                            <button onclick="">取消線</button>
+                            <button onclick="adoptStrikeThrough()">取消線</button>
                         </div>
                         <div>
-                            <button onclick="">下部線</button>
+                            <button onclick="adoptUnderLine()">下部線</button>
                         </div>
                         <div>
-                            <button id="color-selector-button" onclick="showColorSelector()">文字色</button>
-                            <!-- <input type="color" id="color-selector" name="color" style="display: none;" value="#888888"> -->
-                            <input type="color" id="color-selector" name="color" style="display: none;" value="#ffffff" onchange="upateColor(this.value)">
+                            <button onclick="adoptOpacity()">透明度</button>
+                            <input type="number" min="0" max="100" onchange="setOpacity(this.value)">
                         </div>
                         <div>
-                            <button onclick="">背景色</button>
+                            <button onclick="adoptFontColor()">文字色</button>
+                            <input type="color" value="#ffffff" onchange="setFontColor(this.value)">
+                        </div>
+                        <div>
+                            <button onclick="adoptBackGroundColor()">背景色</button>
+                            <input type="color" value="#ffffff" onchange="setBackGroundColor(this.value)">
                         </div>
                         <div>
                             <button onclick="addImage()">画像インポート</button>

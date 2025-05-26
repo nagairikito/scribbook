@@ -8,6 +8,18 @@ let selectedImage = null;
 //設定された画像サイズ
 let imageSize = 300;
 
+//文字サイズ
+let fontSize = 16;
+
+//透明度
+let opacity = 1;
+
+//文字色
+let fontColor = "#ffffff";
+
+//背景色
+let backGroundColor = "#ffffff";
+
 //コンテンツの最初の行にdivタグ付与
 const div = document.createElement("div");
 div.appendChild(inputData.childNodes[0]);
@@ -15,13 +27,9 @@ inputData.prepend(div);
 
 //入力１行目にdivタグをつける処理
 inputData.addEventListener('input', function (e) {
-    // console.log('内容が変更されました: ', this.innerHTML);
-    // count = this.childNodes.length;
     nodes = Array.from(this.childNodes).map((child) => {
-        // console.log(child.childNodes.length);
         return Array.from(child.childNodes);
     });
-    console.log(nodes);
 });
 
 //入力内容をテキストエリアにコピー（inputで送信できないため）
@@ -37,7 +45,9 @@ function addImage() {
 
     const importImageAreas = document.querySelectorAll('.import-image-area');
 
-    adjustImportImageArea(importImageAreas);
+    if(importImageAreas.length > 0) {
+        adjustImportImageArea(importImageAreas);
+    }
 
     const parentElement = document.createElement("div");
     parentElement.classList.add("import-image-area");
@@ -64,12 +74,12 @@ function addImage() {
 
 //画像インポートパーツ増減時のclass名の調整
 function adjustImportImageArea(importImageAreas) {
-    imageCount = 1
+    importImageCount = 1;
     importImageAreas.forEach((importImageArea) => {
         targetClass = importImageArea.classList[1];
         importImageArea.classList.remove(targetClass);
-        importImageArea.classList.add(`no${imageCount}`);
-        imageCount += 1;
+        importImageArea.classList.add(`no${importImageCount}`);
+        importImageCount += 1;
     });
 }
 
@@ -100,25 +110,19 @@ function showInputImage(data) {
 
 //画像サイズをセット
 function setImageSize(value) {
-    console.log(value);
-    // var regexp = new RegExp(/^[0-9]+(\.[0-9]+)?$/);
-    // return regexp.test(val);
+    var regexp = new RegExp(/^[0-9]+(\.[0-9]+)?$/);
+    if(regexp.test(value) == false) {
+        return;
+    }
     imageSize = value;
-    test();
-}
-function test() {
-    console.log(imageSize)
 }
 
 //画像サイズを適用する
 function adoptImageSize() {
-    // if(imageSize == null || imageSize == "" || imageSize == [] || imageSize === "undefined") {
-    //     return;
-    // }
-    console.log(selectedImage)
-    // selectedImage.style = `width: ${imageSize};`
+    if(imageSize == null || imageSize == "" || imageSize == [] || imageSize === "undefined") {
+        return;
+    }
     selectedImage.setAttribute("style", `width: ${imageSize}px;`);
-        console.log(selectedImage)
 
 }
 
@@ -155,9 +159,9 @@ var blogEditField = document.getElementById("original-contents");
 // document.addEventListener('drop', (e) => {
 blogEditField.addEventListener('drop', (e) => {
     let targetPoint = window.getSelection();
-    // if(targetPoint.anchorNode === null) {
-    //     return;
-    // }
+    if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
     e.preventDefault();
 
     //ファイルを取得
@@ -174,11 +178,15 @@ blogEditField.addEventListener('drop', (e) => {
         //ブログ編集フィールドのカーソル位置に画像を挿入
 
         //クラス名「contents-image-area」の数を取得し再命名
-        let contentsImageFields = document.querySelectorAll('.contents-image-area');
+        let contentsImageAreas = document.querySelectorAll('.contents-image-area');
+
+        if(contentsImageAreas > 0) {
+            adjustContentsImageArea(contentsImageAreas);
+        }
 
         let contentsImageField = document.createElement("div");
         contentsImageField.classList.add("contents-image-area");
-        contentsImageField.classList.add(`no${contentsImageFields.length + 1}`);
+        contentsImageField.classList.add(`no${contentsImageAreas.length + 1}`);
         contentsImageField.setAttribute("style", "display: flex; flex-direction: column;");
         contentsImageField.setAttribute("contenteditable", false);
 
@@ -188,13 +196,17 @@ blogEditField.addEventListener('drop', (e) => {
         contentsImageField.appendChild(contentsImageFieldButtons);
 
         let deleteButton = document.createElement("button");
-        deleteButton.setAttribute("onclick", `deleteImage(".contents-image-area.no${contentsImageFields.length + 1}")`);
+        deleteButton.classList.add("delete-contents-image-button");
+        deleteButton.classList.add(`no${contentsImageAreas.length + 1}`);
+        deleteButton.setAttribute("onclick", `deleteContentsImage(".contents-image-area.no${contentsImageAreas.length + 1}")`);
         deleteButton.textContent = "✕";
 
         let selectButton = document.createElement("input");
         selectButton.type = "radio";
         selectButton.name = "contents-image";
-        selectButton.setAttribute("onclick", `setSelectedImage(".contents-image.no${contentsImageFields.length + 1}")`);
+        selectButton.classList.add("select-contents-image-button");
+        selectButton.classList.add(`no${contentsImageAreas.length + 1}`);
+        selectButton.setAttribute("onclick", `setSelectedImage(".contents-image.no${contentsImageAreas.length + 1}")`);
 
         contentsImageFieldButtons.appendChild(deleteButton);
         contentsImageFieldButtons.appendChild(selectButton);
@@ -202,7 +214,7 @@ blogEditField.addEventListener('drop', (e) => {
         let img = document.createElement("img");
         img.src = e.target.result;
         img.classList.add("contents-image"),
-        img.classList.add(`no${contentsImageFields.length + 1}`),
+        img.classList.add(`no${contentsImageAreas.length + 1}`),
         img.setAttribute("style", "width: 300px;");
 
         contentsImageField.appendChild(img);
@@ -212,20 +224,222 @@ blogEditField.addEventListener('drop', (e) => {
         // range.setStartAfter();
     });
     reader.readAsDataURL(file);
-})
+});
 
+//ブログ編集フィールドの画像増減時のclass名調整
+function adjustContentsImageArea(contentsImageAreas) {
+    let index = 0;
+    let contentsImageCount = 1;
 
-function showColorSelector() {
-    const colorSelector = document.getElementById("color-selector");
-    colorSelector.style.display = colorSelector.style.display === 'none' ? 'block' : 'none';
+    let deleteContentsImageButton = document.querySelectorAll('.delete-contents-image-button');
+    let selectContentsImageButton = document.querySelectorAll('.select-contents-image-button');
+    let contentsImage = document.querySelectorAll('.contents-image');
+
+    contentsImageAreas.forEach((contentsImageArea) => {
+        deleteTarget = contentsImageArea.classList[1];
+        contentsImageArea.classList.remove($deleteTarget);
+        contentsImageArea.classList.add(`no${contentsImageCount}`);
+
+        deleteContentsImageButton[index].classList.remove($deleteTarget);
+        deleteContentsImageButton[index].classList.add(`no${contentsImageCount}`);
+        
+        selectContentsImageButton[index].classList.remove($deleteTarget);
+        selectContentsImageButton[index].classList.add(`no${contentsImageCount}`);
+
+        contentsImage[index].classList.remove($deleteTarget);
+        contentsImage[index].classList.add(`no${contentsImageCount}`);
+
+        index += 1;
+        contentsImageCount += 1;
+    })
 }
 
-function updateColor(color) {
-    document.getElementById('selectedColor').textContent = color;
+function deleteContentsImage(target) {
+    let targetImage = document.querySelector(target);
+    targetImage.remove();
+
+    let contentsImageAreas = document.querySelectorAll('.contents-image-area');
+    if(contentsImageAreas > 0) {
+        adjustContentsImageArea(contentsImageAreas);
+    }
+}
+
+//文字色セット
+function setFontColor(value) {
+    if(!value || value == null || value === "undefined" || value == "" || value == []) {
+        return;
+    }
+    fontColor = value;
+}
+
+//文字色適用
+function adoptFontColor() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const span = document.createElement("span");
+    span.style.color = fontColor;
+    span.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(span);
+}
+
+//背景色セット
+function setBackGroundColor(value) {
+    if(!value || value == null || value === "undefined" || value == "" || value == []) {
+        return;
+    }
+    backGroundColor = value;
+}
+
+//背景色適用
+function adoptBackGroundColor() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const span = document.createElement("span");
+    span.style.backgroundColor = backGroundColor;
+    span.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(span);
+}
+
+//文字サイズセット
+function setFontSize(value) {
+    if(!value || value == null || value === "undefined" || value == "" || value == []
+        || 100 < value || 1 > value
+    ) {
+        return;
+    }
+    fontSize = value
+}
+
+//文字サイズ適用
+function adoptFontSize() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const span = document.createElement("span");
+    span.style.fontSize = `${fontSize}px`;
+    span.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(span);
+}
+
+//文字斜体
+function adoptFontStyleItaric() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const i = document.createElement("i");
+    i.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(i);
+}
+
+//取消線
+function adoptStrikeThrough() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const s = document.createElement("s");
+    s.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(s);
+}
+
+//下部線
+function adoptUnderLine() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const span = document.createElement("span");
+    span.style.textDecoration = 'underline';
+    span.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(span);
+}
+
+//透明度セット
+function setOpacity(value) {
+    if(!value || value == null || value === "undefined" || value == "" || value == []
+        || 100 < value || 0 > value
+    ) {
+        return;
+    }
+    opacity = value / 100;
+}
+
+//透明度適用
+function adoptOpacity() {
+    const targetPoint = document.getSelection();
+        if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
+
+    const range = targetPoint.getRangeAt(0);
+    if(!range) {
+        return;
+    }
+
+    const span = document.createElement("span");
+    span.style.opacity = opacity;
+    span.textContent = range.toString();
+
+    range.deleteContents();
+    range.insertNode(span);
 }
 
 
-// document.addEventListener('mouseup', function (ev) {
+// inputData.addEventListener('touchend', function (ev) {
 //     const selection = document.getSelection();
 
 //     if(!selection.rangeCount) {
