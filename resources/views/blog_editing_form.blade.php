@@ -2,16 +2,17 @@
 
 @section('head')
     @parent
+    <link rel="stylesheet" href="{{ asset('css/blogEditing.css') }}">
     <script src="{{ asset('js/blogEditing.js') }}" defer></script>
     <title>編集フォーム_{{ $blog[0]['title'] }}</title>
 @endsection
 
 @section('contents')
-    <div id="blog-posting" class="main-contents">
+    <div id="blog-editing" class="main-contents">
     <div class="main-contents-wrapper">
         <h1>ブログ編集フォーム</h1>
-        <div class="blog-posting-form-wrapper">
-            <form id="blog-posting-form" class="blog-posting-form" action="{{ route('edit_blog') }}" method="POST">
+        <div class="blog-editing-form-wrapper">
+            <form id="blog-editing-form" class="blog-editing-form" action="{{ route('edit_blog') }}" method="POST">
             @csrf
                 <h2>タイトル</h2>
                 <input type="text" name="title" value="{{ $blog[0]['title'] }}">
@@ -32,7 +33,7 @@
                 @endif
 
                 <input type="hidden" name="blog_id" value="{{ $blog[0]['id'] }}">
-                <input type="hidden" id="create-user-id" name="user_id" value="{{ Auth::id() }}">
+                <input type="hidden" id="create-user-id" name="login_user_id" value="{{ Auth::id() }}">
             </form>
 
             <div>

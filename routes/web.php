@@ -58,7 +58,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     // ブログ関連
     Route::get('/blogPostingForm', [BlogPostingController::class, 'blogPostingForm'])->name('blog_posting_form');
     Route::post('/postBlog', [BlogPostingController::class, 'postBlog'])->name('post_blog');
-    Route::post('/blogEditingForm', [BlogEditingController::class, 'blogEditingForm'])->name('blog_editing_form');
+    Route::get('/blogEditingForm', [BlogEditingController::class, 'blogEditingForm'])->name('blog_editing_form');
     Route::post('/editBlog', [BlogEditingController::class, 'editBlog'])->name('edit_blog');
     Route::post('/deleteBlog', [BlogDetailController::class, 'deleteBlog'])->name('delete_blog');
     Route::post('/postComment', [BlogDetailController::class, 'postComment'])->name('post_comment');

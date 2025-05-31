@@ -23,8 +23,17 @@ let displayImagePath = "http://localhost/storage/blog_contents_images/"
 let imageFileName = '';
 
 
-const blogPostingForm = document.getElementById("blog-posting-form");
+const blogEditingForm = document.getElementById("blog-editing-form");
 const inputData = document.getElementById('original-contents');
+
+//編集フォームロード時ブログ編集フィールドの画像のボタンを表示する処理
+let controlContentsImageButtons = document.querySelectorAll('.contents-image-area-buttons');
+
+if(controlContentsImageButtons) {
+    controlContentsImageButtons.forEach((controlButton) => {
+        controlButton.style = "";
+    })
+}
 
 //コンテンツの最初の行にdivタグ付与(なぜか1行目にdivタグがふよされないため以下の処理を記述)
 const div = document.createElement("div");
@@ -42,9 +51,10 @@ inputData.prepend(div);
 // });
 
 //submit後の処理：入力内容をテキストエリアにコピー（inputで送信できないため）
-blogPostingForm.addEventListener('submit', function(e) {
+blogEditingForm.addEventListener('submit', function(e) {
+    // e.preventDefault();
     //img srcをbase64から「保存先＋ファイル名」に差し替え
-    let blogPostingForm = document.getElementById("blog-posting-form");
+    let blogEditingForm = document.getElementById("blog-editing-form");
     let contentsImages = document.querySelectorAll('.contents-image');
 
     let date = new Date();
@@ -59,7 +69,7 @@ blogPostingForm.addEventListener('submit', function(e) {
     inputBlogUniqueId.type = "hidden";
     inputBlogUniqueId.name = "blog_unique_id";
     inputBlogUniqueId.value = blogUniqueId;
-    blogPostingForm.appendChild(inputBlogUniqueId);
+    blogEditingForm.appendChild(inputBlogUniqueId);
 
     contentsImages.forEach((image) => {
         let base64Src = image.src;
@@ -69,7 +79,7 @@ blogPostingForm.addEventListener('submit', function(e) {
 
         let div = document.createElement('div');
         div.classList.add(fileName);
-        blogPostingForm.appendChild(div);
+        blogEditingForm.appendChild(div);
 
         let inputFileName = document.createElement("input");
         inputFileName.type = "hidden";

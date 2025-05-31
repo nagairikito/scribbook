@@ -170,6 +170,7 @@ class BlogRepository extends Repository
             'articles.updated_at',
             'users.name',
         ])
+        ->orderByDesc('articles.id')
         ->get();
 
         return !empty($blogs) ? $blogs->toArray() : [];

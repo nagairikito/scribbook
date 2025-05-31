@@ -17,7 +17,7 @@
 
                     @if(Auth::id() == $blog[0]['created_by'])
                     <div class="blog-control-buttons">
-                        <form action="{{ route('blog_editing_form')}}" class="edit-button-area" method="POST">
+                        <form action="{{ route('blog_editing_form')}}" class="edit-button-area" method="GET">
                         @csrf
                             <input type="submit" class="edit-button" value="編集">
                             <input type="hidden" name="blog_id" value="{{ $blog[0]['id'] }}">

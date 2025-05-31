@@ -1,0 +1,37 @@
+#blog-editing .main-contents-wrapper {
+    width: 100%;
+}
+
+#blog-editing .blog-editing-form-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+}
+
+#blog-editing .blog-editing-form {
+    width: 100%;
+}
+
+#blog-editing .tool-list {
+    margin-bottom: 30px;
+}
+
+#blog-editing .tool-list > div {
+    display: flex;
+}
+
+#blog-editing #blog-editing-form #original-contents.original-contents {
+    width: 95%;
+    border: 1px solid #888888;
+    border-radius: 3px;
+    padding: 20px;
+}
+
+#blog-editing .contents-image,
+#blog-editing .import-image {
+    border: 1px solid #888888;
+}
+
+#blog-editing .set-iamge-size-input-box {
+    width: 70px;
+}

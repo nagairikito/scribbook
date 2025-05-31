@@ -56,9 +56,12 @@ class BlogEditingController extends Controller
     public function editBlog(Request $request) {
         $inputData = [
             'id' => $request['blog_id'],
+            'blog_unique_id' => $request['blog_unique_id'],
             'title' => $request['title'],
             'contents' => $request['contents'],
             'created_by' => $request['login_user_id'],
+            'image_file_names' => $request['image_file_name'],
+            'base64_texts' => $request['base64_text'],
         ];
 
         $result = $this->blogService->editBlog($inputData);

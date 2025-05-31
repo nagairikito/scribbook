@@ -19,7 +19,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-
+use Symfony\Component\Console\Input\Input;
 
 class BlogService extends Service
 {
@@ -77,7 +77,7 @@ class BlogService extends Service
             if($checkPostBlog) {
                 $postFlag = true;
             }
-             $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names']);
+            $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names']);
 
             DB::commit();
             return $postFlag;
@@ -104,10 +104,16 @@ class BlogService extends Service
         if(!$created_by) {
             return $editBlogFlag;
         }
-    
+
+        $targetBlog = $this->blogRepository->blogDetail($inputData['id']);
+        if(!$targetBlog) {
+            return $editBlogFlag;
+        }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-    
+            // $this->deleteBlogContentsImageFromStorage($targetBlog[0]['blog_unique_id']);
+            $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog[0]['blog_unique_id']);
             $checkEditBlog = $this->blogRepository->editBlog($inputData);
             if($checkEditBlog) {
                 $editBlogFlag = true;
@@ -117,6 +123,7 @@ class BlogService extends Service
             return $editBlogFlag;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
             session()->flash('flash_message', 'エラーが発生しました');
         }    
@@ -588,62 +595,120 @@ class BlogService extends Service
     }
 
     /**
+     * ブログコンテンツ画像保存,Storageに保存(新規用)
+     * @param $targetImageName
+     * @return $result
+     */
+    public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId)
+    {
+        if(count($imageBase64Texts) > 0) {
+            foreach($imageBase64Texts as $index => $imageBase64Data) {
+
+                if(preg_match('/^data:image\/[a-zA-Z]+;base64,/', $imageBase64Texts[$index])) {
+                    // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
+                    $base64Image = $imageBase64Texts[$index];
+
+                    // 正規表現でMIMEタイプとBase64本体を抽出
+                    if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
+                        $extension = strtolower($matches[1]); // 例: png, jpeg
+                        $base64Data = substr($base64Image, strpos($base64Image, ',') + 1);
+                    } else {
+                        return response()->json(['error' => 'Invalid base64 format.'], 400);
+                    }
+
+                    // Base64デコード
+                    $imageData = base64_decode($base64Data);
+                    if ($imageData === false) {
+                        return response()->json(['error' => 'Failed to decode base64.'], 400);
+                    }
+
+                    // ファイル名と保存パス生成
+                    $filePath = 'blog_contents_images/' . $imageNames[$index];
+
+                    // 保存（storage/app/public/images に保存）
+                    Storage::disk('public')->put($filePath, $imageData);
+                } else {
+                    $parts = explode('_', $imageNames[$index]);
+                    $remainingFileName = implode('_', array_slice($parts, 2));
+
+                    $allFiles = Storage::disk('public')->allFiles('blog_contents_images');
+                    $targetImageFileNames = array_filter($allFiles, function($file) use ($prevBlogUniqueId) {
+                        if(str_contains($file, $prevBlogUniqueId)) {
+                            return $file;
+                        }
+                    });
+                    $targetImageFileName = array_filter($targetImageFileNames, function($file) use ($remainingFileName) {
+                        if(str_contains($file, $remainingFileName)) {
+                            return $file;
+                        }
+                    });
+
+                    if($targetImageFileName) {
+                        foreach($targetImageFileName as $fileName) {
+                            Storage::disk('public')->move($fileName, 'blog_contents_images/' . $imageNames[$index]);
+                        }
+                    }
+                }
+            }
+            $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId);
+        }
+    }
+
+    /**
+     * ブログコンテンツ画像保存,Storageに保存
+     * @param $targetImageName
+     * @return $result
+     */
+    public function storeBase64Image($imageBase64Texts, $imageNames)
+    {
+        if(count($imageBase64Texts) > 0) {
+            foreach($imageBase64Texts as $index => $imageBase64Data) {
+                // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
+                $base64Image = $imageBase64Texts[$index];
+
+                // 正規表現でMIMEタイプとBase64本体を抽出
+                if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
+                    $extension = strtolower($matches[1]); // 例: png, jpeg
+                    $base64Data = substr($base64Image, strpos($base64Image, ',') + 1);
+                } else {
+                    return response()->json(['error' => 'Invalid base64 format.'], 400);
+                }
+
+                // Base64デコード
+                $imageData = base64_decode($base64Data);
+                if ($imageData === false) {
+                    return response()->json(['error' => 'Failed to decode base64.'], 400);
+                }
+
+                // ファイル名と保存パス生成
+                $filePath = 'blog_contents_images/' . $imageNames[$index];
+
+                // 保存（storage/app/public/images に保存）
+                Storage::disk('public')->put($filePath, $imageData);
+
+            }
+        }
+    }
+
+    /**
      * ブログコンテンツ画像削除,Storageから削除
      * @param $targetImageName
      * @return $result
      */
     public function deleteBlogContentsImageFromStorage($blogUniqueId) {
-        DB::beginTransaction();
-        try {
-            if($blogUniqueId != null && $blogUniqueId != '') {
-                $allFiles = Storage::disk('public')->allFiles('blog_contents_images');
-                $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
-                    if(str_contains($file, $blogUniqueId)) {
-                        return $file;
-                    }
-                });
+        if($blogUniqueId != null && $blogUniqueId != '') {
+            $allFiles = Storage::disk('public')->allFiles('blog_contents_images');
+            $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
+                if(str_contains($file, $blogUniqueId)) {
+                    return $file;
+                }
+            });
 
-                if($targetImageFileNames) {
-                    foreach($targetImageFileNames as $targetImageFileName) {
-                        Storage::disk('public')->delete($targetImageFileName);
-                    }
+            if($targetImageFileNames) {
+                foreach($targetImageFileNames as $targetImageFileName) {
+                    Storage::disk('public')->delete($targetImageFileName);
                 }
             }
-    
-            DB::commit();
-            
-        } catch (\Exception $e) {
-            DB::rollBack();
-            report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }
-    }
-
-    public function storeBase64Image($imageBase64Data, $imageName)
-    {
-        // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
-        $base64Image = $imageBase64Data[0];
-
-        // 正規表現でMIMEタイプとBase64本体を抽出
-        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-            $extension = strtolower($matches[1]); // 例: png, jpeg
-            $base64Data = substr($base64Image, strpos($base64Image, ',') + 1);
-        } else {
-            return response()->json(['error' => 'Invalid base64 format.'], 400);
-        }
-
-        // Base64デコード
-        $imageData = base64_decode($base64Data);
-        if ($imageData === false) {
-            return response()->json(['error' => 'Failed to decode base64.'], 400);
-        }
-
-        // ファイル名と保存パス生成
-        $filePath = 'blog_contents_images/' . $imageName[0];
-
-        // 保存（storage/app/public/images に保存）
-        Storage::disk('public')->put($filePath, $imageData);
-
-        return;
     }
 }
