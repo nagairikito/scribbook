@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Const\BlogConst;
 use App\Models\Advertisement;
 use App\Models\User;
 use App\Models\Article;
@@ -19,6 +18,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+
 
 class BlogService extends Service
 {
@@ -65,8 +66,9 @@ class BlogService extends Service
         if(!$created_by) {
             return $postFlag;
         }
-    
+
         // $inputData['contents'] = html_entity_decode($inputData['contents']);
+
 
         try {
             DB::beginTransaction();
@@ -75,7 +77,8 @@ class BlogService extends Service
             if($checkPostBlog) {
                 $postFlag = true;
             }
-    
+             $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names']);
+
             DB::commit();
             return $postFlag;
 
@@ -125,32 +128,35 @@ class BlogService extends Service
      * @return $result
      */
     public function deleteBlog($inputData) {
-        $deleteBlogStatus = BlogConst::DELETE_INITIAL_VALUE;
+        $deleteBlogFlag = false;
 
+        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+            return $deleteBlogFlag;
+        }
+
+        $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
+        if(!$created_by) {
+            return $deleteBlogFlag;
+        }
+        
+        $targetBlog = $this->blogRepository->blogDetail($inputData['id']);
+        if(!$targetBlog) {
+            return $deleteBlogFlag;
+        }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-    
-            if(!Auth::user() || Auth::id() != $inputData['created_by']) {
-                $deleteBlogStatus = BlogConst::FAIL_DELETE_USER_AUTHENTICATION;
-                return $deleteBlogStatus;
-            }
-    
-            $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
-            if(!$created_by) {
-                $deleteBlogStatus = BlogConst::NOT_FOUND_DELETE_USER_ID;
-                return $deleteBlogStatus;
-            }
-    
-            $checkDeleteBlog = $this->blogRepository->deleteBlog($inputData['id']);
+            $checkDeleteBlog = $this->blogRepository->deleteBlog($targetBlog[0]['id']);
             if($checkDeleteBlog) {
-                $deleteBlogStatus = BlogConst::SUCCESS_BLOG_DELETING;
-                return $deleteBlogStatus;
+                $this->deleteBlogContentsImageFromStorage($targetBlog[0]['blog_unique_id']);
+                $deleteBlogFlag = true;
             }
     
             DB::commit();
-            return $deleteBlogStatus;
+            return $deleteBlogFlag;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
             session()->flash('flash_message', 'エラーが発生しました');
         }    
@@ -470,7 +476,7 @@ class BlogService extends Service
             }
 
             if($inputData['advertisement_image_file'] || $inputData['advertisement_image_file'] != null) {
-                $image_name = $this->upsertUserAdvertisementImageIntoStorage($inputData['advertisement_image_file'], null);
+                $image_name = $this->upsertAdvertisementImageIntoStorage($inputData['advertisement_image_file'], null);
                 $inputData['advertisement_image_name'] = $image_name;
                 $flag = $this->advertisementRepository->registerAdvertisement($inputData);
             }
@@ -486,7 +492,7 @@ class BlogService extends Service
     }
 
     /**
-     * 広告の削除
+     * 広告の削除(DB)
      */
     public function deleteAdvertisement($inputData) {
         $flag = false;
@@ -526,11 +532,11 @@ class BlogService extends Service
     }
 
     /**
-     * ユーザーアイコン更新,Storageに保存
+     * 広告画像保存,Storageに保存
      * @param $iconImageFile
      * @return $result
      */
-    public function upsertUserAdvertisementImageIntoStorage($iconImageFile, $oldImageName) {
+    public function upsertAdvertisementImageIntoStorage($iconImageFile, $oldImageName) {
         try {
             DB::beginTransaction();
     
@@ -551,20 +557,20 @@ class BlogService extends Service
             return $newImageName;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
             session()->flash('flash_message', 'エラーが発生しました');
         }
     }
 
     /**
-     * ユーザーアイコン削除,Storageから削除
-     * @param $iconImageFile
+     * 広告画像削除,Storageから削除
+     * @param $targetImageName
      * @return $result
      */
     public function deleteAdvertisementImageFromStorage($targetImageName) {
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-
             if($targetImageName != null && $targetImageName != 'noImage.png') {
                 $targetImageNameExists = Storage::disk('public')->exists('advertisement_images/'. $targetImageName);
                 if($targetImageNameExists) {
@@ -575,9 +581,69 @@ class BlogService extends Service
             DB::commit();
             
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
             session()->flash('flash_message', 'エラーが発生しました');
         }
     }
 
+    /**
+     * ブログコンテンツ画像削除,Storageから削除
+     * @param $targetImageName
+     * @return $result
+     */
+    public function deleteBlogContentsImageFromStorage($blogUniqueId) {
+        DB::beginTransaction();
+        try {
+            if($blogUniqueId != null && $blogUniqueId != '') {
+                $allFiles = Storage::disk('public')->allFiles('blog_contents_images');
+                $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
+                    if(str_contains($file, $blogUniqueId)) {
+                        return $file;
+                    }
+                });
+
+                if($targetImageFileNames) {
+                    foreach($targetImageFileNames as $targetImageFileName) {
+                        Storage::disk('public')->delete($targetImageFileName);
+                    }
+                }
+            }
+    
+            DB::commit();
+            
+        } catch (\Exception $e) {
+            DB::rollBack();
+            report($e);
+            session()->flash('flash_message', 'エラーが発生しました');
+        }
+    }
+
+    public function storeBase64Image($imageBase64Data, $imageName)
+    {
+        // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
+        $base64Image = $imageBase64Data[0];
+
+        // 正規表現でMIMEタイプとBase64本体を抽出
+        if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
+            $extension = strtolower($matches[1]); // 例: png, jpeg
+            $base64Data = substr($base64Image, strpos($base64Image, ',') + 1);
+        } else {
+            return response()->json(['error' => 'Invalid base64 format.'], 400);
+        }
+
+        // Base64デコード
+        $imageData = base64_decode($base64Data);
+        if ($imageData === false) {
+            return response()->json(['error' => 'Failed to decode base64.'], 400);
+        }
+
+        // ファイル名と保存パス生成
+        $filePath = 'blog_contents_images/' . $imageName[0];
+
+        // 保存（storage/app/public/images に保存）
+        Storage::disk('public')->put($filePath, $imageData);
+
+        return;
+    }
 }

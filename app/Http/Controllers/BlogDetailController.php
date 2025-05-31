@@ -57,18 +57,10 @@ class BlogDetailController extends Controller
 
         $result = $this->blogService->deleteBlog($inputData);
 
-        switch($result) {
-            case BlogConst::FAIL_DELETE_USER_AUTHENTICATION;
-                return back()->with('error_delete_blog', 'セッションが切れています');
-
-            case BlogConst::NOT_FOUND_DELETE_USER_ID;
-                return back()->with('error_delete_blog', 'ブログを削除できません');
-
-            case BlogConst::SUCCESS_BLOG_DELETING;
-                return redirect(route('profile_top', ['id' => Auth::id()]))->with('success_delete_blog', 'ブログを削除しました');
-
-            default;
-                return back()->with('error_delete_blog', '予期せぬエラーが発生しました');
+        if($result) {
+            return redirect(route('profile_top', ['id' => Auth::id()]))->with('success_delete_blog', 'ブログを削除しました');
+        } else {
+            return back()->with('error_delete_blog', '予期せぬエラーが発生しました');
         }
 
     }
@@ -137,6 +129,7 @@ class BlogDetailController extends Controller
      * 広告の登録
      */
     public function registerAdvertisement(Request $request) {
+        dd($request);
         $inputData = [
             'advertisement_image_file' => $request['advertisement_image_file'],
             'url' => $request['url'],

@@ -14,8 +14,9 @@ return new class extends Migration
         if(!Schema::hasTable('article_comments')) {
             Schema::create('articles', function (Blueprint $table) {
                 $table->increments('id');
+                $table->string('blog_unique_id', 50)->comment('ブログユニークID');
                 $table->string('title', 255)->comment('ブログタイトル');
-                $table->text('contents')->comment('ブログコンテンツ');
+                $table->longText('contents')->comment('ブログコンテンツ');
                 $table->integer('created_by')->comment('ユーザーID: users.id');
                 $table->integer('view_count')->comment('閲覧数');
                 $table->timestamps();

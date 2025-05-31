@@ -34,6 +34,7 @@ class BlogRepository extends Repository
      * @return boolean $result
      */
     public function postBlog($inputData) {
+        $this->blog->blog_unique_id = $inputData['blog_unique_id'];
         $this->blog->title = $inputData['title'];
         $this->blog->contents = $inputData['contents'];
         $this->blog->created_by = $inputData['user_id'];
@@ -48,9 +49,10 @@ class BlogRepository extends Repository
      */
     public function editBlog($inputData) {
         $result = $this->blog->where('id', '=', $inputData['id'])->update([
-            'title'         => $inputData['title'],
-            'contents'      => $inputData['contents'],
-            'created_by'    => $inputData['created_by'],
+            'blog_unique_id' => $inputData['blog_unique_id'],
+            'title'          => $inputData['title'],
+            'contents'       => $inputData['contents'],
+            'created_by'     => $inputData['created_by'],
         ]);
         return $result;
     }
@@ -181,6 +183,7 @@ class BlogRepository extends Repository
     public function blogDetail($id) {
         $blog = $this->blog->select(
             'articles.id',
+            'articles.blog_unique_id',
             'articles.title',
             'articles.contents',
             'articles.created_by',

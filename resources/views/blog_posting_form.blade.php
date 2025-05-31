@@ -32,8 +32,9 @@
                         <p class="error-message">{{ session('error_post_blog') }}</p>
                     @endif
 
-                    <input type="hidden" name="user_id" value="{{ Auth::id() }}">
+                    <input type="hidden" id="create-user-id" name="user_id" value="{{ Auth::id() }}">
                 </form>
+
                 <div>
                     <div class="tool-list">
                         <div>
@@ -60,6 +61,9 @@
                         <div>
                             <button onclick="adoptBackGroundColor()">背景色</button>
                             <input type="color" value="#ffffff" onchange="setBackGroundColor(this.value)">
+                        </div>
+                        <div>
+                            <button onclick="adoptUrl()">リンク作成</button>
                         </div>
                         <div>
                             <button onclick="addImage()">画像インポート</button>

@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Article;
 use App\Repositories\BlogRepository;
 use App\Services\BlogService;
+use Symfony\Component\Console\Input\Input;
 
 class BlogPostingController extends Controller
 {
@@ -43,8 +44,11 @@ class BlogPostingController extends Controller
     public function postBlog(BlogPostingRequest $request) {
         $inputData = [
             'user_id' => $request['user_id'],
+            'blog_unique_id' => $request['blog_unique_id'],
             'title' => $request['title'],
             'contents' => $request['contents'],
+            'image_file_names' => $request['image_file_name'],
+            'base64_texts' => $request['base64_text'],
         ];
 
         $result = $this->blogService->postBlog($inputData);
