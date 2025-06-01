@@ -18,12 +18,13 @@
 
 @section('js')
 <script defer>
+    //talk-room-list要素以下の一致フラグ
     let replacementResHTML;
 
     document.addEventListener("DOMContentLoaded", function() {
         getTalkRoomList(true);
+        polling();
     });
-    polling();
 
     $.ajaxSetup({
         headers: {
@@ -84,6 +85,7 @@
                 if(firstFlag == true) {
                     replacementResHTML = html
                     $('.talk-room-list').html(html);
+                    return;
                 }
 
                 MatchConfirmationFlag = equalFlag(html)
@@ -102,7 +104,6 @@
     }
 
     function equalFlag(data) {
-        console.log(data);
         return replacementResHTML.isEqualNode(data);
     }
 

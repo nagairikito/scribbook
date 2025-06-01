@@ -50,7 +50,7 @@ Route::middleware([AuthMiddleware::class])->group(function () {
     Route::post('/deleteUserIcon', [ProfileController::class, 'deleteIconImageFromStorage'])->name('delete_user_icon');
     
     // トーク
-    Route::get('/talkRoomList/{id}', [TalkRoomController::class, 'showTalkRoomList'])->name('talk_room_list');
+    Route::get('/talkRoomList', [TalkRoomController::class, 'showTalkRoomList'])->name('talk_room_list');
     Route::get('/talkRoom', [TalkRoomDetailController::class, 'displayTalkRoom'])->name('display_talk_room');
     // Route::get('/talkRoom/{sender}/{recipient}', [TalkRoomDetailController::class, 'displayTalkRoom'])->name('display_talk_room_has_url_param');
     // Route::get('/sendMessage', [TalkRoomDetailController::class, 'sendMessage'])->name('create_send_message');

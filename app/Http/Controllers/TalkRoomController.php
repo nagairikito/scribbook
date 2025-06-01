@@ -33,7 +33,7 @@ class TalkRoomController extends Controller
     }
     
     /**
-     * トークルームリスト表示
+     * トークルームリストページ表示
      */
     public function showTalkRoomList(Request $request) {
         $talkRoomList = [];

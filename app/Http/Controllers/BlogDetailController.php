@@ -129,7 +129,6 @@ class BlogDetailController extends Controller
      * 広告の登録
      */
     public function registerAdvertisement(Request $request) {
-        dd($request);
         $inputData = [
             'advertisement_image_file' => $request['advertisement_image_file'],
             'url' => $request['url'],

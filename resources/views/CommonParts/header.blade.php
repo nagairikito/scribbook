@@ -19,7 +19,7 @@
                 <div class="header-nav-list">
                     @if(Auth::user())
                         <div><a href="{{ route('blog_posting_form') }}" class="fos-1_15rem"><i class="bi bi-send-plus mr-5p fos-1_15rem"></i>投稿</a></div>
-                        <div><a href="{{ route('talk_room_list', Auth::id()) }}" class="fos-1_15rem"><i class="bi bi-envelope mr-5p fos-1_15rem"></i>トーク</a></div>
+                        <div><a href="{{ route('talk_room_list') }}" class="fos-1_15rem"><i class="bi bi-envelope mr-5p fos-1_15rem"></i>トーク</a></div>
                         <!-- <div><a href=""><i class="bi bi-bell"></i>通知</a></div> -->
                         <div>
                             <a class="header-user-icon-href" href="{{ route('profile_top', ['id' => Auth::id()]) }}">

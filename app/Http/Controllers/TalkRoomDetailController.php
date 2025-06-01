@@ -36,6 +36,10 @@ class TalkRoomDetailController extends Controller
      * トークルーム詳細
      */
     public function displayTalkRoom(Request $request) {
+        if($request['sender'] != Auth::id()) {
+            return redirect('talk_room_list');
+        }
+
         $inputData = [
             'sender' => $request['sender'],
             'recipient' => $request['recipient'],
@@ -60,7 +64,7 @@ class TalkRoomDetailController extends Controller
      * メッセージを送信
      */
     public function sendMessage(Request $request) {
-        if(request()->get('message') == null) {
+        if(request()->get('message') == null || request()->get('sender') != Auth::id()) {
             return back();
         }
 
@@ -80,7 +84,8 @@ class TalkRoomDetailController extends Controller
      */
     public function getMessages(Request $request) {
         $inputData = [
-            'sender' => request()->get('sender'),
+            // 'sender' => request()->get('sender'),
+            'sender' => Auth::id(),
             'recipient' => request()->get('recipient'),
         ];
 
@@ -89,15 +94,23 @@ class TalkRoomDetailController extends Controller
         $messages = $this->talkService->getAllMessageesByRoomId($inputData);
 
         $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
-        $recipientName = $recipient[0]['name'];
+        // $recipientName = $recipient[0]['name'];
 
-        $talkRoom = [
+        // $talkRoom = [
+        //     'messages' => $messages,
+        //     'sender' => Auth::id(),
+        //     'recipient' => $inputData['recipient'],
+        //     'recipient_name' => $recipientName,
+        // ];
+        $talkRoomDatas = [
             'messages' => $messages,
             'sender' => Auth::id(),
-            'recipient' => $inputData['recipient'],
-            'recipient_name' => $recipientName,
+            'recipient' => $recipient,
         ];
 
-        return response()->json(['talkRoom' => $talkRoom]);
+        // return response()->json(['talkRoom' => $talkRoom]);
+        return response()->json([
+            'html' => view('talk_room_parts', ['talkRoomDatas' => $talkRoomDatas])->render(),
+        ]);
     }
 }
