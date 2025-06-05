@@ -15,7 +15,7 @@
             <form id="blog-editing-form" class="blog-editing-form" action="{{ route('edit_blog') }}" method="POST">
             @csrf
                 <h2>タイトル</h2>
-                <input type="text" name="title" value="{{ $blog[0]['title'] }}">
+                <input type="text" name="title" class="blog-title" value="{{ $blog[0]['title'] }}">
                 @if($errors->has('title'))
                     <p class="error-message">{{ $errors->first('title') }}</p>
                 @endif
@@ -39,38 +39,38 @@
             <div>
                 <div class="tool-list">
                     <div>
-                        <button onclick="adoptFontSize()">文字サイズ</button>
+                        <button class="tool-btn" onclick="adoptFontSize()">文字サイズ</button>
                         <input type="number" min="1" max="100" onchange="setFontSize(this.value)">
                     </div>
                     <div>
-                        <button onclick="adoptFontStyleItaric()">斜体</button>
+                        <button class="tool-btn" onclick="adoptFontStyleItaric()">斜体</button>
                     </div>
                     <div>
-                        <button onclick="adoptStrikeThrough()">取消線</button>
+                        <button class="tool-btn" onclick="adoptStrikeThrough()">取消線</button>
                     </div>
                     <div>
-                        <button onclick="adoptUnderLine()">下部線</button>
+                        <button class="tool-btn" onclick="adoptUnderLine()">下部線</button>
                     </div>
                     <div>
-                        <button onclick="adoptOpacity()">透明度</button>
+                        <button class="tool-btn" onclick="adoptOpacity()">透明度</button>
                         <input type="number" min="0" max="100" onchange="setOpacity(this.value)">
                     </div>
                     <div>
-                        <button onclick="adoptFontColor()">文字色</button>
+                        <button class="tool-btn" onclick="adoptFontColor()">文字色</button>
                         <input type="color" value="#ffffff" onchange="setFontColor(this.value)">
                     </div>
                     <div>
-                        <button onclick="adoptBackGroundColor()">背景色</button>
+                        <button class="tool-btn" onclick="adoptBackGroundColor()">背景色</button>
                         <input type="color" value="#ffffff" onchange="setBackGroundColor(this.value)">
                     </div>
                     <div>
-                        <button onclick="adoptUrl()">リンク作成</button>
+                        <button class="tool-btn" onclick="adoptUrl()">リンク作成</button>
                     </div>
                     <div>
-                        <button onclick="addImage()">画像インポート</button>
+                        <button class="tool-btn" onclick="addImage()">画像インポート</button>
                     </div>
                     <div>
-                        <button onclick="adoptImageSize()">画像サイズ適用</button>
+                        <button class="tool-btn" onclick="adoptImageSize()">画像サイズ適用</button>
                         <input type="number" class="set-iamge-size-input-box" value="300" onchange="setImageSize(this.value)">
                     </div>
 

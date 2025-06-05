@@ -20,16 +20,26 @@
     display: flex;
 }
 
+#blog-posting #blog-editing-form .blog-title {
+    width: 95%;
+    height: 30px;
+}
+
 #blog-editing #blog-editing-form #original-contents.original-contents {
     width: 95%;
     border: 1px solid #888888;
     border-radius: 3px;
     padding: 20px;
+    background-color: white;
 }
 
 #blog-editing .contents-image,
 #blog-editing .import-image {
     border: 1px solid #888888;
+}
+
+#blog-editing .tool-btn {
+    width: 50px;
 }
 
 #blog-editing .set-iamge-size-input-box {

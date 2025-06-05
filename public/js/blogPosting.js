@@ -429,7 +429,7 @@ function adoptUrl() {
 
 //画像インポートツール表示(画像インポートボタン押下時)
 function addImage() {
-    let toolSettingField = document.querySelector('.tool-setting-field');
+    let importedImageField = document.querySelector('.imported-img-field');
 
     const importImageAreas = document.querySelectorAll('.import-image-area');
 
@@ -442,8 +442,9 @@ function addImage() {
     parentElement.classList.add(`no${importImageAreas.length + 1}`);
 
     const deleteButton = document.createElement("button");
-    deleteButton.setAttribute('onclick', `deleteToolbarFieldImage(".import-image-area.no${importImageAreas.length + 1}")`);
-    deleteButton.textContent = "削除";
+    deleteButton.setAttribute('onclick', `deleteImportedImage(".import-image-area.no${importImageAreas.length + 1}")`);
+    deleteButton.style = 'width: 30px;'
+    deleteButton.textContent = '✕';
     parentElement.appendChild(deleteButton);
 
     const inputImageButton = document.createElement("input");
@@ -453,7 +454,7 @@ function addImage() {
     inputImageButton.setAttribute("onchange", "importImage(this)")
     parentElement.appendChild(inputImageButton);
 
-    toolSettingField.appendChild(parentElement);
+    importedImageField.appendChild(parentElement);
 }
 
 //画像インポートパーツ増減時のclass名の調整
@@ -468,7 +469,7 @@ function adjustImportImageArea(importImageAreas) {
 }
 
 //ツールバーフィールド画像削除
-function deleteToolbarFieldImage(target) {
+function deleteImportedImage(target) {
     targetImage = document.querySelector(target);
     targetImage.remove();
 
@@ -492,7 +493,7 @@ function importImage(data) {
         img.id = "import-image-area";
         img.src = e.target.result;
         img.alt = fileName;
-        img.setAttribute("style", "width: 300px;");
+        img.setAttribute("style", "width: 200px;");
         let inputImageField = document.querySelector(`.import-image-area.${imageNo}`);
         data.remove();
         inputImageField.appendChild(img);

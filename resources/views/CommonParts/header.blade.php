@@ -12,7 +12,7 @@
                         <input class="search-textbox" type="search" aria-label="Search" name="keyword" placeholder="ブログ名・ユーザー名">
                     @endif
                     <!-- <input class="search-button" type="submit" value="検索" class="btn btn-default"> -->
-                    <button class="" type="submit">検索 <i class="bi bi-search"></i></button>
+                    <button class="search-button" type="submit">検索 <i class="bi bi-search"></i></button>
                 </form>
             </div>
             <div class="header-nav">
