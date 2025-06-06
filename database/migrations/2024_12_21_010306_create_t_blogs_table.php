@@ -11,14 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if(!Schema::hasTable('article_comments')) {
-            Schema::create('articles', function (Blueprint $table) {
+        if(!Schema::hasTable('t_blogs')) {
+            Schema::create('t_blogs', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('blog_unique_id', 50)->comment('ブログユニークID');
                 $table->string('title', 255)->comment('ブログタイトル');
                 $table->longText('contents')->comment('ブログコンテンツ');
-                $table->integer('created_by')->comment('ユーザーID: users.id');
                 $table->integer('view_count')->comment('閲覧数');
+                $table->integer('created_by');
+                $table->integer('updated_by');
                 $table->timestamps();
                 $table->comment('ブログ');
             });
@@ -30,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('articles');
+        Schema::dropIfExists('t_blogs');
     }
 };

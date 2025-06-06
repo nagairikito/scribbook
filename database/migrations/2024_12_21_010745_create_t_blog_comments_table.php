@@ -11,11 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if(!Schema::hasTable('article_comments')) {
-            Schema::create('article_comments', function (Blueprint $table) {
-                $table->integer('target_article')->comment('ブログID: articles.id');
+        if(!Schema::hasTable('t_blog_comments')) {
+            Schema::create('t_blog_comments', function (Blueprint $table) {
+                $table->integer('blog_id')->comment('ブログID: t_blogs.id');
                 $table->string('comment')->comment('ブログコメント');
-                $table->integer('created_by')->comment('コメント作成者: user.id');
+                $table->integer('created_by')->nullable();
+                $table->integer('updated_by')->nullable();
                 $table->timestamps();
                 $table->comment('ブログコメント');
             });
@@ -27,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('article_comments');
+        Schema::dropIfExists('t_blog_comments');
     }
 };

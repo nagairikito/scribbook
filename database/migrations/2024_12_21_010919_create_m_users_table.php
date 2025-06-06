@@ -11,15 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        if(!Schema::hasTable('users')) {
-            Schema::create('users', function (Blueprint $table) {
+        if(!Schema::hasTable('m_users')) {
+            Schema::create('m_users', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('name', 255)->comment('ユーザー名');
                 $table->string('login_id', 255)->unique()->comment('ログインID');
                 $table->string('password', 255)->comment('ログインパスワード');
-                $table->string('icon_image')->default('noImage.png')->comment('プロフィールアイコンPath');
-                $table->string('discription', 500)->nullable()->comment('プロフィール概要欄');
+                $table->string('icon_image')->default('noImage.png')->comment('プロフィールアイコン');
+                $table->string('discription', 1000)->nullable()->comment('プロフィール概要欄');
                 $table->integer('delete_flag')->default(0)->comment('削除フラグ');
+                $table->integer('created_by')->nullable();
+                $table->integer('updated_by')->nullable();
                 $table->timestamps();
                 $table->comment('ユーザー');
             });
@@ -79,7 +81,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('m_users');
         Schema::dropIfExists('password_reset_tokens');
         Schema::dropIfExists('sessions');
     }

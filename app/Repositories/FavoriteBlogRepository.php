@@ -13,10 +13,8 @@ class FavoriteBlogRepository extends Repository
 {
     public $favoriteBlog;
     
-    public function __construct() {
-        // Modelのインスタンス化
-        $this->favoriteBlog = new FavoriteBlog;
-
+    public function __construct(FavoriteBlog $favoriteBlog) {
+        $this->favoriteBlog = $favoriteBlog;
     }
 
     /**
@@ -28,8 +26,8 @@ class FavoriteBlogRepository extends Repository
         $favoriteBlogs = $this->favoriteBlog
         ->join('articles', 'articles.id', '=', 'favorite_blogs.blog_id')
         ->join('users', 'users.id', '=', 'favorite_blogs.user_id')
-        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
-        ->where('favorite_blogs.user_id', '=', $id)
+        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('favorite_blogs.user_id', $id)
         ->orderByDesc('favorite_blogs.created_at')
         ->select(
             'articles.*',
@@ -47,8 +45,8 @@ class FavoriteBlogRepository extends Repository
      */
     public function checkExsitsFavoriteBlogByBlogIdAndUserId($inputData) {
         $result = $this->favoriteBlog
-        ->where('user_id', '=', $inputData['user_id'])
-        ->where('blog_id', '=', $inputData['blog_id'])
+        ->where('user_id', $inputData['user_id'])
+        ->where('blog_id', $inputData['blog_id'])
         ->exists();
 
         return $result;
@@ -74,8 +72,8 @@ class FavoriteBlogRepository extends Repository
      */
     public function deleteFavoriteBlog($inputData) {
         $result = $this->favoriteBlog
-        ->where('user_id', '=', $inputData['user_id'])
-        ->where('blog_id', '=', $inputData['blog_id'])
+        ->where('user_id', $inputData['user_id'])
+        ->where('blog_id', $inputData['blog_id'])
         ->delete();
 
         return $result;

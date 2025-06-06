@@ -4,18 +4,17 @@ namespace App\Repositories;
 
 use App\Const\AccountConst;
 use Illuminate\Http\Request;
-use App\Models\ArticleComment;
+use App\Models\BlogComment;
 
 use function Laravel\Prompts\select;
 
-class BlogCommentsRepository extends Repository
+class blogCommentRepository extends Repository
 {
-    public $blogComments;
+    public $blogComment;
     
-    public function __construct() {
+    public function __construct(BlogComment $blogComment) {
         // Modelのインスタンス化
-        $this->blogComments = new ArticleComment;
-
+        $this->blogComment = $blogComment;
     }
     
     /**
@@ -24,10 +23,10 @@ class BlogCommentsRepository extends Repository
      * @return $result
      */
     public function postComment($inputData) {
-        $this->blogComments->target_article = $inputData['target_article'];
-        $this->blogComments->comment = $inputData['comment'];
-        $this->blogComments->created_by = $inputData['created_by'];
-        $result = $this->blogComments->save();
+        $this->blogComment->blog_id = $inputData['blog_id'];
+        $this->blogComment->comment = $inputData['comment'];
+        $this->blogComment->created_by = $inputData['created_by'];
+        $result = $this->blogComment->save();
 
         return $result;
     }
@@ -37,19 +36,19 @@ class BlogCommentsRepository extends Repository
      * @param $id
      * @return $comments
      */
-    public function getBlogComments($id) {
-        $comments = $this->blogComments
-        ->join('users', 'users.id', '=', 'article_comments.created_by')
-        ->where('article_comments.target_article', '=', $id)
-        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
-        ->orderByDesc('article_comments.created_at')
+    public function getblogComment($id) {
+        $comments = $this->blogComment
+        ->join('m_users', 'm_users.id', '=', 't_blog_comments.created_by')
+        ->where('t_blog_comments.blog_id', $id)
+        ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->orderByDesc('t_blog_comments.created_at')
         ->select([
-            'article_comments.target_article',
-            'article_comments.comment',
-            'article_comments.created_at',
-            'article_comments.created_by',
-            'users.name',
-            'users.icon_image',
+            't_blog_comments.blog_id',
+            't_blog_comments.comment',
+            't_blog_comments.created_at',
+            't_blog_comments.created_by',
+            'm_users.name',
+            'm_users.icon_image',
         ])
         ->get();
 

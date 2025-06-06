@@ -4,17 +4,19 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BrowsingHistory extends Model
+class blogComment extends Model
 {
-    protected $table = 't_browsing_histories';
+    protected $table = 't_blog_comments';
+
     /**
      * The attributes that are mass assignable.
      *
      * @var list<string>
      */
     // protected $fillable = [
-    //     'user_id',
-    //     'blog_id',
+    //     'target_article',
+    //     'comment',
+    //     'created_by'
     // ];
 
 }

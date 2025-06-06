@@ -3,19 +3,19 @@
 namespace App\Repositories;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-use App\Models\Article;
-
 use App\Const\AccountConst;
+use App\Models\Article;
+use App\Models\User;
 
 class SearchRepository extends Repository
 {
     public $user;
     public $blog;
-    public function __construct() {
+
+    public function __construct(User $user, Article $article) {
         // Modelのインスタンス化
-        $this->user = new User;
-        $this->blog = new Article;
+        $this->user = $user;
+        $this->blog = $article;
 
     }
     
@@ -30,7 +30,7 @@ class SearchRepository extends Repository
         ->where('articles.title', 'LIKE', "%{$inputData['keyword']}%")
         ->where('articles.contents', 'LIKE', "%{$inputData['keyword']}%")
         ->where('users.name', 'LIKE', "%{$inputData['keyword']}%")
-        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->select(
             'articles.id',
             'articles.title',
@@ -44,7 +44,7 @@ class SearchRepository extends Repository
 
         $users = $this->user
         ->where('name', 'LIKE', "%{$inputData['keyword']}%")
-        ->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->select(
             'id',
             'name',

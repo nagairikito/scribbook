@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Const\AccountConst;
-use App\Models\User;
-use App\Models\FavoriteUser;
 use App\Repositories\AccountRepository;
 use App\Repositories\FavoriteUserRepository;
 use Illuminate\Http\Request;
@@ -18,16 +16,9 @@ class AccountService extends Service
     public $accountRepository;
     public $favoriteUserRepository;
 
-    public function __construct() {
-
-        // Modelのインスタンス化
-        $user = new User;
-        $favoriteUser = new FavoriteUser;
-
-        // Repositryのインスタンス化
-        $this->accountRepository = new AccountRepository($user);
-        $this->favoriteUserRepository = new FavoriteUserRepository($favoriteUser);
-
+    public function __construct(AccountRepository $accountRepository, FavoriteUserRepository $favoriteUserRepository) {
+        $this->accountRepository = $accountRepository;
+        $this->favoriteUserRepository = $favoriteUserRepository;
     }
 
     /**

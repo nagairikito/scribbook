@@ -3,29 +3,15 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\BlogPostingRequest;
-use App\Const\BlogConst;
 use Illuminate\Support\Facades\Auth;
-
-
-use App\Models\Article;
-use App\Repositories\BlogRepository;
 use App\Services\BlogService;
 
 class BlogDetailController extends Controller
 {
     public $blogService;
 
-    public function __construct() {
-        // Modelのインスタンス化
-        $blog = new Article;
-        
-        // Repositoryのインスタンス化
-        $blogRepository = new BlogRepository($blog);
-
-        // Serviceのインスタンス化
-        $this->blogService = new BlogService($blogRepository);
-
+    public function __construct(BlogService $blogService) {
+        $this->blogService = $blogService;
     }
 
     /**
@@ -112,7 +98,7 @@ class BlogDetailController extends Controller
      */
     public function postComment(Request $request) {
         $inputData = [
-            'target_article'     => $request['target_blog'],
+            'blog_id'            => $request['target_blog'],
             'comment'            => $request['comment'],
             'created_by'         => $request['login_user_id'],
         ];
@@ -120,7 +106,7 @@ class BlogDetailController extends Controller
         $result = $this->blogService->postComment($inputData);
         
         if($result == true) {
-            return redirect(route('blog_detail', ['id' => $inputData['target_article']]));
+            return redirect(route('blog_detail', ['id' => $inputData['blog_id']]));
         }
         return back()->with('error_post_comment', 'コメントを投稿できませんでした');
     }

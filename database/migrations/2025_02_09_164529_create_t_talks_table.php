@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('talks', function (Blueprint $table) {
-            $table->string('message', 500)->comment('メッセージ');
+        Schema::create('t_talks', function (Blueprint $table) {
+            $table->longText('message')->comment('メッセージ');
             $table->string('attached_file_path')->nullable()->comment('添付ファイルのパス');
-            $table->integer('created_by')->comment('送信者');
             $table->integer('talk_room_id')->comment('トークルームID');
+            $table->integer('read_flag')->comment('0:未読、1:既読');
             $table->integer('delete_flag_1')->default(0)->comment('トークルームテーブルのユーザー1の削除フラグ');
             $table->integer('delete_flag_2')->default(0)->comment('トークルームテーブルのユーザー2の削除フラグ');
+            $table->integer('created_by')->comment('メッセージ送信者');
+            $table->integer('updated')->comment('メッセージ更新者');
             $table->timestamps();
             $table->comment('トークメッセージ');
         });
@@ -28,6 +30,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('talks');
+        Schema::dropIfExists('t_talks');
     }
 };

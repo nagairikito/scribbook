@@ -2,23 +2,18 @@
 
 namespace App\Repositories;
 
-use App\Const\AccountConst;
 use Illuminate\Http\Request;
 use App\Models\Advertisement;
-use App\Models\Article;
 
 use function Laravel\Prompts\select;
 
 class AdvertisementRepository extends Repository
 {
     public $advertisement;
-    public $article;
     
-    public function __construct() {
+    public function __construct(Advertisement $advertisement) {
         // Modelのインスタンス化
-        $this->advertisement = new Advertisement;
-        $this->article = new Article;
-
+        $this->advertisement = $advertisement;
     }
 
     /**
@@ -48,8 +43,8 @@ class AdvertisementRepository extends Repository
      */
     public function checkRegisteredAdvertisement($blogId) {
         $result = $this->advertisement
-        ->join('articles', 'articles.id', 'advertisements.blog_id')
-        ->where('advertisements.blog_id', $blogId)
+        ->join('t_blogs', 't_blogs.id', 't_advertisements.blog_id')
+        ->where('t_advertisements.blog_id', $blogId)
         ->count();
 
         return $result;

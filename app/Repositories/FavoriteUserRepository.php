@@ -6,16 +6,12 @@ use App\Const\AccountConst;
 use Illuminate\Http\Request;
 use App\Models\FavoriteUser;
 
-use function Laravel\Prompts\select;
-
 class FavoriteUserRepository extends Repository
 {
     public $favoriteUser;
     
-    public function __construct() {
-        // Modelのインスタンス化
-        $this->favoriteUser = new FavoriteUser;
-
+    public function __construct(FavoriteUser $favoriteUser) {
+        $this->favoriteUser = $favoriteUser;
     }
 
     /**
@@ -26,8 +22,8 @@ class FavoriteUserRepository extends Repository
     public function getFavoriteUsersByUserId($id) {
         $favoriteUsers = $this->favoriteUser
         ->join('users', 'users.id', '=', 'favorite_users.favorite_user_id')
-        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
-        ->where('favorite_users.user_id', '=', $id)
+        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('favorite_users.user_id', $id)
         ->orderByDesc('favorite_users.created_at')
         ->select(
             'users.*',
@@ -45,9 +41,9 @@ class FavoriteUserRepository extends Repository
     public function checkFavorite($login_user_id, $target_favorite_user_id) {
         $checkFavorite = $this->favoriteUser
         ->join('users', 'users.id', '=', 'favorite_users.favorite_user_id')
-        ->where('users.delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)
-        ->where('favorite_users.user_id', '=', $login_user_id)
-        ->where('favorite_users.favorite_user_id', '=', $target_favorite_user_id)
+        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('favorite_users.user_id', $login_user_id)
+        ->where('favorite_users.favorite_user_id', $target_favorite_user_id)
         ->exists();
 
         return $checkFavorite;
@@ -73,12 +69,10 @@ class FavoriteUserRepository extends Repository
      */
     public function deleteFavoriteUser($inputData) {
         $result = $this->favoriteUser
-        ->where('user_id', '=', $inputData['user_id'])
-        ->where('favorite_user_id', '=', $inputData['favorite_user_id'])
+        ->where('user_id', $inputData['user_id'])
+        ->where('favorite_user_id', $inputData['favorite_user_id'])
         ->delete();
 
         return $result;
     }
-    
-
 }

@@ -11,10 +11,8 @@ class TalkRepository extends Repository
 {
     public $talk;
 
-    public function __construct() {
-        // Modelのインスタンス化
-        $this->talk = new Talk;
-
+    public function __construct(Talk $talk) {
+        $this->talk = $talk;
     }
     
     /**
@@ -38,7 +36,7 @@ class TalkRepository extends Repository
     public function getAllMessageesByRoomId($inputData) {
         $messages = $this->talk
         ->join('users', 'users.id', '=', 'talks.created_by')
-        ->where('talk_room_id', '=', $inputData['talk_room_id'])
+        ->where('talk_room_id', $inputData['talk_room_id'])
         ->orderBy('talks.updated_at')
         ->select(
             'talks.message',
@@ -61,8 +59,8 @@ class TalkRepository extends Repository
     public function getLatestMessageBySender($inputData) {
         $messages = $this->talk
         ->join('users', 'users.id', '=', 'talks.created_by')
-        ->where('talk_room_id', '=', $inputData['talk_room_id'])
-        ->where('created_by', '=', $inputData['sender'])
+        ->where('talk_room_id', $inputData['talk_room_id'])
+        ->where('created_by', $inputData['sender'])
         ->orderByDesc('talks.updated_at')
         ->select(
             'talks.message',

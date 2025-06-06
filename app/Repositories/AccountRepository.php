@@ -3,17 +3,15 @@
 namespace App\Repositories;
 
 use Illuminate\Http\Request;
-use App\Models\User;
-
 use App\Const\AccountConst;
+use App\Models\User;
 
 class AccountRepository extends Repository
 {
     public $user;
 
-    public function __construct() {
-        // Modelのインスタンス化
-        $this->user = new User;
+    public function __construct(User $user) {
+        $this->user = $user;
     }
     
     /**
@@ -35,7 +33,7 @@ class AccountRepository extends Repository
      * @return object $result
      */
     public function getAccountById($id) {
-        $result = $this->user->where('id', '=', $id)->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)->get();
+        $result = $this->user->where('id', '=', $id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->get();
         return !empty($result) ? $result->toArray() : [];
     }
 
@@ -45,7 +43,7 @@ class AccountRepository extends Repository
      * @return object $result
      */
     public function existsAccountById($id) {
-        $result = $this->user->where('id', '=', $id)->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)->get();
+        $result = $this->user->where('id', '=', $id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->get();
         return !empty($result) ? $result->toArray() : [];
     }
 
@@ -55,7 +53,7 @@ class AccountRepository extends Repository
      * @return array $loginUser
      */
     public function login($login_id) {
-        $loginUser = $this->user->where('login_id', '=', $login_id)->where('delete_flag', '=', AccountConst::USER_DELETE_FLAG_OFF)->first();
+        $loginUser = $this->user->where('login_id', '=', $login_id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->first();
         return $loginUser;
     }
 
@@ -65,7 +63,7 @@ class AccountRepository extends Repository
      * @return $result
      */
     public function updateProfile($inputData) {
-        $targetAccount = $this->user->where('id', '=', $inputData['id'])->first();
+        $targetAccount = $this->user->where('id', $inputData['id'])->first();
         $targetAccount->name = $inputData['name'];
         $targetAccount->login_id = $inputData['login_id'];
         $targetAccount->password = $inputData['password'];
@@ -81,7 +79,7 @@ class AccountRepository extends Repository
      * @return $result
      */
     public function deleteAccount($inputData) {
-        $targetAccount = $this->user->where('id', '=', $inputData['id'])->first();
+        $targetAccount = $this->user->where('id', $inputData['id'])->first();
         $targetAccount->delete_flag = AccountConst::USER_DELETE_FLAG_ON;
         $result = $targetAccount->save();
         return $result;

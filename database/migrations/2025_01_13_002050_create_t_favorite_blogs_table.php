@@ -11,9 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('favorite_blogs', function (Blueprint $table) {
-            $table->integer('user_id')->comment('users.id');
-            $table->integer('blog_id')->comment('articles.id');
+        Schema::create('t_favorite_blogs', function (Blueprint $table) {
+            $table->integer('user_id')->comment('m_users.id');
+            $table->integer('blog_id')->comment('t_blogs.id');
+            $table->integer('created_by')->nullable();
+            $table->integer('updated_by')->nullable();
             $table->timestamps();
             $table->comment('お気に入りブログ');
         });
@@ -24,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('favorite_blogs');
+        Schema::dropIfExists('t_favorite_blogs');
     }
 };

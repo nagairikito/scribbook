@@ -11,13 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('advertisements', function (Blueprint $table) {
+        Schema::create('t_advertisements', function (Blueprint $table) {
                 $table->increments('id');
                 $table->text('advertisement_image_name')->comment('広告の画像名');
                 $table->text('url')->comment('url');
-                $table->integer('created_by')->comment('ユーザーID: users.id');
                 $table->integer('blog_id')->comment('紐づくブログのID');
                 $table->integer('access_count')->default(0)->comment('アクセス数');
+                $table->integer('created_by')->nullable();
+                $table->integer('updated_by')->nullable();
                 $table->timestamps();
                 $table->comment('広告');
         });
@@ -28,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('advertisements');
+        Schema::dropIfExists('t_advertisements');
     }
 };

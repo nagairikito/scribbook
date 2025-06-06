@@ -3,17 +3,16 @@
 namespace App\Repositories;
 
 use Illuminate\Http\Request;
-use App\Models\TalkRoom;
-
 use App\Const\TalkConst;
+use App\Models\TalkRoom;
 
 class TalkRoomRepository extends Repository
 {
     public $talkRoom;
 
-    public function __construct() {
+    public function __construct(TalkRoom $talkRoom) {
         // Modelのインスタンス化
-        $this->talkRoom = new TalkRoom;
+        $this->talkRoom = $talkRoom;
 
     }
     
@@ -104,7 +103,7 @@ class TalkRoomRepository extends Repository
      */
     public function checkExistsAndGetUserId2AndTalkRoomIds($user_id) {
         $talkRoomIds = $this->talkRoom
-        ->where('user_id_2', '=', $user_id)
+        ->where('user_id_2', $user_id)
         ->select('id')
         ->get();
         
@@ -119,7 +118,7 @@ class TalkRoomRepository extends Repository
     public function getTalkRoomListWithUserId1ByTartgetUserId($talkRoomId) {
         $talkRoomListWithUserId1 = $this->talkRoom
         ->join('users', 'users.id', '=', 'talk_rooms.user_id_1')
-        ->where('talk_rooms.id', '=', $talkRoomId)
+        ->where('talk_rooms.id', $talkRoomId)
         ->select(
             'talk_rooms.updated_at',
             'users.id',
@@ -137,8 +136,8 @@ class TalkRoomRepository extends Repository
      */
     public function checkExistsTargetTalkRoom($user_id_1, $user_id_2) {
         $result = $this->talkRoom
-        ->where('user_id_1', '=', $user_id_1)
-        ->where('user_id_2', '=', $user_id_2)
+        ->where('user_id_1', $user_id_1)
+        ->where('user_id_2', $user_id_2)
         ->exists();
         
         return $result;
@@ -151,8 +150,8 @@ class TalkRoomRepository extends Repository
      */
     public function getTargetTalkRoomId($user_id_1, $user_id_2) {
         $talkRoomId = $this->talkRoom
-        ->where('user_id_1', '=', $user_id_1)
-        ->where('user_id_2', '=', $user_id_2)
+        ->where('user_id_1', $user_id_1)
+        ->where('user_id_2', $user_id_2)
         ->value('id');
 
         return $talkRoomId;
@@ -177,12 +176,10 @@ class TalkRoomRepository extends Repository
      * @return boolean $result
      */
     public function updateTalkRoom($talkRoomId) {
-        $targetTalkRoom = $this->talkRoom->where('id', '=', $talkRoomId)->first();
+        $targetTalkRoom = $this->talkRoom->where('id', $talkRoomId)->first();
         $targetTalkRoom->updated_at = now();
         $result = $targetTalkRoom->save();
         
         return $result;
     }
-
-
 }

@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class Talk extends Model
+class Blog extends Model
 {
-    protected $table = 't_talks';
+    protected $table = 't_blogs';
 
     /**
      * The attributes that are mass assignable.
@@ -14,12 +14,11 @@ class Talk extends Model
      * @var list<string>
      */
     // protected $fillable = [
-    //     'message',
-    //     'attached_file_path',
+    //     'title',
+    //     'contents',
+    //     'image',
     //     'created_by',
-    //     'talk_room_id',
-    //     'delete_flag_1',
-    //     'delete_flag_2',
+    //     'view_count',
     // ];
 
 }

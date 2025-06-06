@@ -2,7 +2,6 @@
 
 namespace App\Repositories;
 
-use App\Const\AccountConst;
 use Illuminate\Http\Request;
 use App\Models\BrowsingHistory;
 
@@ -12,10 +11,8 @@ class BrowsingHistoryRepository extends Repository
 {
     public $browsingHistory;
     
-    public function __construct() {
-        // Modelのインスタンス化
-        $this->browsingHistory = new BrowsingHistory;
-
+    public function __construct(BrowsingHistory $browsingHistory) {
+        $this->browsingHistory = $browsingHistory;
     }
     
     /**
@@ -37,7 +34,7 @@ class BrowsingHistoryRepository extends Repository
     public function getBrowsingHisotryByUserId($user_id) {
         $browsingHistory = $this->browsingHistory
         ->join('articles', 'articles.id', '=', 'browsing_histories.blog_id')
-        ->where('browsing_histories.user_id', '=', $user_id)
+        ->where('browsing_histories.user_id', $user_id)
         ->orderByDesc('browsing_histories.updated_at')
         ->select(
             'articles.*',

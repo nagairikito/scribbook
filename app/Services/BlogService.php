@@ -2,12 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Advertisement;
-use App\Models\User;
-use App\Models\Article;
-use App\Models\ArticleComment;
-use App\Models\FavoriteBlog;
-use App\Models\BrowsingHistory;
 use App\Repositories\BlogRepository;
 use App\Repositories\BlogCommentsRepository;
 use App\Repositories\BrowsingHistoryRepository;
@@ -18,8 +12,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Symfony\Component\Console\Input\Input;
 
 class BlogService extends Service
 {
@@ -30,24 +22,14 @@ class BlogService extends Service
     public $BrowsingHistoryRepository;
     public $advertisementRepository;
 
-    public function __construct() {
-
-        // Modelのインスタンス化
-        $user = new User;
-        $blog = new Article;
-        $blogComments = new ArticleComment;
-        $favoriteBlog = new FavoriteBlog;
-        $browsingHistory = new BrowsingHistory;
-        $advertisement = new Advertisement;
-
-        // Repositryのインスタンス化
-        $this->accountRepository = new AccountRepository($user);
-        $this->blogRepository = new BlogRepository($blog);
-        $this->blogCommentsRepository = new BlogCommentsRepository($blogComments);
-        $this->favoriteBlogRepository = new FavoriteBlogRepository($favoriteBlog);
-        $this->BrowsingHistoryRepository = new BrowsingHistoryRepository($browsingHistory);
-        $this->advertisementRepository = new AdvertisementRepository($advertisement);
-
+    public function __construct(AccountRepository $accountRepository, BlogRepository $blogRepository, BlogCommentsRepository $blogCommentsRepository
+                                , FavoriteBlogRepository $favoriteBlogRepository, BrowsingHistoryRepository $browsingHistoryRepository, AdvertisementRepository $advertisementRepository) {
+        $this->accountRepository = $accountRepository;
+        $this->blogRepository = $blogRepository;
+        $this->blogCommentsRepository = $blogCommentsRepository;
+        $this->favoriteBlogRepository = $favoriteBlogRepository;
+        $this->BrowsingHistoryRepository = $browsingHistoryRepository;
+        $this->advertisementRepository = $advertisementRepository;
     }
     
     /**

@@ -14,26 +14,9 @@ class TalkService extends Service
     public $talkRepository;
     public $talkRoomRepository;
 
-    public function __construct() {
-        // Modelのインスタンス化
-        $talk = new Talk;
-        $talkRoom = new TalkRoom;
-
-        // Repositoryのインスタンス化
-        $this->talkRepository = new TalkRepository($talk);
-        $this->talkRoomRepository = new TalkRoomRepository($talkRoom);
-
-        try {
-            DB::beginTransaction();
-    
-            
-            DB::commit();
-            
-        } catch (\Exception $e) {
-            report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
-        }    
-
+    public function __construct(TalkRepository $talkRepository, TalkRoomRepository $talkRoomRepository) {
+        $this->talkRepository = $talkRepository;
+        $this->talkRoomRepository = $talkRoomRepository;
     }
 
     /**
@@ -129,9 +112,8 @@ class TalkService extends Service
      * @return bool $result
      */
     public function sendMessage($inputData) {
-        try {
-            DB::beginTransaction();
-    
+        DB::beginTransaction();
+        try {    
             $talkRoomId = $this->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
             if($talkRoomId) {
                 $this->talkRoomRepository->updateTalkRoom($talkRoomId);
@@ -162,11 +144,10 @@ class TalkService extends Service
             return $messages;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
             session()->flash('flash_message', 'エラーが発生しました');
         }    
-
-
     }
 
 }
