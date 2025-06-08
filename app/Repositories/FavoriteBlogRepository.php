@@ -19,19 +19,19 @@ class FavoriteBlogRepository extends Repository
 
     /**
      * 対象のユーザーIDに紐づくお気に入り登録されたブログを全件取得
-     * @param $id
-     * @return $favoriteBlogs
+     * @param int $id
+     * @return array $favoriteBlogs
      */
     public function getAllFavoriteBlogsByUserId($id) {
         $favoriteBlogs = $this->favoriteBlog
-        ->join('articles', 'articles.id', '=', 'favorite_blogs.blog_id')
-        ->join('users', 'users.id', '=', 'favorite_blogs.user_id')
-        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
-        ->where('favorite_blogs.user_id', $id)
-        ->orderByDesc('favorite_blogs.created_at')
+        ->join('t_blogs', 't_blogs.id', '=', 't_favorite_blogs.blog_id')
+        ->join('m_users', 'm_users.id', '=', 't_favorite_blogs.user_id')
+        ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('t_favorite_blogs.user_id', $id)
+        ->orderByDesc('t_favorite_blogs.created_at')
         ->select(
-            'articles.*',
-            'users.name'
+            't_blogs.*',
+            'm_users.name'
         )
         ->get();
 
@@ -40,8 +40,8 @@ class FavoriteBlogRepository extends Repository
     
     /**
      * ユーザーIDとブログIDをもとに対象のブログがお気に入り登録されているかを判定
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function checkExsitsFavoriteBlogByBlogIdAndUserId($inputData) {
         $result = $this->favoriteBlog
@@ -54,8 +54,8 @@ class FavoriteBlogRepository extends Repository
 
     /**
      * ブログお気に入り登録
-     * @param $inputData
-     * @return boolean $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function registerFavoriteBlog($inputData) {
         $this->favoriteBlog->user_id = $inputData['user_id'];
@@ -67,8 +67,8 @@ class FavoriteBlogRepository extends Repository
 
     /**
      * ブログお気に入り登録解除
-     * @param $inputData
-     * @return boolean $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function deleteFavoriteBlog($inputData) {
         $result = $this->favoriteBlog

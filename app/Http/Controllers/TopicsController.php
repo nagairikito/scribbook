@@ -15,10 +15,11 @@ class TopicsController extends Controller
 
     /**
      * トピックス表示
+     * @return view
      */
     public function topics() {
-        $allBlogs = $this->blogService->getTopics();
+        $topics = $this->blogService->getTopics();
 
-        return view('topics', ['allBlogs' => $allBlogs]);
+        return view('topics', ['blogs' => $topics]);
     }
 }

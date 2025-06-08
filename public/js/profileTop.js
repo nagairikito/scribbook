@@ -66,3 +66,15 @@ function initUserIcon() {
     iconImage[0].value = 'noImage.png';
 }
 
+/**
+ * バリデーションエラー時のモーダル制御
+ */
+document.addEventListener('DOMContentLoaded', () => {
+    if(document.querySelectorAll(".error-message.me").length > 0) {
+        openModal(EDIT_PROFILE)
+    }
+    if(document.querySelectorAll(".error-message.privacy").length > 0) {
+        openModal(PRIVACY_SETTING)
+    }
+
+})

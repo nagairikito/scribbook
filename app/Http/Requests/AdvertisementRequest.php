@@ -4,7 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class BlogPostingRequest extends FormRequest
+class AdvertisementRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,8 +22,8 @@ class BlogPostingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'title'                   => 'required|string|max:255',
-            'contents'                => 'required|string',
+            'advertisement_image_name'   => 'string',
+            'comment'                    => 'string',
         ];
     }
     
@@ -35,12 +35,8 @@ class BlogPostingRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'title.required'      => 'タイトルは必須です',
-            'title.string'        => '文字形式で入力してください',
-            'title.max'           => '255文字以下で入力してください',
-            'contents.required'   => 'コンテンツは必須です',
-            'contents.string'     => '文字形式で入力してください',
-
+            'advertisement_image_name.string'   => '文字形式で入力してください',
+            'url.string'                        => '文字形式で入力してください',
         ];
     }
 }

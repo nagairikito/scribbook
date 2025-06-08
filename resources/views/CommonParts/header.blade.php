@@ -6,8 +6,8 @@
             <div class="header-search-bar">
                 <form action="{{ route('search') }}" method="GET" class="header-search-bar-wrapper">
                 @csrf
-                    @if(isset($keyword))
-                    <input class="search-textbox" type="search" aria-label="Search" name="keyword" value="{{$keyword ? $keyword : ''}}" placeholder="ブログ名・ユーザー名" required="required">
+                    @if(isset($result['keyword']))
+                    <input class="search-textbox" type="search" aria-label="Search" name="keyword" value="{{$result['keyword'] ? $result['keyword'] : ''}}" placeholder="ブログ名・ユーザー名" required="required">
                     @else
                         <input class="search-textbox" type="search" aria-label="Search" name="keyword" placeholder="ブログ名・ユーザー名">
                     @endif

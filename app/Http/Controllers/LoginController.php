@@ -30,10 +30,10 @@ class LoginController extends Controller
 
     /**
      * ログイン
-     * @param $request
+     * @param LoginRequest $request
      * @return view|object
      */
-    public function login(LoginRequest $request, Response $response) {
+    public function login(LoginRequest $request) {
         if(Auth::user()) {
             return back()->with('error_login', '既にログイン情報が存在しています。一度ログアウトしてください');
         }
@@ -43,21 +43,11 @@ class LoginController extends Controller
             'password' => $request->input('password'),
         ];
 
-        $loginStatus = $this->accountService->login($inputData);
-
-        switch($loginStatus) {
-            case AccountConst::NOT_FOUND_LOGIN_ID:
-                return back()->with('error_login', 'ログインIDが存在しないまたは入力された内容が正しくありません')->withInput($inputData);
-            
-            case AccountConst::NOT_MATCH_LOGIN_PASSWORD:
-                return back()->with('error_login', '入力されたパスワードが正しくありません')->withInput($inputData);
-
-            case AccountConst::SUCCESS_LOGIN:
-                return redirect(route('toppage'))->with('success_login', 'ログインしました');
-            
-            default:
-                return back()->with('error_login', '予期せぬエラーが発生しました')->withInput($inputData);
+        $result = $this->accountService->login($inputData);
+        if($result) {
+            return redirect(route('toppage'))->with('success_login', 'ログインしました');
         }
+        return back()->with('error_login', 'エラーが発生しました')->withInput();
     }
 
     /**

@@ -29,7 +29,7 @@ class AccountRegistrationController extends Controller
 
     /**
      * アカウント新規登録
-     * @param $request
+     * @param AccountRegisterationRequest $request
      * @return view
      */
     public function registerAccount(AccountRegisterationRequest $request) {
@@ -40,8 +40,8 @@ class AccountRegistrationController extends Controller
         ];
         $result = $this->accountService->registerAccount($inputData);
 
-        if($result == AccountConst::FAIL_ACCOUNT_REGISTERATION) {
-            return back()->with('error_account_registeraion','アカウント作成に失敗しました');
+        if($result == false) {
+            return back()->with('error_account_registeraion','エラーが発生しました')->withInput();
         }
         return view('success_account_registeration');
     }

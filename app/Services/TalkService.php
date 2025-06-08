@@ -21,6 +21,8 @@ class TalkService extends Service
 
     /**
      * ユーザーIDに紐づくトークルームを全件取得
+     * @param int $userId
+     * @return array $talkRoomList
      */
     public function getTalkRoomListByUserId($userId) {
         // talk_roomsのuser_id_1に登録されているかチェック
@@ -82,17 +84,20 @@ class TalkService extends Service
 
     /**
      * 2ユーザー間のトークルームIDの取得
+     * @param int $userId1
+     * @param int $userId2
+     * @param int $talkRoomId
      */
-    public function getTargetTalkRoomId($user_id_1, $user_id_2) {
+    public function getTargetTalkRoomId($userId1, $userId2) {
         $talkRoomId = null;
 
-        $checkExistsTalkRoom1 = $this->talkRoomRepository->checkExistsTargetTalkRoom($user_id_1, $user_id_2);
+        $checkExistsTalkRoom1 = $this->talkRoomRepository->checkExistsTargetTalkRoom($userId1, $userId2);
         if($checkExistsTalkRoom1) {
-            $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($user_id_1, $user_id_2);
+            $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($userId1, $userId2);
         }
-        $checkExistsTalkRoom2 = $this->talkRoomRepository->checkExistsTargetTalkRoom($user_id_2, $user_id_1);
+        $checkExistsTalkRoom2 = $this->talkRoomRepository->checkExistsTargetTalkRoom($userId2, $userId1);
         if($checkExistsTalkRoom2) {
-            $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($user_id_2, $user_id_1);
+            $talkRoomId = $this->talkRoomRepository->getTargetTalkRoomId($userId2, $userId1);
         }
 
         return $talkRoomId;
@@ -100,6 +105,8 @@ class TalkService extends Service
     
     /**
      * 2ユーザー間のトークルームのメッセージを全件の取得
+     * @param array $talkRoom
+     * @return array $messages
      */
     public function getAllMessageesByRoomId($talkRoom) {
         $messages = $this->talkRepository->getAllMessageesByRoomId($talkRoom);
@@ -108,7 +115,7 @@ class TalkService extends Service
         
     /**
      * メッセージ送信処理
-     * @param $inputData
+     * @param array $inputData
      * @return bool $result
      */
     public function sendMessage($inputData) {
@@ -146,7 +153,6 @@ class TalkService extends Service
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }    
     }
 

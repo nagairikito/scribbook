@@ -24,8 +24,8 @@ class SearchService extends Service
     
     /**
      * 検索結果
-     * @param $inputData
-     * @return bool $result
+     * @param array $inputData
+     * @return array $result
      */
     public function search($inputData) {
         $result = $this->searchRepository->search($inputData);

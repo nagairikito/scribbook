@@ -4,7 +4,7 @@ namespace App\Repositories;
 
 use Illuminate\Http\Request;
 use App\Const\AccountConst;
-use App\Models\Article;
+use App\Models\Blog;
 use App\Models\User;
 
 class SearchRepository extends Repository
@@ -12,33 +12,33 @@ class SearchRepository extends Repository
     public $user;
     public $blog;
 
-    public function __construct(User $user, Article $article) {
+    public function __construct(User $user, Blog $blog) {
         // Modelのインスタンス化
         $this->user = $user;
-        $this->blog = $article;
+        $this->blog = $blog;
 
     }
     
     /**
      * 検索結果取得
-     * @param $inputData
-     * @return boolean $result
+     * @param array $inputData
+     * @return array $result
      */
     public function search($inputData) {
         $blogs = $this->blog
-        ->join('users', 'users.id', '=', 'articles.created_by')
-        ->where('articles.title', 'LIKE', "%{$inputData['keyword']}%")
-        ->where('articles.contents', 'LIKE', "%{$inputData['keyword']}%")
-        ->where('users.name', 'LIKE', "%{$inputData['keyword']}%")
-        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
+        ->orWhere('t_blogs.title', 'LIKE', "%{$inputData['keyword']}%")
+        ->orWhere('t_blogs.contents', 'LIKE', "%{$inputData['keyword']}%")
+        ->orWhere('m_users.name', 'LIKE', "%{$inputData['keyword']}%")
+        ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->select(
-            'articles.id',
-            'articles.title',
-            'articles.contents',
-            'articles.created_at',
-            'articles.updated_at',
-            'articles.created_by',
-            'users.name',
+            't_blogs.id as id',
+            't_blogs.title as title',
+            't_blogs.contents as contents',
+            't_blogs.created_at as created_at',
+            't_blogs.updated_at as updated_at',
+            't_blogs.created_by as created_by',
+            'm_users.name as name',
         )
         ->get();
 

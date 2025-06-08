@@ -14,8 +14,8 @@ class FavoriteUserBlogController extends Controller
     }
 
     /**
-     * ユーザーIDに紐づくお気に入り登録したユーザーのブログ全件取得
-     * @param $request
+     * ユーザーIDをもとにお気に入り登録したユーザーのブログ全件取得
+     * @param array $request
      * @return view
      */
     public function getBlogPostedByFavoriteUserByUserId(Request $request) {
@@ -24,6 +24,6 @@ class FavoriteUserBlogController extends Controller
         ];
         $blogsPostedByFavoriteUser = $this->blogService->getBlogPostedByFavoriteUserByUserId($inputData['user_id']);
 
-        return view('favorite_user_blogs', compact('blogsPostedByFavoriteUser'));
+        return view('favorite_user_blogs', ['blogs' => $blogsPostedByFavoriteUser]);
     }
 }

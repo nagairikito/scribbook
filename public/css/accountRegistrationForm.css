@@ -28,7 +28,10 @@
 }
 
 #account-registration-form .account-registration-form-area .account-registration-button-area {
-    margin: 0 auto 30px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #account-registration-form .account-registration-form-area > div > p {

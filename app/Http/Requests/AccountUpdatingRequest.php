@@ -26,7 +26,7 @@ class AccountUpdatingRequest extends FormRequest
         $loginUserId = $collectRequest['login_user_id'];
         return [
             'name'                    => 'required|string|max:255',
-            'login_id'                => "required|string|max:255|unique:users,login_id,{$loginUserId},id",
+            'login_id'                => "required|string|max:255|unique:m_users,login_id,{$loginUserId},id",
             'password'                => 'required|confirmed|string|max:255',
             'icon_image'              => 'nullable|max:255',
             'discription'             => 'nullable|string|max:500',

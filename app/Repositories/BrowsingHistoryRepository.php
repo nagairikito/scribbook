@@ -17,27 +17,33 @@ class BrowsingHistoryRepository extends Repository
     
     /**
      * 閲覧履歴登録・更新
+     * @param int $userId
+     * @param int $blogId
+     * @return void
      */
-    public function upsertBrowsingHistory($user_id, $blog_id) {
+    public function upsertBrowsingHistory($userId, $blogId) {
         $result = $this->browsingHistory->upsert([
-            'user_id' => $user_id,
-            'blog_id' => $blog_id,
+            'user_id' => $userId,
+            'blog_id' => $blogId,
+            'created_at' => now(),
             'updated_at' => now(),
         ], ['user_id', 'blog_id'], ['updated_at']);
-
-        return $result;
     }
 
     /**
      * ユーザーIDに紐づく閲覧履歴を取得
+     * @param int $userId
+     * @return $browsingHistory
      */
-    public function getBrowsingHisotryByUserId($user_id) {
+    public function getBrowsingHisotryByUserId($userId) {
         $browsingHistory = $this->browsingHistory
-        ->join('articles', 'articles.id', '=', 'browsing_histories.blog_id')
-        ->where('browsing_histories.user_id', $user_id)
-        ->orderByDesc('browsing_histories.updated_at')
+        ->join('t_blogs', 't_blogs.id', '=', 't_browsing_histories.blog_id')
+        ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
+        ->where('t_browsing_histories.user_id', $userId)
+        ->orderByDesc('t_browsing_histories.updated_at')
         ->select(
-            'articles.*',
+            't_blogs.*',
+            'm_users.name as name'
         )
         ->get();
 

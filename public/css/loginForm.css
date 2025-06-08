@@ -28,7 +28,10 @@
 }
 
 #login-form .login-form-area .login-button-area {
-    margin: 0 auto 30px auto;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
 
 #login-form .login-form-area .to-registration-form {

@@ -15,8 +15,8 @@ class FavoriteBlogController extends Controller
 
     /**
      * お気に入りブログ一覧を表示
-     * @param $id
-     * @return $favoriteBlogs
+     * @param array $request
+     * @return view
      */
     public function getFavoriteBlogs(Request $request) {
         $inputData = [
@@ -25,6 +25,6 @@ class FavoriteBlogController extends Controller
 
         $favoriteBlogs = $this->blogService->getAllFavoriteBlogsByUserId($inputData['id']);
 
-        return view('favorite_blogs', ['favoriteBlogs' => $favoriteBlogs]);
+        return view('favorite_blogs', ['blogs' => $favoriteBlogs]);
     }
 }

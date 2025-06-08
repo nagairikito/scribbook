@@ -18,12 +18,15 @@ class AdvertisementRepository extends Repository
 
     /**
      * 広告の登録
+     * @param arrau $intputData
+     * @param bool $result
      */
     public function registerAdvertisement($inputData) {
         $this->advertisement->advertisement_image_name = $inputData['advertisement_image_name'];
         $this->advertisement->url = $inputData['url'];
-        $this->advertisement->created_by = $inputData['created_by'];
         $this->advertisement->blog_id = $inputData['blog_id'];
+        $this->advertisement->created_by = $inputData['created_by'];
+        $this->advertisement->updated_by = $inputData['updated_by'];
         $result = $this->advertisement->save();
 
         return $result;
@@ -31,6 +34,8 @@ class AdvertisementRepository extends Repository
 
     /**
      * 広告の削除
+     * @param int $id
+     * @return bool $result
      */
     public function deleteAdvertisement($id) {
         $result = $this->advertisement->where('id', $id)->delete();
@@ -39,19 +44,23 @@ class AdvertisementRepository extends Repository
     }
 
     /**
-     * 広告登録済み確認
+     * ブログに紐づく広告の数取得
+     * @param int $blogId
+     * @return int $count
      */
-    public function checkRegisteredAdvertisement($blogId) {
-        $result = $this->advertisement
+    public function getRegisteredAdvertisementCount($blogId) {
+        $count = $this->advertisement
         ->join('t_blogs', 't_blogs.id', 't_advertisements.blog_id')
         ->where('t_advertisements.blog_id', $blogId)
         ->count();
 
-        return $result;
+        return $count;
     }
 
     /**
      * ブログに紐づく広告を取得
+     * @param int $blogId
+     * @return array $advertisement
      */
     public function getAdvertisementByBlogId($blogId) {
         $advertisement = $this->advertisement->where('blog_id', $blogId)->get();
@@ -60,10 +69,10 @@ class AdvertisementRepository extends Repository
     }
 
     /**
-     * IDによるによる広告を取得
+     * IDによる広告の単一取得
      */
     public function getAdvertisementById($id) {
-        $advertisement = $this->advertisement->where('id', $id)->get();
+        $advertisement = $this->advertisement->where('id', $id)->first();
 
         return !empty($advertisement) ? $advertisement->toArray() : [];
     }

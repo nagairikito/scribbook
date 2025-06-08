@@ -15,15 +15,16 @@ class BrowsingHistoryController extends Controller
 
     /**
      * 閲覧履歴表示
+     * @param array $request
+     * @return view
      */
     public function showBrowsingHistory(Request $request) {
         $inputData = [
             'user_id' => $request['id'],
         ];
 
-        $blogs = $this->blogService->showBrowsingHistory($inputData);
+        $browsingHistory = $this->blogService->getBrowsingHistory($inputData);
 
-        return view('browsing_history', compact('blogs'));
-
+        return view('browsing_history', ['blogs' => $browsingHistory]);
     }
 }

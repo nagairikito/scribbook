@@ -23,8 +23,8 @@ class AccountRegisterationRequest extends FormRequest
     {
         return [
             'name'                    => 'required|string|max:255',
-            'login_id'                => 'required|unique:users|string|max:255',
-            'password'                => 'required|confirmed|string|max:32',
+            'login_id'                => 'required|unique:m_users|string|regex:/^[a-zA-Z0-9._@-]+$/|max:255',
+            'password'                => 'required|confirmed|string|alpha_num|max:32',
         ];
     }
     
@@ -42,10 +42,12 @@ class AccountRegisterationRequest extends FormRequest
             'login_id.required'  => 'ログインIDは必須です',
             'login_id.unique'    => 'このログインＩＤは既に使用されています',
             'login_id.string'    => '文字形式で入力してください',
+            'login_id.regex'     => '「英数字」「.」「-」「_」「@」のみ使用できます',
             'login_id.max'       => '255文字以下で入力してください',
             'password.required'  => 'パスワードは必須です',
             'password.confirmed' => '確認用パスワードと一致しません',
             'password.string'    => '文字形式で入力してください',
+            'password.alpha_num' => '英数字で入力してください',
             'password.max'       => '255文字以下で入力してください',
 
         ];

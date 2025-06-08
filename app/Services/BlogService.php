@@ -3,7 +3,7 @@
 namespace App\Services;
 
 use App\Repositories\BlogRepository;
-use App\Repositories\BlogCommentsRepository;
+use App\Repositories\BlogCommentRepository;
 use App\Repositories\BrowsingHistoryRepository;
 use App\Repositories\AccountRepository;
 use App\Repositories\AdvertisementRepository;
@@ -12,21 +12,22 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use PhpParser\ErrorHandler\Throwing;
 
 class BlogService extends Service
 {
     public $accountRepository;
     public $blogRepository;
-    public $blogCommentsRepository;
+    public $blogCommentRepository;
     public $favoriteBlogRepository;
     public $BrowsingHistoryRepository;
     public $advertisementRepository;
 
-    public function __construct(AccountRepository $accountRepository, BlogRepository $blogRepository, BlogCommentsRepository $blogCommentsRepository
+    public function __construct(AccountRepository $accountRepository, BlogRepository $blogRepository, BlogCommentRepository $blogCommentRepository
                                 , FavoriteBlogRepository $favoriteBlogRepository, BrowsingHistoryRepository $browsingHistoryRepository, AdvertisementRepository $advertisementRepository) {
         $this->accountRepository = $accountRepository;
         $this->blogRepository = $blogRepository;
-        $this->blogCommentsRepository = $blogCommentsRepository;
+        $this->blogCommentRepository = $blogCommentRepository;
         $this->favoriteBlogRepository = $favoriteBlogRepository;
         $this->BrowsingHistoryRepository = $browsingHistoryRepository;
         $this->advertisementRepository = $advertisementRepository;
@@ -34,7 +35,7 @@ class BlogService extends Service
     
     /**
      * ブログ登録
-     * @param $inputData
+     * @param array $inputData
      * @return bool $blogPostStatus
      */
     public function postBlog($inputData) {
@@ -44,36 +45,34 @@ class BlogService extends Service
             return $postFlag;
         }
 
-        $created_by = $this->accountRepository->getAccountById($inputData['user_id']);
+        $created_by = $this->accountRepository->existsAccountById($inputData['user_id']);
         if(!$created_by) {
             return $postFlag;
         }
 
-        // $inputData['contents'] = html_entity_decode($inputData['contents']);
-
-
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-
             $checkPostBlog = $this->blogRepository->postBlog($inputData);
             if($checkPostBlog) {
                 $postFlag = true;
             }
-            $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names']);
+            if($inputData['base64_texts'] != [] || $inputData['base64_texts'] != null || $inputData['image_file_names'] != [] || $inputData['image_file_names'] != null) {
+                $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names']);
+            }
 
             DB::commit();
             return $postFlag;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }    
     }
 
     /**
      * ブログ編集
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function editBlog($inputData) {
         $editBlogFlag = false;
@@ -82,12 +81,12 @@ class BlogService extends Service
             return $editBlogFlag;
         }
 
-        $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
+        $created_by = $this->accountRepository->existsAccountById($inputData['created_by']);
         if(!$created_by) {
             return $editBlogFlag;
         }
 
-        $targetBlog = $this->blogRepository->blogDetail($inputData['id']);
+        $targetBlog = $this->blogRepository->getBlogDetail($inputData['id']);
         if(!$targetBlog) {
             return $editBlogFlag;
         }
@@ -95,7 +94,7 @@ class BlogService extends Service
         DB::beginTransaction();
         try {
             // $this->deleteBlogContentsImageFromStorage($targetBlog[0]['blog_unique_id']);
-            $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog[0]['blog_unique_id']);
+            $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog['blog_unique_id']);
             $checkEditBlog = $this->blogRepository->editBlog($inputData);
             if($checkEditBlog) {
                 $editBlogFlag = true;
@@ -113,8 +112,8 @@ class BlogService extends Service
     
     /**
      * ブログ削除
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function deleteBlog($inputData) {
         $deleteBlogFlag = false;
@@ -123,21 +122,21 @@ class BlogService extends Service
             return $deleteBlogFlag;
         }
 
-        $created_by = $this->accountRepository->getAccountById($inputData['created_by']);
-        if(!$created_by) {
+        $existsCreatedUserFlag = $this->accountRepository->existsAccountById($inputData['created_by']);
+        if(!$existsCreatedUserFlag) {
             return $deleteBlogFlag;
         }
         
-        $targetBlog = $this->blogRepository->blogDetail($inputData['id']);
+        $targetBlog = $this->blogRepository->getBlogDetail($inputData['id']);
         if(!$targetBlog) {
             return $deleteBlogFlag;
         }
 
         DB::beginTransaction();
         try {
-            $checkDeleteBlog = $this->blogRepository->deleteBlog($targetBlog[0]['id']);
+            $checkDeleteBlog = $this->blogRepository->deleteBlog($targetBlog['id']);
             if($checkDeleteBlog) {
-                $this->deleteBlogContentsImageFromStorage($targetBlog[0]['blog_unique_id']);
+                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id']);
                 $deleteBlogFlag = true;
             }
     
@@ -147,13 +146,12 @@ class BlogService extends Service
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }    
     }
 
     /**
      * ブログ全件取得
-     * @return $allBlogs
+     * @return array $allBlogs
      */
     public function getAllBlogs() {
         $allBlogs = $this->blogRepository->getAllBlogs();
@@ -162,6 +160,7 @@ class BlogService extends Service
 
     /**
      * トピックス取得
+     * @return array $topics
      */
     public function getTopics() {
         $topics = $this->blogRepository->getTopics();
@@ -169,29 +168,29 @@ class BlogService extends Service
     }
 
     /**
-     * ユーザーIDに紐づくブログからブログIDをもとに1件取得
-     * @param $userId
-     * @return $blogs
+     * ブログIDをもとにユーザーIDに紐づくブログを単一取得
+     * @param array $userId
+     * @return array $blogs
      */
-    public function getBlogByUserId($inputData) {
+    public function getBlogByBlogIdAndUserId($inputData) {
 
         $loginUser = $this->accountRepository->getAccountById($inputData['user_id']);
         if(!$loginUser) {
             return [];
         }
 
-        $blogs = $this->blogRepository->getBlogByUserId($inputData['id']);
+        $blogs = $this->blogRepository->getBlogWithUserById($inputData['id']);
         return $blogs;
     }
 
     /**
      * ユーザーIDに紐づくブログを全件取得
-     * @param $userId
-     * @return $blogs
+     * @param int $userId
+     * @return array $blogs
      */
     public function getBlogsByUserId($userId) {
 
-        $targetUser = $this->accountRepository->getAccountById($userId);
+        $targetUser = $this->accountRepository->existsAccountById($userId);
         if(!$targetUser) {
             return [];
         }
@@ -201,13 +200,13 @@ class BlogService extends Service
     }
 
     /**
-     * ユーザーIDに紐づくお気に入り登録したユーザーのブログ全件取得
-     * @param $userId
-     * @return $blogs
+     * ユーザーIDをもとにお気に入り登録したユーザーのブログ全件取得
+     * @param int $userId
+     * @return array $blogs
      */
     public function getBlogPostedByFavoriteUserByUserId($userId) {
 
-        $targetUser = $this->accountRepository->getAccountById($userId);
+        $targetUser = $this->accountRepository->existsAccountById($userId);
         if(!$targetUser) {
             return [];
         }
@@ -218,47 +217,45 @@ class BlogService extends Service
 
     /**
      * ブログ詳細取得
-     * @param $id
-     * @return $blog
+     * @param int $id
+     * @return array $blog
      */
-    public function blogDetail($id) {
-        $blog = $this->blogRepository->blogDetail($id);
-        $blog[0]['contents'] = html_entity_decode($blog[0]['contents']);
+    public function getBlogDetail($id) {
+        $blog = $this->blogRepository->getBlogDetail($id);
+        $blog['contents'] = html_entity_decode($blog['contents']);
 
         // 閲覧処理（閲覧数増加、閲覧履歴の登録）
-        $this->blogRepository->increaseViewCount($id);
+        $this->blogRepository->increaseViewCount($blog['id']);
         if(Auth::id()) {
-            $this->BrowsingHistoryRepository->upsertBrowsingHistory(Auth::id() ,$id);
+            $this->BrowsingHistoryRepository->upsertBrowsingHistory(Auth::id() ,$blog['id']);
         }
 
-        $blog[0]['favorite_flag'] = false;
+        $blog['favorite_flag'] = false;
         if(Auth::user()) {
-            // $checkFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $id);
-            $checkFavoriteBlog = $this->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $id);
+            $checkFavoriteBlog = $this->checkExsitsFavoriteBlogByBlogIdAndUserId(Auth::id(), $blog['id']);
             if($checkFavoriteBlog) {
-                $blog[0]['favorite_flag'] = true;
+                $blog['favorite_flag'] = true;
             }
         }
-
 
         return $blog;
     }
 
     /**
      * ブログに紐づくコメントを取得
-     * @param $id
-     * @return $comments
+     * @param int $id
+     * @return array $comments
      */
     public function getBlogComments($id) {
-        $comments = $this->blogCommentsRepository->getBlogComments($id);
+        $comments = $this->blogCommentRepository->getBlogComments($id);
 
         return $comments;
     }
 
     /**
      * ブログに紐づく広告を取得
-     * @param $id
-     * @return $comments
+     * @param int $id
+     * @return array $comments
      */
     public function getAdvertisementByBlogId($id) {
         $advertisement = $this->advertisementRepository->getAdvertisementByBlogId($id);
@@ -268,15 +265,15 @@ class BlogService extends Service
 
     /**
      * 対象ユーザーIDに紐づくお気に入り登録されたブログを全件取得
-     * @param $id
-     * @return $favoriteBlogs
+     * @param int $id
+     * @return array $favoriteBlogs
      */
     public function getAllFavoriteBlogsByUserId($id) {
         if(!Auth::user() || Auth::id() != $id) {
             return [];
         }
         
-        $checkExistsUser = $this->accountRepository->getAccountById($id);
+        $checkExistsUser = $this->accountRepository->existsAccountById($id);
         if(!$checkExistsUser) {
             return [];
         }
@@ -287,21 +284,21 @@ class BlogService extends Service
 
     /**
      * ユーザーIDとブログIDをもとに対象のユーザーが対象のブログがお気に入り登録しているかを判定
-     * @param $user_id, $blog_id
-     * @return $result
+     * @param int $userId
+     * @param int $blogId
+     * @return bool $result
      */
-    public function checkExsitsFavoriteBlogByBlogIdAndUserId($user_id, $blog_id) {
+    public function checkExsitsFavoriteBlogByBlogIdAndUserId($userId, $blogId) {
 
-        $checkExistsUser = $this->accountRepository->getAccountById($user_id);
+        $checkExistsUser = $this->accountRepository->getAccountById($userId);
         if(!$checkExistsUser) {
             return false;
         }
 
         $inputData = [
-            'user_id' => $user_id,
-            'blog_id' => $blog_id,
+            'user_id' => $userId,
+            'blog_id' => $blogId,
         ];
-
         $result = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
         
         return $result;
@@ -309,25 +306,25 @@ class BlogService extends Service
     
     /**
      * ブログコメント登録
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function postComment($inputData) {
         $postCommentStauts = false;
 
+    
+        if(!Auth::user() || Auth::id() != $inputData['created_by']) {
+            return $postCommentStauts;
+        }
+
+        $loginUser = $this->accountRepository->existsAccountById($inputData['created_by']);
+        if(!$loginUser) {
+            return $postCommentStauts;
+        }
+    
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
-    
-            if(!Auth::user() || Auth::id() != $inputData['created_by']) {
-                return $postCommentStauts;
-            }
-    
-            $loginUser = $this->accountRepository->getAccountById($inputData['created_by']);
-            if(!$loginUser) {
-                return $postCommentStauts;
-            }
-    
-            $result = $this->blogCommentsRepository->postComment($inputData);
+            $result = $this->blogCommentRepository->postComment($inputData);
             if($result) {
                 $postCommentStauts = true;
             }
@@ -336,41 +333,40 @@ class BlogService extends Service
             return $postCommentStauts;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }
     }
 
     /**
      * ブログお気に入り登録
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function registerFavoriteBlog($inputData) {
         $registerFavoriteBlogStatus = false;
 
-        try {
-            DB::beginTransaction();
+        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $targetUser = $this->accountRepository->existsAccountById($inputData['user_id']);
+        if(!$targetUser) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $targetBlog = $this->blogRepository->getBlogDetail($inputData['blog_id']);
+        if(!$targetBlog) {
+            return $registerFavoriteBlogStatus;
+        }
+
+        $exsitsFavoriteBlogFlag = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+        if($exsitsFavoriteBlogFlag) {
+            return $registerFavoriteBlogStatus;
+        }
     
-            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-                return $registerFavoriteBlogStatus;
-            }
-    
-            $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
-            if(!$targetUser) {
-                return $registerFavoriteBlogStatus;
-            }
-    
-            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
-            if(!$targetBlog) {
-                return $registerFavoriteBlogStatus;
-            }
-    
-            $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
-            if($checkExsitsFavoriteBlog) {
-                return $registerFavoriteBlogStatus;
-            }
-    
+        DB::beginTransaction();
+        try {    
             $result = $this->favoriteBlogRepository->registerFavoriteBlog($inputData);
             if($result == true) {
                 $registerFavoriteBlogStatus = true;
@@ -380,8 +376,8 @@ class BlogService extends Service
             return $registerFavoriteBlogStatus;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }    
     }
 
@@ -393,28 +389,27 @@ class BlogService extends Service
     public function deleteFavoriteBlog($inputData) {
         $deleteFavoriteBlogStatus = false;
 
-        try {
-            DB::beginTransaction();
+        if(!Auth::user() || Auth::id() != $inputData['user_id']) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $targetUser = $this->accountRepository->existsAccountById($inputData['user_id']);
+        if(!$targetUser) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $targetBlog = $this->blogRepository->getBlogDetail($inputData['blog_id']);
+        if(!$targetBlog) {
+            return $deleteFavoriteBlogStatus;
+        }
+
+        $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
+        if(!$checkExsitsFavoriteBlog) {
+            return $deleteFavoriteBlogStatus;
+        }
     
-            if(!Auth::user() || Auth::id() != $inputData['user_id']) {
-                return $deleteFavoriteBlogStatus;
-            }
-    
-            $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
-            if(!$targetUser) {
-                return $deleteFavoriteBlogStatus;
-            }
-    
-            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
-            if(!$targetBlog) {
-                return $deleteFavoriteBlogStatus;
-            }
-    
-            $checkExsitsFavoriteBlog = $this->favoriteBlogRepository->checkExsitsFavoriteBlogByBlogIdAndUserId($inputData);
-            if(!$checkExsitsFavoriteBlog) {
-                return $deleteFavoriteBlogStatus;
-            }
-    
+        DB::beginTransaction();
+        try {    
             $result = $this->favoriteBlogRepository->deleteFavoriteBlog($inputData);
             if($result == true) {
                 $deleteFavoriteBlogStatus = true;
@@ -424,16 +419,18 @@ class BlogService extends Service
             return $deleteFavoriteBlogStatus;
 
         } catch (\Exception $e) {
+            DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
         }    
     }
 
     /**
      * 閲覧履歴表示
+     * @param array $inputData
+     * @return array $browsingHistory
      */
-    public function showBrowsingHistory($inputData) {
-        $targetUser = $this->accountRepository->getAccountById($inputData['user_id']);
+    public function getBrowsingHistory($inputData) {
+        $targetUser = $this->accountRepository->existsAccountById($inputData['user_id']);
         if(!$targetUser) {
             return false;
         }
@@ -445,92 +442,100 @@ class BlogService extends Service
 
     /**
      * 広告の登録
+     * @param array $inputData
+     * @return bool $flag
      */
     public function registerAdvertisement($inputData) {
         $flag = false;
-        // try {
-        //     DB::beginTransaction();
 
+        $targetUser = $this->accountRepository->existsAccountById($inputData['created_by']);
+        if(!$targetUser) {
+            return $flag;
+        }
 
-            $targetUser = $this->accountRepository->getAccountById($inputData['created_by']);
-            if(!$targetUser) {
-                return $flag;
-            }
+        $targetBlog = $this->blogRepository->getBlogDetail($inputData['blog_id']);
+        $RegisteredAdvertisementCount = $this->advertisementRepository->getRegisteredAdvertisementCount($targetBlog['id']);
 
-            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
-            $RegisteredAdvertisementCount = $this->advertisementRepository->checkRegisteredAdvertisement($inputData['blog_id']);
+        if(!$targetBlog || $RegisteredAdvertisementCount > 0) {
+            return $flag;
+        }
 
-            if(!$targetBlog || $RegisteredAdvertisementCount > 0) {
-                return $flag;
-            }
-
+        DB::beginTransaction();
+        try {
             if($inputData['advertisement_image_file'] || $inputData['advertisement_image_file'] != null) {
                 $image_name = $this->upsertAdvertisementImageIntoStorage($inputData['advertisement_image_file'], null);
                 $inputData['advertisement_image_name'] = $image_name;
                 $flag = $this->advertisementRepository->registerAdvertisement($inputData);
             }
 
-
-            // DB::commit();
+            DB::commit();
             return $flag;
 
-        // } catch (\Exception $e) {
-        //     report($e);
-        //     session()->flash('flash_message', 'エラーが発生しました');
-        // }    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            report($e);
+        }    
     }
 
     /**
      * 広告の削除(DB)
+     * @param array $inputData
+     * @return bool $flag
      */
     public function deleteAdvertisement($inputData) {
         $flag = false;
-        // try {
-        //     DB::beginTransaction();
 
+        $targetUser = $this->accountRepository->existsAccountById($inputData['created_by']);
+        if(!$targetUser || Auth::id() != $inputData['created_by']) {
+            return $flag;
+        }
 
-            $targetUser = $this->accountRepository->getAccountById($inputData['created_by']);
-            if(!$targetUser || Auth::id() != $inputData['created_by']) {
-                return $flag;
-            }
+        $targetBlog = $this->blogRepository->getBlogDetail($inputData['blog_id']);
+        $RegisteredAdvertisementCount = $this->advertisementRepository->getRegisteredAdvertisementCount($targetBlog['id']);
 
-            $targetBlog = $this->blogRepository->blogDetail($inputData['blog_id']);
-            $RegisteredAdvertisementCount = $this->advertisementRepository->checkRegisteredAdvertisement($inputData['blog_id']);
+        if(!$targetBlog || $RegisteredAdvertisementCount == 0) {
+            return $flag;
+        }
 
-            if(!$targetBlog || $RegisteredAdvertisementCount == 0) {
-                return $flag;
-            }
+        $targetAdvertisement = $this->advertisementRepository->getAdvertisementById($inputData['id']);
 
-            $targetAdvertisement = $this->advertisementRepository->getAdvertisementById($inputData['id']);
-
+        DB::beginTransaction();
+        try {
             if($inputData['advertisement_image_name'] && 
                 $inputData['advertisement_image_name'] != null &&
                 count($targetAdvertisement) != 0) {
-                    $this->deleteAdvertisementImageFromStorage($targetAdvertisement[0]['advertisement_image_name']);
-                    $this->advertisementRepository->deleteAdvertisement($targetAdvertisement[0]['id']);
+                    $deleteImageFlag = $this->deleteAdvertisementImageFromStorage($targetAdvertisement['advertisement_image_name']);
+                    $deleteDbFlag = $this->advertisementRepository->deleteAdvertisement($targetAdvertisement['id']);
+                    if($deleteImageFlag == false || $deleteDbFlag == false) {
+                        throw new \Exception('広告の削除に失敗しました');
+                    }
                     $flag = true;
             }
 
-            // DB::commit();
+            DB::commit();
             return $flag;
 
-        // } catch (\Exception $e) {
-        //     report($e);
-        //     session()->flash('flash_message', 'エラーが発生しました');
-        // }    
+        } catch (\Exception $e) {
+            DB::rollBack();
+            report($e);
+        }    
     }
 
     /**
      * 広告画像保存,Storageに保存
-     * @param $iconImageFile
-     * @return $result
+     * 画像保存後にStorageに保存されている画像名を返す
+     * @param object $iconImageFile
+     * @param string $oldImageName
+     * @return string $newImageName
      */
     public function upsertAdvertisementImageIntoStorage($iconImageFile, $oldImageName) {
-        try {
-            DB::beginTransaction();
-    
+        DB::beginTransaction();
+        try {    
             if($oldImageName && $oldImageName != null) {
-                $this->deleteAdvertisementImageFromStorage($oldImageName);
+                $deleteResult = $this->deleteAdvertisementImageFromStorage($oldImageName);
+                if($deleteResult == false) {
+                    throw new \Exception('エラーが発生しました。');
+                }
             }
 
             $newImageName = 'noImage.png';
@@ -539,7 +544,10 @@ class BlogService extends Service
                 $newImageName = date('Ymd_His') . '_' . $originalName;
         
                 // Storage::disk('public')->putFileAs('advertisement_image_file', $iconImageFile->file('advertisement_image_file'), $newImageName);    
-                Storage::disk('public')->putFileAs('advertisement_images', $iconImageFile, $newImageName);    
+                $registerResult = Storage::disk('public')->putFileAs('advertisement_images', $iconImageFile, $newImageName);
+                if($registerResult == false) {
+                    throw new \Exception('ファイルの登録に失敗しました。');
+                }
             }
     
             DB::commit();
@@ -548,14 +556,14 @@ class BlogService extends Service
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
+            throw $e;
         }
     }
 
     /**
      * 広告画像削除,Storageから削除
-     * @param $targetImageName
-     * @return $result
+     * @param string $targetImageName
+     * @return bool
      */
     public function deleteAdvertisementImageFromStorage($targetImageName) {
         DB::beginTransaction();
@@ -563,23 +571,29 @@ class BlogService extends Service
             if($targetImageName != null && $targetImageName != 'noImage.png') {
                 $targetImageNameExists = Storage::disk('public')->exists('advertisement_images/'. $targetImageName);
                 if($targetImageNameExists) {
-                    Storage::disk('public')->delete('advertisement_images/'. $targetImageName);
+                    $result = Storage::disk('public')->delete('advertisement_images/'. $targetImageName);
+                    if($result == false) {
+                        throw new \Exception('画像の削除に失敗しました。');
+                    }
                 }
             }
     
             DB::commit();
+            return $result;
             
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
-            session()->flash('flash_message', 'エラーが発生しました');
+            throw $e;
         }
     }
 
     /**
-     * ブログコンテンツ画像保存,Storageに保存(新規用)
-     * @param $targetImageName
-     * @return $result
+     * ブログコンテンツ画像保存,Storageに保存(更新用)
+     * @param array $imageBase64Texts
+     * @param object $imageNames
+     * @param string $prevBlogUniqueId
+     * @return void
      */
     public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId)
     {
@@ -608,7 +622,10 @@ class BlogService extends Service
                     $filePath = 'blog_contents_images/' . $imageNames[$index];
 
                     // 保存（storage/app/public/images に保存）
-                    Storage::disk('public')->put($filePath, $imageData);
+                    $result = Storage::disk('public')->put($filePath, $imageData);
+                    if($result == false) {
+                        throw new \Exception('画像の保存に失敗しました');
+                    }
                 } else {
                     $parts = explode('_', $imageNames[$index]);
                     $remainingFileName = implode('_', array_slice($parts, 2));
@@ -627,7 +644,10 @@ class BlogService extends Service
 
                     if($targetImageFileName) {
                         foreach($targetImageFileName as $fileName) {
-                            Storage::disk('public')->move($fileName, 'blog_contents_images/' . $imageNames[$index]);
+                            $changeNameFlag = Storage::disk('public')->move($fileName, 'blog_contents_images/' . $imageNames[$index]);
+                            if($changeNameFlag == false) {
+                                throw new \Exception('画像名の更新に失敗しました');
+                            }
                         }
                     }
                 }
@@ -637,13 +657,14 @@ class BlogService extends Service
     }
 
     /**
-     * ブログコンテンツ画像保存,Storageに保存
-     * @param $targetImageName
-     * @return $result
+     * ブログコンテンツ画像保存,Storageに保存(新規用)
+     * @param array $targetImageName
+     * @param string $imageNames
+     * @return void
      */
     public function storeBase64Image($imageBase64Texts, $imageNames)
     {
-        if(count($imageBase64Texts) > 0) {
+        if($imageBase64Texts == null || count($imageBase64Texts) > 0) {
             foreach($imageBase64Texts as $index => $imageBase64Data) {
                 // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
                 $base64Image = $imageBase64Texts[$index];
@@ -666,16 +687,18 @@ class BlogService extends Service
                 $filePath = 'blog_contents_images/' . $imageNames[$index];
 
                 // 保存（storage/app/public/images に保存）
-                Storage::disk('public')->put($filePath, $imageData);
-
+                $result = Storage::disk('public')->put($filePath, $imageData);
+                if($result == false) {
+                    throw new \Exception('画像の保存に失敗しました');
+                }
             }
         }
     }
 
     /**
      * ブログコンテンツ画像削除,Storageから削除
-     * @param $targetImageName
-     * @return $result
+     * @param string $targetImageName
+     * @return void
      */
     public function deleteBlogContentsImageFromStorage($blogUniqueId) {
         if($blogUniqueId != null && $blogUniqueId != '') {
@@ -688,7 +711,10 @@ class BlogService extends Service
 
             if($targetImageFileNames) {
                 foreach($targetImageFileNames as $targetImageFileName) {
-                    Storage::disk('public')->delete($targetImageFileName);
+                    $result = Storage::disk('public')->delete($targetImageFileName);
+                    if($result == false) {
+                        throw new \Exception('ファイルの削除に失敗しました。');
+                    }
                 }
             }
         }

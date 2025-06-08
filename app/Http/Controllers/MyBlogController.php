@@ -15,6 +15,8 @@ class MyBlogController extends Controller
 
     /**
      * マイブログ表示
+     * @param array $request
+     * @return view
      */
     public function showMYBlogs(Request $request) {
         $inputData = [
@@ -23,7 +25,7 @@ class MyBlogController extends Controller
 
         $myBlogs = $this->blogService->getBlogsByUserId($inputData['user_id']);
 
-        return view('my_blogs', compact('myBlogs'));
+        return view('my_blogs', ['blogs' => $myBlogs]);
 
     }
 }

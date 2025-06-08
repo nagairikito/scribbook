@@ -19,6 +19,7 @@ class TalkRoomController extends Controller
     
     /**
      * トークルームリストページ表示
+     * @return view
      */
     public function showTalkRoomList(Request $request) {
         $talkRoomList = [];
@@ -28,6 +29,7 @@ class TalkRoomController extends Controller
 
     /**
      * トークルームリスト表示
+     * @return view
      */
     public function getTalkRoomList(Request $request) {
         $talkRoomList = $this->talkService->getTalkRoomListByUserId(Auth::id());

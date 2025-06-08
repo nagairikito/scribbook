@@ -10,9 +10,17 @@
 @section('contents')
     <div class="main-contents">
         @include('session_messages')
+            ブログのサムネイル
+            プロフィールのアイコン画像削除
+            検索後画面
+            全体レイアウト比率調整
+            未読数表示
+            時刻表示
 
         <div class="blog-list">
             <h2>トップ</h2>
+            @include('blog_unit')
+
             @if(count($allBlogs) > 0)
             <ul class="blog-list-wrapper">
                 @foreach($allBlogs as $blog)
@@ -29,6 +37,7 @@
             @else
             <p>ブログがありません</p>
             @endif
+            @include('blog_unit', ['word' => 'ブログがありません'])
         </div>
     </div>
 @endsection

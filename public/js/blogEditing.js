@@ -36,9 +36,9 @@ if(controlContentsImageButtons) {
 }
 
 //コンテンツの最初の行にdivタグ付与(なぜか1行目にdivタグがふよされないため以下の処理を記述)
-const div = document.createElement("div");
-div.appendChild(inputData.childNodes[0]);
-inputData.prepend(div);
+// const div = document.createElement("div");
+// div.appendChild(inputData.childNodes[0]);
+// inputData.prepend(div);
 
 //入力１行目にdivタグをつける処理
 // inputData.addEventListener('input', function (e) {
@@ -52,56 +52,91 @@ inputData.prepend(div);
 
 //submit後の処理：入力内容をテキストエリアにコピー（inputで送信できないため）
 blogEditingForm.addEventListener('submit', function(e) {
-    // e.preventDefault();
-    //img srcをbase64から「保存先＋ファイル名」に差し替え
-    let blogEditingForm = document.getElementById("blog-editing-form");
-    let contentsImages = document.querySelectorAll('.contents-image');
+    e.preventDefault();
+    if(document.querySelectorAll('.error-message').length > 0) {
+        document.querySelectorAll('.error-message').forEach((error) => {
+            error.remove();
+        });
+    } 
+    //バリデーション
+    let validationFlag = true;
+    let titleElm = document.querySelector('.blog-title');
+    let title = document.querySelector('input[name="title"].blog-title').value;
+    let contents = document.querySelector('.original-contents');
 
-    let date = new Date();
-    let subimtTime = date.getFullYear()
-                     + ('0' + (date.getMonth() + 1)).slice(-2)
-                     + ('0' + date.getDate()).slice(-2)
-                     + ('0' + date.getHours()).slice(-2)
-                     + ('0' + date.getMinutes()).slice(-2);
-    let blogUniqueId = subimtTime + "_" + generateRandomString(16);
+    if(title.trim() === '') {
+        validationFlag = false;
+        let p = document.createElement("p");
+        p.classList.add("error-message");
+        p.textContent = "タイトルは必須です"
+        titleElm.after(p);
+    }
+    if(title.trim().length > 255) {
+        validationFlag = false;
+        let p = document.createElement("p");
+        p.classList.add("error-message");
+        p.textContent = "タイトルは255文字以下で入力してください"
+        titleElm.after(p);
+    }
+    if(contents.textContent.trim() === '') {
+        validationFlag = false;
+        let p = document.createElement("p");
+        p.classList.add("error-message");
+        p.textContent = "コンテンツは必須です"
+        contents.after(p);
+    }
 
-    let inputBlogUniqueId = document.createElement("input");
-    inputBlogUniqueId.type = "hidden";
-    inputBlogUniqueId.name = "blog_unique_id";
-    inputBlogUniqueId.value = blogUniqueId;
-    blogEditingForm.appendChild(inputBlogUniqueId);
+    if(validationFlag == true) {
+        //img srcをbase64から「保存先＋ファイル名」に差し替え
+        let blogEditingForm = document.getElementById("blog-editing-form");
+        let contentsImages = document.querySelectorAll('.contents-image');
 
-    contentsImages.forEach((image) => {
-        let base64Src = image.src;
-        let fileName = blogUniqueId + "_" + image.alt;
+        let date = new Date();
+        let subimtTime = date.getFullYear()
+                        + ('0' + (date.getMonth() + 1)).slice(-2)
+                        + ('0' + date.getDate()).slice(-2)
+                        + ('0' + date.getHours()).slice(-2)
+                        + ('0' + date.getMinutes()).slice(-2);
+        let blogUniqueId = subimtTime + "_" + generateRandomString(16);
 
-        image.src = displayImagePath + fileName;
+        let inputBlogUniqueId = document.createElement("input");
+        inputBlogUniqueId.type = "hidden";
+        inputBlogUniqueId.name = "blog_unique_id";
+        inputBlogUniqueId.value = blogUniqueId;
+        blogEditingForm.appendChild(inputBlogUniqueId);
 
-        let div = document.createElement('div');
-        div.classList.add(fileName);
-        blogEditingForm.appendChild(div);
+        contentsImages.forEach((image) => {
+            let base64Src = image.src;
+            let fileName = blogUniqueId + "_" + image.alt;
 
-        let inputFileName = document.createElement("input");
-        inputFileName.type = "hidden";
-        inputFileName.name = "image_file_name[]"
-        inputFileName.value = fileName;
-        div.appendChild(inputFileName);
+            image.src = displayImagePath + fileName;
 
-        let inputBase64Text = document.createElement("input");
-        inputBase64Text.type = "hidden";
-        inputBase64Text.name = "base64_text[]"
-        inputBase64Text.value = base64Src;
-        div.appendChild(inputBase64Text);
-    })
+            let div = document.createElement('div');
+            div.classList.add(fileName);
+            blogEditingForm.appendChild(div);
 
-    let contentsImageAreaButtons = document.querySelectorAll('.contents-image-area-buttons');
-    contentsImageAreaButtons.forEach((buttons) => {
-        buttons.style = "display: none;";
-    })
+            let inputFileName = document.createElement("input");
+            inputFileName.type = "hidden";
+            inputFileName.name = "image_file_name[]"
+            inputFileName.value = fileName;
+            div.appendChild(inputFileName);
 
-    const originalContents = document.getElementById("original-contents");
-    const replacementContents = document.getElementById("replacement-contents");
-    replacementContents.value = originalContents.innerHTML;
+            let inputBase64Text = document.createElement("input");
+            inputBase64Text.type = "hidden";
+            inputBase64Text.name = "base64_text[]"
+            inputBase64Text.value = base64Src;
+            div.appendChild(inputBase64Text);
+        })
+
+        let contentsImageAreaButtons = document.querySelectorAll('.contents-image-area-buttons');
+        contentsImageAreaButtons.forEach((buttons) => {
+            buttons.style = "display: none;";
+        })
+
+        const originalContents = document.getElementById("original-contents");
+        const replacementContents = document.getElementById("replacement-contents");
+        replacementContents.value = originalContents.innerHTML;
+    }
 })
 
 //画像保存時のランダムな羅列を生成

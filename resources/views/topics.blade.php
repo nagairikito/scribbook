@@ -28,6 +28,7 @@
             @else
             <p>ブログがありません</p>
             @endif
+            @include('blog_unit', ['word' => 'トピックスがありません'])
         </div>
     </div>
 @endsection

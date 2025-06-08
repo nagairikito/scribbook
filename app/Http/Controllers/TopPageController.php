@@ -18,9 +18,10 @@ class TopPageController extends Controller
     
     /**
      * トップページ初期表示
+     * @return view
      */
     public function index() {
         $allBlogs = $this->blogService->getAllBlogs();
-        return view('toppage', ['allBlogs' => $allBlogs]);
+        return view('toppage', ['blogs' => $allBlogs]);
     }
 }

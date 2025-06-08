@@ -15,13 +15,13 @@
                 <form id="blog-posting-form" class="blog-posting-form" action="{{ route('post_blog') }}" method="POST">
                 @csrf
                     <h2>タイトル</h2>
-                    <input type="text" name="title" class="blog-title">
+                    <input type="text" name="title" class="blog-title aaa" value="{{ old('title') }}">
                     @if($errors->has('title'))
                         <p class="error-message">{{ $errors->first('title') }}</p>
                     @endif
                     <h2>コンテンツ</h2>
                     <textarea id="replacement-contents" name="contents" style="display: none;"></textarea>
-                    <div id="original-contents" class="original-contents" contenteditable="true"><br></div>
+                    <div id="original-contents" class="original-contents" contenteditable="true">{!! old('contents') !!}</div>
 
                     @if($errors->has('contents'))
                         <p class="error-message">{{ $errors->first('contents') }}</p>

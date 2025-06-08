@@ -14,7 +14,7 @@
         <div class="category-view">
             <div class="category-blog">
                 @if(count($result['blogs']) > 0)
-                    <div class="article-list">
+                    <div class="blog-list">
                         @foreach($result['blogs'] as $blog)
                             <div>
                                 <div><a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">{{ $blog['title'] }}</a></td>
@@ -28,6 +28,7 @@
                 @else
                     <p>キーワードと一致するブログが見つかりません</p>
                 @endif
+                @include('blog_unit', ['word' => 'キーワードと一致するブログが見つかりません'])
             </div>
 
             <div class="category-user">
@@ -43,7 +44,7 @@
                                             @csrf
                                             <input type="submit" class="favorite-user-button mb-15p" value="お気に入り登録">
                                             <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user[0]['id'] }}">
+                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
                                         </form>
                                     @else
                                         <form action="{{ route('delete_favorite_user') }}" metohd="POST">

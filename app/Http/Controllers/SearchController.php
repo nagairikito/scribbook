@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\SearchRequest;
 use App\Repositories\FavoriteUserRepository;
 use App\Services\AccountService;
 use App\Services\BlogService;
@@ -24,8 +25,8 @@ class SearchController extends Controller
     
     /**
      * 検索結果初期表示
-     * @param $request
-     * @return $result
+     * @param SearchRequest $request
+     * @return view
      */
     public function search(Request $request) {
         if(isset($request['keyword']) && empty($request['keyword'])) {
@@ -36,8 +37,9 @@ class SearchController extends Controller
         ];
 
         $result = $this->searchService->search($inputData);
+
         // $this->favoriteUserRepository->checkFavorite();
-        $keyword = $inputData['keyword'];
-        return view('search', compact(['result', 'keyword']));
+        $result['keyword'] = $inputData['keyword'];
+        return view('search', compact(['result']));
     }
 }

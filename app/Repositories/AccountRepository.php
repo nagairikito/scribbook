@@ -16,7 +16,7 @@ class AccountRepository extends Repository
     
     /**
      * アカウント新規登録
-     * @param $inputData
+     * @param array $inputData
      * @return boolean $result
      */
     public function registerAccount($inputData) {
@@ -29,31 +29,31 @@ class AccountRepository extends Repository
 
     /**
      * idをもとに特定のアカウント情報を単体取得
-     * @param $id
-     * @return object $result
+     * @param int $id
+     * @return array $result
      */
     public function getAccountById($id) {
-        $result = $this->user->where('id', '=', $id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->get();
+        $result = $this->user->where('id', '=', $id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->first();
         return !empty($result) ? $result->toArray() : [];
     }
 
     /**
-     * idをもとに特定のアカウント情報の存在確認
-     * @param $id
-     * @return object $result
+     * idをもとに特定の単一アカウント情報の存在確認
+     * @param int $id
+     * @return bool $result
      */
     public function existsAccountById($id) {
-        $result = $this->user->where('id', '=', $id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->get();
-        return !empty($result) ? $result->toArray() : [];
+        $result = $this->user->where('id', '=', $id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->exists();
+        return $result;
     }
 
     /**
      * ログインユーザーの取得
-     * @param $login_id
+     * @param int $login_id
      * @return array $loginUser
      */
-    public function login($login_id) {
-        $loginUser = $this->user->where('login_id', '=', $login_id)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->first();
+    public function login($loginId) {
+        $loginUser = $this->user->where('login_id', '=', $loginId)->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)->first();
         return $loginUser;
     }
 
@@ -75,8 +75,8 @@ class AccountRepository extends Repository
 
     /**
      * アカウント削除
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function deleteAccount($inputData) {
         $targetAccount = $this->user->where('id', $inputData['id'])->first();

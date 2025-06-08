@@ -16,17 +16,17 @@ class FavoriteUserRepository extends Repository
 
     /**
      * 対象のユーザーIDに紐づくお気に入り登録されたユーザーを全件取得
-     * @param $id
-     * @return $favoriteUsers
+     * @param int $id
+     * @return array $favoriteUsers
      */
     public function getFavoriteUsersByUserId($id) {
         $favoriteUsers = $this->favoriteUser
-        ->join('users', 'users.id', '=', 'favorite_users.favorite_user_id')
-        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
-        ->where('favorite_users.user_id', $id)
-        ->orderByDesc('favorite_users.created_at')
+        ->join('m_users', 'm_users.id', '=', 't_favorite_users.favorite_user_id')
+        ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('t_favorite_users.user_id', $id)
+        ->orderByDesc('t_favorite_users.created_at')
         ->select(
-            'users.*',
+            'm_users.*',
         )
         ->get();
 
@@ -35,15 +35,16 @@ class FavoriteUserRepository extends Repository
 
     /**
      * 対象のユーザーIDに紐づくお気に入り登録されたユーザーを全件取得
-     * @param $login_user_id $target_favorite_user_id
-     * @return $checkFavorite
+     * @param int $loginUserId
+     * @param int $targetFavoriteUserId
+     * @return bool $checkFavorite
      */
-    public function checkFavorite($login_user_id, $target_favorite_user_id) {
+    public function checkFavorite($loginUserId, $targetFavoriteUserId) {
         $checkFavorite = $this->favoriteUser
-        ->join('users', 'users.id', '=', 'favorite_users.favorite_user_id')
-        ->where('users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
-        ->where('favorite_users.user_id', $login_user_id)
-        ->where('favorite_users.favorite_user_id', $target_favorite_user_id)
+        ->join('m_users', 'm_users.id', '=', 't_favorite_users.favorite_user_id')
+        ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
+        ->where('t_favorite_users.user_id', $loginUserId)
+        ->where('t_favorite_users.favorite_user_id', $targetFavoriteUserId)
         ->exists();
 
         return $checkFavorite;
@@ -51,8 +52,8 @@ class FavoriteUserRepository extends Repository
 
     /**
      * ユーザーお気に入り登録
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function registerFavoriteUser($inputData) {
         $this->favoriteUser->user_id = $inputData['user_id'];
@@ -64,8 +65,8 @@ class FavoriteUserRepository extends Repository
     
     /**
      * ユーザーお気に入り登録解除
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function deleteFavoriteUser($inputData) {
         $result = $this->favoriteUser

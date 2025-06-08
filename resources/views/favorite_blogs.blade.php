@@ -26,5 +26,6 @@
         @else
         <p>お気に入り登録したブログはありません</p>
         @endif
+        @include('blog_unit', ['word' => 'お気に入り登録したブログはありません'])
     </div>
 @endsection

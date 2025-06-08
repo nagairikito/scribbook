@@ -16,7 +16,7 @@
                 </div>
                 <div class="login-id-area">
                     <p>ログインID</p>
-                    <input type="text" name="login_id" class="input-box">
+                    <input type="text" name="login_id" class="input-box" value="{{ old('login_id') }}">
                     @if($errors->has('login_id'))
                     <p class="error-message">{{ $errors->first('login_id') }}</p>
                     @endif

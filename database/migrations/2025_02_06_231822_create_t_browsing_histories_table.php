@@ -12,8 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('t_browsing_histories', function (Blueprint $table) {
-            $table->integer('user_id')->comment('users.id');
-            $table->integer('blog_id')->comment('articles.id');
+            $table->integer('user_id')->comment('m_users.id');
+            $table->integer('blog_id')->comment('t_blogs.id');
             $table->integer('created_by')->nullable();
             $table->integer('updated_by')->nullable();
             $table->timestamps();

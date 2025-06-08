@@ -25,7 +25,7 @@ class BlogRepository extends Repository
     
     /**
      * ブログ登録
-     * @param $inputData
+     * @param array $inputData
      * @return boolean $result
      */
     public function postBlog($inputData) {
@@ -33,21 +33,23 @@ class BlogRepository extends Repository
         $this->blog->title = $inputData['title'];
         $this->blog->contents = $inputData['contents'];
         $this->blog->created_by = $inputData['user_id'];
+        $this->blog->updated_by = $inputData['user_id'];
         $result = $this->blog->save();
         return $result;
     }
 
     /**
      * ブログ編集
-     * @param $inputData
-     * @return $$result
+     * @param array $inputData
+     * @return bool $result
      */
     public function editBlog($inputData) {
         $result = $this->blog->where('id', $inputData['id'])->update([
             'blog_unique_id' => $inputData['blog_unique_id'],
             'title'          => $inputData['title'],
             'contents'       => $inputData['contents'],
-            'created_by'     => $inputData['created_by'],
+            'updated_by'     => $inputData['created_by'],
+            'updated_at'     => now(),
         ]);
         return $result;
     }
@@ -85,10 +87,10 @@ class BlogRepository extends Repository
 
     /**
      * トピックス取得
-     * @return $allBlogs
+     * @return array $topics
      */
     public function getTopics() {
-        $allblogs = $this->blog->select(
+        $topics = $this->blog->select(
             't_blogs.id',
             't_blogs.title',
             't_blogs.contents',
@@ -101,15 +103,15 @@ class BlogRepository extends Repository
         ->limit(10)
         ->get();
 
-        return !empty($allblogs) ? $allblogs->toArray() : [];
+        return !empty($topics) ? $topics->toArray() : [];
     }
 
     /**
-     * ユーザーIDに紐づくブログIDをもとに１件取得
-     * @param $id
-     * @return $blog
+     * ブログIDをもとにユーザーIDに紐づくブログを単一取得
+     * @param int $id
+     * @return array $blog
      */
-    public function getBlogByUserId($id) {
+    public function getBlogWithUserById($id) {
         $blog = $this->blog
         ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
         ->where('t_blogs.id', $id)
@@ -117,19 +119,19 @@ class BlogRepository extends Repository
             't_blogs.*',
             'm_users.name',
         )
-        ->get();
+        ->first();
 
         return !empty($blog) ? $blog->toArray() : [];
     }
 
     /**
-     * ユーザーIDに紐づくお気に入り登録したユーザーのブログ全件取得
-     * @param $id
-     * @return $blogs
+     * ユーザーIDをもとにお気に入り登録したユーザーのブログ全件取得
+     * @param int $id
+     * @return array $blogs
      */
     public function getBlogPostedByFavoriteUserByUserId($id) {
         $blogs = $this->blog
-        ->join('t_favorite_users', 't_favorite_user_id', '=', 't_blogs.created_by')
+        ->join('t_favorite_users', 't_favorite_users.favorite_user_id', '=', 't_blogs.created_by')
         ->join('m_users', 'm_users.id', '=', 't_favorite_users.favorite_user_id')
         ->where('t_favorite_users.user_id', $id)
         ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
@@ -147,8 +149,8 @@ class BlogRepository extends Repository
 
     /**
      * ユーザーIDに紐づくブログを全件取得
-     * @param $userId
-     * @return $blogs
+     * @param int $userId
+     * @return array $blogs
      */
     public function getBlogsByUserId($userId) {
         $blogs = $this->blog
@@ -171,10 +173,10 @@ class BlogRepository extends Repository
 
     /**
      * ブログ詳細取得
-     * @param $id
-     * @return $blog
+     * @param int $id
+     * @return array $blog
      */
-    public function blogDetail($id) {
+    public function getBlogDetail($id) {
         $blog = $this->blog->select(
             't_blogs.id',
             't_blogs.blog_unique_id',
@@ -188,21 +190,21 @@ class BlogRepository extends Repository
         ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
         ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->where('t_blogs.id', $id)
-        ->get();
+        ->first();
 
         return !empty($blog) ? $blog->toArray() : [];
     }
 
     /**
      * ブログ閲覧数増加
+     * @param int $id
+     * @return void
      */
     public function increaseViewCount($id) {
         $targetBlog = $this->blog->where('id', $id)->first();
         $targetBlog->view_count += 1;
         $targetBlog->timestamps = false;
         $result = $targetBlog->save();
-
-        return $result;
     }
 
 }

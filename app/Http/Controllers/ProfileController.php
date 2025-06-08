@@ -21,6 +21,7 @@ class ProfileController extends Controller
 
     /**
      * プロフィール初期表示
+     * @param array $request
      * @return view
      */
     public function profileTop(Request $request) {
@@ -30,10 +31,10 @@ class ProfileController extends Controller
 
         $targetAccount = $this->accountService->getAccountById($inputData['user_id']);
         if(!$targetAccount) {
-            return back()->with('error','対象のアカウントが見つかりません');
+            return [];
         }
 
-        $blogs = $this->blogService->getBlogsByUserId($targetAccount[0]['id']);
+        $blogs = $this->blogService->getBlogsByUserId($targetAccount['id']);
 
         return view('profile_top', ['user' => $targetAccount, 'blogs' => $blogs]);
     }
@@ -41,7 +42,7 @@ class ProfileController extends Controller
     /**
      * ログアウト
      * 
-     * @param $request
+     * @param array|object $request
      * @return view
      */
     public function logout(Request $request) {
@@ -61,7 +62,7 @@ class ProfileController extends Controller
 
     /**
      * プロフィール更新
-     * @param object $request
+     * @param AccountUpdatingRequest $request
      * @return view
      */
     public function updateProfile(AccountUpdatingRequest $request) {
@@ -80,19 +81,10 @@ class ProfileController extends Controller
 
         $result = $this->accountService->updateProfile($inputData);
 
-        switch($result) {
-            case AccountConst::FAIL_UPDATE_USER_AUTHENTICATION:
-                return back()->with('error_update', 'セッションが切れています。再度ログインしなおしてください')->withInput($inputData);
-            
-            case AccountConst::NOT_FOUND_UPDATE_USER_ID:
-                return back()->with('error_update', 'アカウント情報が見つかりません')->withInput($inputData);
-
-            case AccountConst::SUCCESS_ACCOUNT_UPDATING:
-                return redirect(route('profile_top', ['id' => $inputData['id']]))->with('success_update', 'プロフィールを更新しました');
-            
-            default:
-                return back()->with('error_update', '予期せぬエラーが発生しました')->withInput($inputData);
+        if($result) {
+            return redirect(route('profile_top', ['id' => $inputData['id']]))->with('success_update', 'プロフィールを更新しました');
         }
+        return back()->with('error_update', '予期せぬエラーが発生しました')->withInput($inputData);
     }
 
     /**
@@ -104,7 +96,7 @@ class ProfileController extends Controller
 
     /**
      * アカウント削除
-     * @param $request
+     * @param object $request
      * @return view
      */
     public function deleteAccount(Request $request) {
@@ -115,25 +107,15 @@ class ProfileController extends Controller
 
         $result = $this->accountService->deleteAccount($inputData);
 
-        switch($result) {
-            case AccountConst::FAIL_DELETE_USER_AUTHENTICATION:
-                return back()->with('error_delete', 'セッションが切れています。再度ログインしなおしてください')->withInput($inputData);
-            
-            case AccountConst::NOT_FOUND_DELETE_USER_ID:
-                return back()->with('error_delete', 'アカウント情報が見つかりません')->withInput($inputData);
-
-            case AccountConst::SUCCESS_ACCOUNT_DELETING:
-                return redirect(route('toppage'))->with('success_delete', 'アカウントを削除しました');
-            
-            default:
-                return back()->with('error_delete', '予期せぬエラーが発生しました')->withInput($inputData);
+        if($result) {
+            return redirect(route('toppage'))->with('success_delete', 'アカウントを削除しました');
         }
-
+        return back()->with('error_delete', '予期せぬエラーが発生しました')->withInput($inputData);
     }
 
     /**
      * ユーザーお気に入り登録
-     * @param $request
+     * @param array $request
      * @return view
      */
     public function registerFavoriteUser(Request $request) {
@@ -152,7 +134,7 @@ class ProfileController extends Controller
 
     /**
      * ユーザーお気に入り登録解除
-     * @param $request
+     * @param array $request
      * @return view
      */
     public function deleteFavoriteUser(Request $request) {

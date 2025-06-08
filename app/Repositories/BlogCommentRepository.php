@@ -19,13 +19,14 @@ class blogCommentRepository extends Repository
     
     /**
      * ブログコメント登録
-     * @param $inputData
-     * @return $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function postComment($inputData) {
         $this->blogComment->blog_id = $inputData['blog_id'];
         $this->blogComment->comment = $inputData['comment'];
         $this->blogComment->created_by = $inputData['created_by'];
+        $this->blogComment->updated_by = $inputData['updated_by'];
         $result = $this->blogComment->save();
 
         return $result;
@@ -33,10 +34,10 @@ class blogCommentRepository extends Repository
 
     /**
      * ブログに紐づくコメント取得
-     * @param $id
-     * @return $comments
+     * @param int $id
+     * @return array $comments
      */
-    public function getblogComment($id) {
+    public function getblogComments($id) {
         $comments = $this->blogComment
         ->join('m_users', 'm_users.id', '=', 't_blog_comments.created_by')
         ->where('t_blog_comments.blog_id', $id)
@@ -54,6 +55,4 @@ class blogCommentRepository extends Repository
 
         return $comments;
     }
-
-
 }

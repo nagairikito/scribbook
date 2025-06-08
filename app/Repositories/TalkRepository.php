@@ -17,34 +17,35 @@ class TalkRepository extends Repository
     
     /**
      * 送信されたメッセージ登録
-     * @param $inputData
-     * @return boolean $result
+     * @param array $inputData
+     * @return bool $result
      */
     public function saveMessage($inputData) {
         $this->talk->message = $inputData['message'];
-        $this->talk->created_by = $inputData['sender'];
         $this->talk->talk_room_id = $inputData['talk_room_id'];
+        $this->talk->created_by = $inputData['sender'];
+        $this->talk->updated_by = $inputData['sender'];
         $result = $this->talk->save();
         return $result;
     }
 
     /**
      * トークルームIDによるメッセージ全件を取得
-     * @param $inputData
-     * @return boolean $result
+     * @param array $inputData
+     * @return array $messages
      */
     public function getAllMessageesByRoomId($inputData) {
         $messages = $this->talk
-        ->join('users', 'users.id', '=', 'talks.created_by')
-        ->where('talk_room_id', $inputData['talk_room_id'])
-        ->orderBy('talks.updated_at')
+        ->join('m_users', 'm_users.id', '=', 't_talks.created_by')
+        ->where('t_talks.talk_room_id', $inputData['talk_room_id'])
+        ->orderBy('t_talks.updated_at')
         ->select(
-            'talks.message',
-            'talks.attached_file_path',
-            'talks.updated_at',
-            'talks.created_by',
-            'users.name',
-            'users.icon_image',
+            't_talks.message',
+            't_talks.attached_file_path',
+            't_talks.updated_at',
+            't_talks.created_by',
+            'm_users.name',
+            'm_users.icon_image',
         )
         ->get();
 
@@ -58,17 +59,17 @@ class TalkRepository extends Repository
      */
     public function getLatestMessageBySender($inputData) {
         $messages = $this->talk
-        ->join('users', 'users.id', '=', 'talks.created_by')
-        ->where('talk_room_id', $inputData['talk_room_id'])
-        ->where('created_by', $inputData['sender'])
-        ->orderByDesc('talks.updated_at')
+        ->join('m_users', 'm_users.id', '=', 't_talks.created_by')
+        ->where('t_talk_room_id', $inputData['talk_room_id'])
+        ->where('t_talks.created_by', $inputData['sender'])
+        ->orderByDesc('t_talks.updated_at')
         ->select(
-            'talks.message',
-            'talks.attached_file_path',
-            'talks.updated_at',
-            'talks.created_by',
-            'users.name',
-            'users.icon_image',
+            't_talks.message',
+            't_talks.attached_file_path',
+            't_talks.updated_at',
+            't_talks.created_by',
+            'm_users.name',
+            'm_users.icon_image',
         )
         ->first();
 
@@ -77,19 +78,20 @@ class TalkRepository extends Repository
 
     /**
      * トークルームの最新のメッセージを取得
-     * @param $inputData
-     * @return boolean $result
+     * @param int $talkRoomId
+     * @param string $deleteFlagColumn
+     * @return array $latestMessages
      */
     public function getLatestMessageByTalkRoomId($talkRoomId, $deleteFlagColumn) {
         $latestMessages = $this->talk
-        ->join('talk_rooms', 'talk_rooms.id', 'talks.talk_room_id')
-        ->where('talks.talk_room_id', $talkRoomId)
-        ->where('talks.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
-        ->where('talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
-        ->orderByDesc('talks.updated_at')
+        ->join('t_talk_rooms', 't_talk_rooms.id', 't_talks.talk_room_id')
+        ->where('t_talks.talk_room_id', $talkRoomId)
+        ->where('t_talks.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
+        ->where('t_talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
+        ->orderByDesc('t_talks.updated_at')
         ->select(
-            'message',
-            'attached_file_path',
+            't_talks.message',
+            't_talks.attached_file_path',
         )
         ->first();
 

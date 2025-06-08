@@ -24,7 +24,8 @@
             @endforeach
         </ul>
         @else
-        <p>お気に入り登録したブログはありません</p>
+        <p>ブログがありません</p>
         @endif
+        @include('blog_unit', ['word' => '投稿がありません'])
     </div>
 @endsection

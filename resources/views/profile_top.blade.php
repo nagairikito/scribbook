@@ -17,7 +17,7 @@
                 @include('session_messages')
 
                 <div class="profile-card">
-                    @if(Auth::user() && Auth::id() == $user[0]['id'])
+                    @if(Auth::user() && Auth::id() == $user['id'])
                         <div class="profile-button-list">
                             <div class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)"><p>プロフィール編集</p></div>
                             <div class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)"><p>プライバシー設定</p></div>
@@ -35,25 +35,25 @@
                         <div class="left-contents">
                             <div>
                                 <div class="profile-image-frame">
-                                    <img src="{{ asset('storage/user_icon_images/' .$user[0]['icon_image']) }}" class="profile-icon">
+                                    <img src="{{ asset('storage/user_icon_images/' .$user['icon_image']) }}" class="profile-icon">
                                 </div>
-                                @if(Auth::user() && Auth::id() == $user[0]['id'])
+                                @if(Auth::user() && Auth::id() == $user['id'])
                                     <div class="open-favorite-user-modal" onclick="openModal(FAVORITE_USER)">お気に入りユーザー</div>
 
-                                @elseif(Auth::user() && Auth::id() != $user[0]['id'])
-                                    @if($user[0]['favorite_flag'] == false)
+                                @elseif(Auth::user() && Auth::id() != $user['id'])
+                                    @if($user['favorite_flag'] == false)
                                         <form action="{{ route('register_favorite_user') }}" metohd="POST">
                                             @csrf
                                             <input type="submit" class="favorite-user-button mb-15p" value="お気に入り登録">
                                             <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user[0]['id'] }}">
+                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
                                         </form>
                                     @else
                                         <form action="{{ route('delete_favorite_user') }}" metohd="POST">
                                             @csrf
                                             <input type="submit" class="favorite-user-button mb-15p" value="お気に入り登録解除">
                                             <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user[0]['id'] }}">
+                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
                                             <input type="hidden" name="page_type" value="profile_top">
                                         </form>
                                     @endif
@@ -61,7 +61,7 @@
                                         <form action="{{ route('display_talk_room') }}" method="get">
                                             @csrf
                                             <input type="hidden" name="sender" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="recipient" value="{{ $user[0]['id'] }}">
+                                            <input type="hidden" name="recipient" value="{{ $user['id'] }}">
                                             <input type="submit" class="message-button" value="メッセージを送る">
                                         </form>
                                     </div>
@@ -72,15 +72,15 @@
                         <div class="right-contents">
                             <div>
                                 <p>名前</p>
-                                <p class="word-wrap">{{ $user[0]['name'] }}</p>
+                                <p class="word-wrap">{{ $user['name'] }}</p>
                             </div>
                             <div>
                                 <p>ユーザーID<p>
-                                <p class="word-wrap">{{ $user[0]['id'] }}<span class="user-id-attention">※ログインIDとは異なります</span><p>
+                                <p class="word-wrap">{{ $user['id'] }}<span class="user-id-attention">※ログインIDとは異なります</span><p>
                             </div>
                             <div>
                                 <p>概要欄</p>
-                                <p class="word-wrap">{{ $user[0]['discription'] }}</p>
+                                <p class="word-wrap">{{ $user['discription'] }}</p>
                             </div>
                         </div>
                     </div>
@@ -104,11 +104,12 @@
                     @else
                     <p>投稿がありません</p>
                     @endif
+                    @include('blog_unit', ['word' => '投稿がありません'])
                 </div>
             </div>
         </div>
 
-        @if(Auth::user() && Auth::id() == $user[0]['id'])
+        @if(Auth::user() && Auth::id() == $user['id'])
         <!-- モーダル -->
         <div id="modal" class="modal close">
             <div class="modal-wrapper">
@@ -125,7 +126,7 @@
                             <div class="profile-editing-contents-area">
                                 @if(session('error_update'))
                                     <div>
-                                        <p class="error-message">{{ session('error_update') }}</p>
+                                        <p class="error-message me">{{ session('error_update') }}</p>
                                     </div>
                                 @endif
                                 <div class="profile-editing-input-area">
@@ -139,21 +140,17 @@
                                         <!-- </div> -->
                                     </div>
                                     <div>
-                                        <p>ユーザーID<span class="user-id-attention">※ログインIDとは異なります、ユーザーIDは変更できません</span></p>
-                                        <p class="user-id-value">{{ Auth::user()->id }}</p>
-                                    </div>
-                                    <div>
                                         <p>名前</p>
-                                        <input type="text" class="input-box" name="name" value="{{ Auth::user()->name }}">
+                                        <input type="text" class="input-box" name="name" value="{{ old('name', Auth::user()->name) }}">
                                         @if($errors->has('name'))
-                                        <p class="error-message">{{ $errors->first('name') }}</p>
+                                        <p class="error-message me">{{ $errors->first('name') }}</p>
                                         @endif
                                     </div>
                                     <div>
                                         <p>概要欄</p>
-                                        <textarea name="discription" cols="70" rows="15" style="resize: none;">{{ Auth::user()->discription }}</textarea>
+                                        <textarea name="discription" cols="70" rows="15" style="resize: none;">{{ old('discription', Auth::user()->discription) }}</textarea>
                                         @if($errors->has('discription'))
-                                        <p class="error-message">{{ $errors->first('discription') }}</p>
+                                        <p class="error-message me">{{ $errors->first('discription') }}</p>
                                         @endif
                                     </div>
                                     <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
@@ -183,14 +180,18 @@
                             <div class="privacy-setting-contents-area">
                                 <div class="privacy-setting-input-area">
                                     <div>
+                                        <p>ユーザーID<span class="user-id-attention">※ログインIDとは異なります、ユーザーIDは変更できません</span></p>
+                                        <p class="user-id-value">{{ Auth::user()->id }}</p>
+                                    </div>
+                                    <div>
                                         <p>現在のログインID:</p>
                                         <p class="login-id-value">{{ Auth::user()->login_id }}</p>
                                     </div>
                                     <div>
                                         <p>新しいログインID:</p>
-                                        <input type="text" class="input-box" name="login_id">
+                                        <input type="text" class="input-box" name="login_id" value="{{ old('login_id') }}">
                                         @if($errors->has('login_id'))
-                                        <p class="error-message">{{ $errors->first('login_id') }}</p>
+                                        <p class="error-message privacy">{{ $errors->first('login_id') }}</p>
                                         @endif
                                         <p class="password-attention">※ログインIDのみ変更したい場合は新しいパスワードと確認用パスワードに現在のパスワードを入力してください</p>
                                     </div>
@@ -198,7 +199,7 @@
                                         <p>新しいパスワード:</p>
                                         <input type="password" class="input-box" name="password">
                                         @if($errors->has('password'))
-                                        <p class="error-message">{{ $errors->first('password') }}</p>
+                                        <p class="error-message privacy">{{ $errors->first('password') }}</p>
                                         @endif
                                     </div>
                                     <div>
@@ -221,10 +222,10 @@
                         <div class="favorite-user-control-buttons">
                             <div class="close-favorite-user-modal" onclick="closeModal(FAVORITE_USER)">✕</div>
                         </div>
-                        @if(count($user[0]['favorite_users']) > 0)
+                        @if(count($user['favorite_users']) > 0)
                         <div class="favorite-user-list">
                             <div class="favorite-user-list-wrapper">
-                                @foreach($user[0]['favorite_users'] as $favorite_user)
+                                @foreach($user['favorite_users'] as $favorite_user)
                                 <div class="favorite-user-unit">
                                     <div class="left">
                                         <a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}">

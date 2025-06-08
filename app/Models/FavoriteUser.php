@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FavoriteUser extends Model
 {
-    protected $table = 't_favoriter_users';
+    protected $table = 't_favorite_users';
     
     /**
      * The attributes that are mass assignable.

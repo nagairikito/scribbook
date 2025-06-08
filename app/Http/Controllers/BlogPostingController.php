@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Http\Requests\BlogPostingRequest;
+use App\Http\Requests\BlogRequest;
 use App\Services\BlogService;
 
 class BlogPostingController extends Controller
@@ -23,10 +23,10 @@ class BlogPostingController extends Controller
 
     /**
      * ブログ投稿
-     * @param $request
+     * @param　BlogRequest $request
      * @return view
      */
-    public function postBlog(BlogPostingRequest $request) {
+    public function postBlog(BlogRequest $request) {
         $inputData = [
             'user_id' => $request['user_id'],
             'blog_unique_id' => $request['blog_unique_id'],
@@ -41,7 +41,7 @@ class BlogPostingController extends Controller
         if($result) {
             return redirect(route('toppage'))->with('success_post_blog', 'ブログを投稿しました');
         }
-        return back()->with('error_post_blog', '予期せぬエラーが発生しました');
+        return back()->with('error_post_blog', 'エラーが発生しました')->withInput();
 
     }
 }

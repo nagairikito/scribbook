@@ -22,8 +22,8 @@ class LoginRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'login_id'                => 'required|string|max:255|exists:users,login_id',
-            'password'                => 'required|string|max:32',
+            'login_id'                => 'required|string|regex:/^[a-zA-Z0-9._@-]+$/|max:255|exists:m_users,login_id',
+            'password'                => 'required|string|alpha_num|max:32',
         ];
     }
     
@@ -37,10 +37,12 @@ class LoginRequest extends FormRequest
         return [
             'login_id.required'  => 'ログインIDを入力してください',
             'login_id.string'    => '文字形式で入力してください',
+            'login_id.regex'     => '「英数字」「.」「-」「_」「@」のみ使用できます',
             'login_id.max'       => '255文字以下で入力してください',
             'login_id.exists'    => 'このログインＩＤは存在しません',
             'password.required'  => 'パスワードを入力してください',
             'password.string'    => '文字形式で入力してください',
+            'password.alpha_num' => '英数字で入力してください',
             'password.max'       => '255文字以下で入力してください',
 
         ];

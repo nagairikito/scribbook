@@ -19,6 +19,8 @@ class TalkRoomDetailController extends Controller
     
     /**
      * トークルーム詳細
+     * @param $request
+     * @return array $talkRoom
      */
     public function displayTalkRoom(Request $request) {
         if($request['sender'] != Auth::id()) {
@@ -34,7 +36,7 @@ class TalkRoomDetailController extends Controller
         $inputData['talk_room_id'] = $talkRoomId;
 
         $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
-        $recipientName = $recipient[0]['name'];
+        $recipientName = $recipient['name'];
 
         $talkRoom = [
             'messages' => null,
@@ -47,6 +49,7 @@ class TalkRoomDetailController extends Controller
 
     /**
      * メッセージを送信
+     * @param object request
      */
     public function sendMessage(Request $request) {
         if(request()->get('message') == null || request()->get('sender') != Auth::id()) {
@@ -66,6 +69,7 @@ class TalkRoomDetailController extends Controller
 
     /**
      * メッセージ全件取得
+     * @param object request
      */
     public function getMessages(Request $request) {
         $inputData = [
@@ -79,14 +83,6 @@ class TalkRoomDetailController extends Controller
         $messages = $this->talkService->getAllMessageesByRoomId($inputData);
 
         $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
-        // $recipientName = $recipient[0]['name'];
-
-        // $talkRoom = [
-        //     'messages' => $messages,
-        //     'sender' => Auth::id(),
-        //     'recipient' => $inputData['recipient'],
-        //     'recipient_name' => $recipientName,
-        // ];
         $talkRoomDatas = [
             'messages' => $messages,
             'sender' => Auth::id(),

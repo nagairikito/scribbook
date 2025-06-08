@@ -60,8 +60,10 @@ class TalkRoomRepository extends Repository
 
     /**
      * user_id_1,2に指定のユーザーIDがヒットするか、一致していればトークルームIDを返す
-     * @param $inputData
-     * @return boolean $result
+     * @param int $useId
+     * @param string $userIdColumn
+     * @param string $deleteFlagColumn
+     * @return array $talkRoomIds
      */
     public function checkExistsUserId1AndGetTalkRoomIdByTargetUserId($userId, $userIdColumn, $deleteFlagColumn) {
         $talkRoomIds = $this->talkRoom
@@ -74,22 +76,24 @@ class TalkRoomRepository extends Repository
     }
 
     /**
-     * user_id_1,2でusersテーブルとリレーションを持たせ、トークルームIDでトークルーム情報を取得する
-     * @param $inputData
-     * @return boolean $result
+     * user_id_1,2とトークルームIDでトーク相手を含むトークルーム情報を取得する
+     * @param int $talkRoomIds
+     * @param string $userIdColumn
+     * @param string $deleteFlagColumn
+     * @return array $talkRoomListWithOppositeUser
      */
     public function getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds, $userIdColumn, $deleteFlagColumn) {
         $talkRoomListWithOppositeUser = $this->talkRoom
-        ->join('users', 'users.id', 'talk_rooms.' . $userIdColumn)
-        ->whereIn('talk_rooms.id', $talkRoomIds)
-        ->where('talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
-        ->distinct('talk_rooms.id')
+        ->join('m_users', 'm_users.id', '=', 't_talk_rooms.' . $userIdColumn)
+        ->whereIn('t_talk_rooms.id', $talkRoomIds)
+        ->where('t_talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
+        ->distinct('t_talk_rooms.id')
         ->select(
-            'talk_rooms.id as talk_room_id',
-            'talk_rooms.updated_at',
-            'users.id as user_id',
-            'users.icon_image',
-            'users.name',
+            't_talk_rooms.id as talk_room_id',
+            't_talk_rooms.updated_at',
+            'm_users.id as user_id',
+            'm_users.icon_image',
+            'm_users.name',
         )
         ->get();
         
@@ -117,12 +121,12 @@ class TalkRoomRepository extends Repository
      */
     public function getTalkRoomListWithUserId1ByTartgetUserId($talkRoomId) {
         $talkRoomListWithUserId1 = $this->talkRoom
-        ->join('users', 'users.id', '=', 'talk_rooms.user_id_1')
-        ->where('talk_rooms.id', $talkRoomId)
+        ->join('m_users', 'm_users.id', '=', 't_talk_rooms.user_id_1')
+        ->where('t_talk_rooms.id', $talkRoomId)
         ->select(
-            'talk_rooms.updated_at',
-            'users.id',
-            'users.name',
+            't_talk_rooms.updated_at',
+            'm_users.id',
+            'm_users.name',
         )
         ->get();
         
@@ -131,13 +135,14 @@ class TalkRoomRepository extends Repository
 
     /**
      * 2ユーザー間のトークルームの存在チェック
-     * @param $inputData
-     * @return boolean $result
+     * @param int $userId1
+     * @param int $userId2
+     * @return bool $result
      */
-    public function checkExistsTargetTalkRoom($user_id_1, $user_id_2) {
+    public function checkExistsTargetTalkRoom($userId1, $userId2) {
         $result = $this->talkRoom
-        ->where('user_id_1', $user_id_1)
-        ->where('user_id_2', $user_id_2)
+        ->where('user_id_1', $userId1)
+        ->where('user_id_2', $userId2)
         ->exists();
         
         return $result;
@@ -145,13 +150,14 @@ class TalkRoomRepository extends Repository
 
     /**
      * 2ユーザー間のトークルームIDを取得
-     * @param $inputData
-     * @return boolean $result
+     * @param int $userId1
+     * @param int $userId2
+     * @return int $talkRoomId
      */
-    public function getTargetTalkRoomId($user_id_1, $user_id_2) {
+    public function getTargetTalkRoomId($userId1, $userId2) {
         $talkRoomId = $this->talkRoom
-        ->where('user_id_1', $user_id_1)
-        ->where('user_id_2', $user_id_2)
+        ->where('user_id_1', $userId1)
+        ->where('user_id_2', $userId2)
         ->value('id');
 
         return $talkRoomId;
@@ -159,12 +165,15 @@ class TalkRoomRepository extends Repository
 
     /**
      * 初回メッセージが送信された時点でトークルームを生成する
-     * @param $inputData
-     * @return boolean $result
+     * @param int $userId1
+     * @param int $userId2
+     * @return bool $result
      */
-    public function createTalkRoom($user_id_1, $user_id_2) {
-        $this->talkRoom->user_id_1 = $user_id_1;
-        $this->talkRoom->user_id_2 = $user_id_2;
+    public function createTalkRoom($userId1, $userId2) {
+        $this->talkRoom->user_id_1 = $userId1;
+        $this->talkRoom->user_id_2 = $userId2;
+        $this->talkRoom->created_by = $userId1;
+        $this->talkRoom->updated_by = $userId1;
         $result = $this->talkRoom->save();
         
         return $result;
@@ -172,8 +181,8 @@ class TalkRoomRepository extends Repository
 
     /**
      * トークルームの更新日時を最新にする
-     * @param $inputData
-     * @return boolean $result
+     * @param int $inputData
+     * @return bool $result
      */
     public function updateTalkRoom($talkRoomId) {
         $targetTalkRoom = $this->talkRoom->where('id', $talkRoomId)->first();

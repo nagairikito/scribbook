@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Http\Requests\BlogRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Services\BlogService;
 
@@ -16,7 +17,7 @@ class BlogEditingController extends Controller
 
     /**
      * ブログ編集フォーム
-     * @param $request
+     * @param array $request
      * @return view
      */
     public function blogEditingForm(Request $request) {
@@ -25,7 +26,7 @@ class BlogEditingController extends Controller
             'user_id' => $request['login_user_id'],
         ];
 
-        $blog = $this->blogService->getBlogByUserId($inputData);
+        $blog = $this->blogService->getBlogByBlogIdAndUserId($inputData);
 
         if(empty($blog)) {
             return redirect(route('toppage'))->with('error_get_blog_detail', '予期せぬエラーが発生しました');
@@ -36,10 +37,10 @@ class BlogEditingController extends Controller
 
     /**
      * ブログ編集
-     * @param $request
+     * @param BlogRequest $request
      * @return view
      */
-    public function editBlog(Request $request) {
+    public function editBlog(BlogRequest $request) {
         $inputData = [
             'id' => $request['blog_id'],
             'blog_unique_id' => $request['blog_unique_id'],
