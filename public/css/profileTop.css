@@ -112,10 +112,11 @@
     height: 100%;
     top: 0;
     left: 0;
+    z-index: 10000;
 }
 
 #profile-top .modal-contents {
-    z-index: 1;
+    z-index: 10000;
     position: absolute;
     top: 50%;
     left: 50%;
@@ -192,8 +193,28 @@
     margin: 0 auto;
 }
 
-#profile-editing-modal .profile-editing-input-area > div > p:first-child,
+#privacy-setting-modal .privacy-setting-input-area > div {
+    padding: 0px 30px;
+}
+
+#privacy-setting-modal .privacy-setting-input-area > div:not(:first-child) {
+    border-top: 1px solid #888888;
+}
+
 #privacy-setting-modal .privacy-setting-input-area > div > p:first-child {
+    margin-bottom: 0;
+    font-weight: bold;
+    font-size: 1.3rem;
+}
+
+#privacy-setting-modal .privacy-setting-input-area > div > div {
+    padding-left: 10px;
+}
+#privacy-setting-modal .privacy-setting-input-area > div > div > p:first-child{
+    margin-bottom: 0;
+}
+
+#profile-editing-modal .profile-editing-input-area > div > p:first-child {
     margin-bottom: 0;
     font-weight: bold;
 }
@@ -230,13 +251,12 @@
 .user-id-attention,
 #privacy-setting-modal .password-attention {
     font-size: 0.7rem;
-    margin-left: 10px;
 }
 
 #profile-editing-modal .user-id-value,
 #privacy-setting-modal .login-id-value {
     margin-top: 0px;
-    margin-left: 30px;
+    /* margin-left: 30px; */
 }
 
 #profile-editing-modal .account-deleting-button-area {

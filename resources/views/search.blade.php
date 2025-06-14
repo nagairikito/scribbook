@@ -4,6 +4,7 @@
     @parent
     <link rel="stylesheet" href="{{ asset('css/search.css') }}">
     <script src="{{ asset('js/search.js') }}" defer></script>
+    
     <title>お気に入りブログ</title>
 @endsection
 
@@ -13,22 +14,7 @@
 
         <div class="category-view">
             <div class="category-blog">
-                @if(count($result['blogs']) > 0)
-                    <div class="blog-list">
-                        @foreach($result['blogs'] as $blog)
-                            <div>
-                                <div><a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">{{ $blog['title'] }}</a></td>
-                                <div class="blog-contents"><a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">{{ $blog['contents'] }}</a></td>
-                                <div class="post-user"><a href="{{ route('profile_top', ['id' => $blog['created_by']]) }}">{{ $blog['name'] }}</a></td>
-                                <div class="posted-at">{{ $blog['created_at'] }}</td>
-                            </div>
-                        @endforeach
-                    </div>
-
-                @else
-                    <p>キーワードと一致するブログが見つかりません</p>
-                @endif
-                @include('blog_unit', ['word' => 'キーワードと一致するブログが見つかりません'])
+                @include('blog_unit', ['blogs' => $result['blogs'], 'word' => 'キーワードと一致するブログが見つかりません'])
             </div>
 
             <div class="category-user">

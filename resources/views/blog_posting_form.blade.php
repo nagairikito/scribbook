@@ -14,6 +14,8 @@
             <div class="blog-posting-form-wrapper">
                 <form id="blog-posting-form" class="blog-posting-form" action="{{ route('post_blog') }}" method="POST">
                 @csrf
+                    <h2>サムネイル</h2>
+                    <input type="file" name="thumbnail">
                     <h2>タイトル</h2>
                     <input type="text" name="title" class="blog-title aaa" value="{{ old('title') }}">
                     @if($errors->has('title'))

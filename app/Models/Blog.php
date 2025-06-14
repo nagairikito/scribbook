@@ -21,4 +21,21 @@ class Blog extends Model
     //     'view_count',
     // ];
 
+    public function attributesToArray()
+    {
+        $attributes = parent::attributesToArray();
+
+        if ($this->created_at) {
+            $attributes['created_at'] = $this->created_at
+                ->copy()->setTimezone('Asia/Tokyo')->format('Y/m/d H:i');
+        }
+
+        if ($this->updated_at) {
+            $attributes['updated_at'] = $this->updated_at
+                ->copy()->setTimezone('Asia/Tokyo')->format('Y/m/d H:i');
+        }
+
+        return $attributes;
+    }
+
 }

@@ -1,3 +1,9 @@
+//toolフィールドのwidth設定
+let toolsField = document.querySelector('#blog-posting .tools-field');
+
+let toolsFieldW = w * 0.175;  //wはdisplayScreenSizeSettingで定義済み
+toolsField.style.width =  toolsFieldW + 'px';
+
 //文字サイズ
 let fontSize = 16;
 

@@ -11,10 +11,39 @@ main .blog-unit {
     border: 2px solid black;
     border-radius: 5%;
     margin: 5px;
+    position: relative;
+}
+
+main .blog-unit-wrapper {
+    width: 100%;
+    position: absolute;
+}
+
+main .blog-unit-info {
+    position: absolute;
+    z-index: 1;
+    top: 0;
+    left: 0;
+}
+
+main .thumbnail {
+    position: absolute;
+    width: 100%;
+    opacity: 0.9;
+    top: 0;
+    left: 0;
+    border-radius: 12.5px;
 }
 
 
-.blog-contents {
+main .post-user {
+    position: absolute;
+    z-index: 1;
+    bottom: 15px;
+    left: 0;
+}
+
+main .blog-contents {
     max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;

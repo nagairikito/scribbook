@@ -73,12 +73,12 @@ class TalkRoomDetailController extends Controller
      */
     public function getMessages(Request $request) {
         $inputData = [
-            // 'sender' => request()->get('sender'),
             'sender' => Auth::id(),
             'recipient' => request()->get('recipient'),
         ];
 
         $talkRoomId = $this->talkService->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
+        $this->talkService->alreadyReadFlagOn($talkRoomId, Auth::id()); //既読処理
         $inputData['talk_room_id'] = $talkRoomId;
         $messages = $this->talkService->getAllMessageesByRoomId($inputData);
 
@@ -89,7 +89,6 @@ class TalkRoomDetailController extends Controller
             'recipient' => $recipient,
         ];
 
-        // return response()->json(['talkRoom' => $talkRoom]);
         return response()->json([
             'html' => view('talk_room_parts', ['talkRoomDatas' => $talkRoomDatas])->render(),
         ]);

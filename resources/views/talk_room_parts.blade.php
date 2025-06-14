@@ -8,7 +8,14 @@
                     </div>
                 @endif
                 <p class="message-contents">{{ $message['message'] }}</p>
-                <p class="send-at">{{ $message['updated_at'] }}</p>
+                <div class="msg-stauts {{ $message['created_by'] == $talkRoomDatas['sender'] ? 'send' : 'receive' }}">
+                    @if($message['read_flag'] == config('consts.TALK.READ_FLAG_ON'))
+                        <p class="already-read">既読</p>
+                    @else
+                        <p></p>
+                    @endif
+                    <p class="send-at">{{ $message['updated_at'] }}</p>
+                </div>
             </div>
         @endforeach
     

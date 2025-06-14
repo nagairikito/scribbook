@@ -10,18 +10,24 @@
                         <div class="top">
                             <p>{{ $talkRoom['name'] }}</p>
                             <div class="unread-messege-count-wrapper mr-20p">
-                                <div class="unread-messege-count">2</div>
+                                @if($talkRoom['unReadMsgCount'] > 0)
+                                    <div class="unread-messege-count-circle">
+                                        <span class="unread-messege-count">{{$talkRoom['unReadMsgCount']}}</span>
+                                    </div>
+                                @else
+                                    <div></div>
+                                @endif
                             </div>
                         </div>
                         <div id="bottom" class="bottom">
-                            @if($talkRoom['latest_message']['message'] != null && $talkRoom['latest_message']['attached_file_path'] == null)
+                            @if($talkRoom['message'] != null && $talkRoom['attached_file_path'] == null)
                                 <div class="message-wrapper">
-                                    <p class="message">{{ $talkRoom['latest_message']['message'] }}</p>
+                                    <p class="message">{{ $talkRoom['message'] }}</p>
                                 </div>
                                 <div class="send-time-wrapper">
                                     <p class="send-time">{{ $talkRoom['updated_at'] }}</p>
                                 </div>    
-                            @elseif($talkRoom['latest_message']['message'] == null && $talkRoom['latest_message']['attached_file_path'] != null)
+                            @elseif($talkRoom['message'] == null && $talkRoom['attached_file_path'] != null)
                                 <p>画像を送信しました</p>
                                 <div>
                                     <p>{{ $talkRoom['updated_at'] }}</p>

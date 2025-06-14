@@ -5,7 +5,6 @@
     <link rel="stylesheet" href="{{ asset('css/profileTop.css') }}">
     <link rel="stylesheet" href="{{ asset('css/blogUnit.css') }}">
     <script src="{{ asset('js/profileTop.js') }}" defer></script>
-    <script src="{{ asset('js/blogUnitGetScreenSize.js') }}" defer></script>
     <title>プロフィール</title>
 @endsection
 
@@ -89,21 +88,6 @@
 
                 <div class="blog-list">
                     <h2>ブログ一覧</h2>
-                    @if(count($blogs) > 0)
-                    <ul class="blog-list-wrapper">
-                        @foreach($blogs as $blog)
-                        <li class="blog-unit">
-                            <a href="{{ route('blog_detail', ['id' => $blog['id']]) }}">
-                                <p class="title">{{ $blog['title'] }}</p>
-                                <p class="blog-contents">{{ $blog['contents'] }}</p>
-                                <p class="posted-at">{{ $blog['updated_at'] }}</td>
-                            </a>
-                        </li>
-                        @endforeach
-                    </ul>
-                    @else
-                    <p>投稿がありません</p>
-                    @endif
                     @include('blog_unit', ['word' => '投稿がありません'])
                 </div>
             </div>
@@ -180,36 +164,45 @@
                             <div class="privacy-setting-contents-area">
                                 <div class="privacy-setting-input-area">
                                     <div>
-                                        <p>ユーザーID<span class="user-id-attention">※ログインIDとは異なります、ユーザーIDは変更できません</span></p>
-                                        <p class="user-id-value">{{ Auth::user()->id }}</p>
+                                        <p>ユーザーID</p>
+                                        <div>
+                                            <p class="user-id-value">{{ Auth::user()->id }}</p>
+                                            <p class="user-id-attention">※ログインIDとは異なります、ユーザーIDは変更できません</p>
+                                        </div>
                                     </div>
                                     <div>
-                                        <p>現在のログインID:</p>
-                                        <p class="login-id-value">{{ Auth::user()->login_id }}</p>
+                                        <p>ログインID</p>
+                                        <div>
+                                            <p>現在のログインID:</p>
+                                            <p class="login-id-value">{{ Auth::user()->login_id }}</p>
+                                        </div>
+                                        <div>
+                                            <p>新しいログインID:</p>
+                                            <input type="text" class="input-box" name="login_id" value="{{ old('login_id') }}">
+                                            @if($errors->has('login_id'))
+                                            <p class="error-message privacy">{{ $errors->first('login_id') }}</p>
+                                            @endif
+                                            <p class="password-attention">※ログインIDのみ変更したい場合は新しいパスワードと確認用パスワードに現在のパスワードを入力してください</p>
+                                        </div>
                                     </div>
                                     <div>
-                                        <p>新しいログインID:</p>
-                                        <input type="text" class="input-box" name="login_id" value="{{ old('login_id') }}">
-                                        @if($errors->has('login_id'))
-                                        <p class="error-message privacy">{{ $errors->first('login_id') }}</p>
-                                        @endif
-                                        <p class="password-attention">※ログインIDのみ変更したい場合は新しいパスワードと確認用パスワードに現在のパスワードを入力してください</p>
+                                        <p>パスワード</p>
+                                        <div>
+                                            <p>新しいパスワード:</p>
+                                            <input type="password" class="input-box" name="password">
+                                            @if($errors->has('password'))
+                                            <p class="error-message privacy">{{ $errors->first('password') }}</p>
+                                            @endif
+                                        </div>
+                                        <div>
+                                            <p>確認用パスワード:</p>
+                                            <input type="password" class="input-box" name="password_confirmation">
+                                        </div>
                                     </div>
-                                    <div>
-                                        <p>新しいパスワード:</p>
-                                        <input type="password" class="input-box" name="password">
-                                        @if($errors->has('password'))
-                                        <p class="error-message privacy">{{ $errors->first('password') }}</p>
-                                        @endif
-                                    </div>
-                                    <div>
-                                        <p>確認用パスワード:</p>
-                                        <input type="password" class="input-box" name="password_confirmation">
-                                    </div>
-                                    <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                    <input type="hidden" name="name" value="{{ Auth::user()->name }}">
-                                    <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
-                                    <input type="hidden" name="discription" value="{{ Auth::user()->discription }}">
+                                        <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                        <input type="hidden" name="name" value="{{ Auth::user()->name }}">
+                                        <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
+                                        <input type="hidden" name="discription" value="{{ Auth::user()->discription }}">
                                 </div>
                             </div>
                         </form>

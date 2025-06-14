@@ -77,9 +77,10 @@ class BlogRepository extends Repository
             't_blogs.created_by',
             'm_users.name',
             't_blogs.created_at',
+            't_blogs.updated_at',
         )
         ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
-        ->orderByDesc('t_blogs.created_at')
+        ->orderByDesc('t_blogs.updated_at')
         ->get();
 
         return !empty($allblogs) ? $allblogs->toArray() : [];
@@ -97,6 +98,7 @@ class BlogRepository extends Repository
             't_blogs.created_by',
             'm_users.name',
             't_blogs.created_at',
+            't_blogs.updated_at',
         )
         ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
         ->orderByDesc('t_blogs.view_count')

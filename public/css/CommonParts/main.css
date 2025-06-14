@@ -10,25 +10,30 @@ main .main-wrapper {
 }
 
 main .advertisement-area {
-    /* width: 17.5%; */
-    width: 17.5vw;
+    width: 17.5%;
     min-height: 100vh;
-    background-color: #f2f5db;
+    background-color: gray;
+    /* background-color: #f2f5db; */
 }
 
 main nav {
     /* width: 12.5%; */
-    min-width: 12.5vw;
-    min-height: calc(100vh - 50px);
+    min-width: 12.5%;
+    /* min-height: calc(100vh - 50px); */
     background-color: #f0f5ca;
+    position: sticky;
+    height: 100vh;
+    top: 0;
+    left: 0;
+    z-index: 100;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
 }
 
 main nav .nav-wrapper {
-    min-width: 12%;
+    min-width: 100%;
     /* min-width: inherit; */
     min-height: calc(100vh - 7vh - 30px);
     height: calc(100vh - 7vh - 50px);
-    position: fixed;
     padding: 30px 0 0 20px;
     margin: 10px 0;
     border-right: 0.1px solid #bebebe;
@@ -59,8 +64,7 @@ main nav .nav-wrapper .post-blog-button {
 
 main .main-contents {
     /* width: 70%; */
-    width: 70vw;
-    max-width: 70vw;
+    flex: 1;
     padding: 10px;
     display: flex;
     flex-direction: column;

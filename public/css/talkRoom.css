@@ -41,6 +41,7 @@
 
 .message {
     display: flex;
+    /* align-items: flex-end; */
     max-width: 80%;
     line-break: anywhere;
     margin-bottom: 10px;
@@ -63,16 +64,41 @@
 }
 
 .message-contents {
-    margin: 15px 10px auto 10px;
+    margin: 15px 10px 0 10px;
     padding: 5px;
     border-radius: 5px;
 
     background-color: #22eeee;
 }
 
-/* .send-at {
-    width: 50px;
-} */
+.msg-stauts {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+}
+.msg-stauts.send {
+    align-items: flex-end;
+}
+.msg-stauts.receive {
+    align-items: flex-start;
+}
+
+
+.msg-stauts {
+    line-height: 1.1;
+}
+
+.already-read {
+    font-size: 10px;
+    margin: 0;
+    /* text-align: end; */
+}
+
+.send-at {
+    width: 120px;
+    font-size: 15px;
+    margin: 0;
+}
 
 .message-send-button-wrapper {
     position: relative;

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Repositories\AccountRepository;
 use App\Services\TalkService;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 
 class TalkRoomController extends Controller
 {
@@ -23,6 +24,7 @@ class TalkRoomController extends Controller
      */
     public function showTalkRoomList(Request $request) {
         $talkRoomList = [];
+        
         return view('talk_room_list', compact('talkRoomList'));
         // return view('talk_room_list_blade', compact('talkRoomList'));
     }
@@ -32,7 +34,11 @@ class TalkRoomController extends Controller
      * @return view
      */
     public function getTalkRoomList(Request $request) {
-        $talkRoomList = $this->talkService->getTalkRoomListByUserId(Auth::id());
+        $loginId = Auth::id();
+        $talkRoomList = $this->talkService->getTalkRoomListByUserId($loginId);
+        // $talkRoomList = $this->talkService->getTalkRoomListByUserId(Auth::id());
+Log::debug('auth id', ['id' => Auth::id()]);
+
         return response()->json([
             'html' => view('talk_room_list_parts', ['talkRoomList' => $talkRoomList])->render(),
         ]);

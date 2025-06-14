@@ -1,3 +1,8 @@
+@php
+    $hideAdvertisementPage = ['blog_posting_form', 'blog_editing_form'];
+@endphp
+
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -7,8 +12,10 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
         <link rel="stylesheet" href="{{ asset('css/style.css') }}">
         <link rel="stylesheet" href="{{ asset('css/common.css') }}">
+        <link rel="stylesheet" href="{{ asset('css/blogUnit.css') }}">
         <link rel="stylesheet" href="{{ asset('css/CommonParts/main.css') }}">
-        <script src="{{ asset('js/CommonParts/getScreenSize.js') }}" defer></script>
+        <script src="{{ asset('js/displayScreenSizeSetting.js') }}" defer></script>
+        <script src="{{ asset('js/blogUnitSizeSetting.js') }}" defer></script>
     @show
 </head>
 <body>
@@ -19,7 +26,9 @@
 
                 @yield('contents')
 
-                @include('CommonParts.advertisement')
+                @if(!in_array(Route::currentRouteName(), $hideAdvertisementPage))
+                    @include('CommonParts.advertisement')
+                @endif
             </div>
         </main>
 
