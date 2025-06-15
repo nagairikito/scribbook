@@ -8,7 +8,11 @@
                 <p class="posted-at">{{ $blog['updated_at'] }}</td>
             </div>
             <p class="post-user"><a href="{{ route('profile_top', ['id' => $blog['created_by']]) }}">{{ $blog['name'] }}</a></p>
-            <img class="thumbnail" src="{{ asset('storage/blog_thumbnail_images/noImage.png') }}">
+            @if($blog['thumbnail'] != 'noImage.png')
+                <img class="thumbnail" src="{{ asset('storage/blog_thumbnail_images/' . $blog['blog_unique_id'] . '_' . $blog['thumbnail']) }}">
+            @else
+                <img class="thumbnail" src="{{ asset('storage/blog_thumbnail_images/noImage.png') }}">
+            @endif
         </a>
     </li>
     @endforeach

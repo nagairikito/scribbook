@@ -75,6 +75,8 @@ class BlogRepository extends Repository
     public function getAllBlogs() {
         $allblogs = $this->blog->select(
             't_blogs.id',
+            't_blogs.blog_unique_id',
+            't_blogs.thumbnail',
             't_blogs.title',
             't_blogs.contents',
             't_blogs.created_by',
@@ -96,6 +98,8 @@ class BlogRepository extends Repository
     public function getTopics() {
         $topics = $this->blog->select(
             't_blogs.id',
+            't_blogs.blog_unique_id',
+            't_blogs.thumbnail',
             't_blogs.title',
             't_blogs.contents',
             't_blogs.created_by',
@@ -164,6 +168,8 @@ class BlogRepository extends Repository
         ->where('t_blogs.created_by', $userId)
         ->select([
             't_blogs.id',
+            't_blogs.blog_unique_id',
+            't_blogs.thumbnail',
             't_blogs.title',
             't_blogs.contents',
             't_blogs.created_by',
