@@ -75,15 +75,6 @@ class TalkRoomRepository extends Repository
 
         return !empty($talkRoomIds) ? $talkRoomIds->toArray() : [];
     }
-    // public function checkExistsUserId1AndGetTalkRoomIdByTargetUserId($userId, $userIdColumn, $deleteFlagColumn) {
-    //     $talkRoomIds = $this->talkRoom
-    //     ->where($userIdColumn, $userId)
-    //     ->where($deleteFlagColumn, TalkConst::FLAG_OFF)
-    //     ->select('id')
-    //     ->get();
-
-    //     return !empty($talkRoomIds) ? $talkRoomIds->toArray() : [];
-    // }
 
     /**
      * user_id_1,2とトークルームIDでトーク相手を含むトークルーム情報を取得する
@@ -95,10 +86,10 @@ class TalkRoomRepository extends Repository
     public function getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds, $userIdColumn, $deleteFlagColumn)
     {
         $latestTalkSub = DB::table('t_talks as latest_talks')
-            ->select('talk_room_id', 'message', 'attached_file_path', 'updated_at as talk_updated_at')
+            ->select('talk_room_id', 'message', 'attached_file_path', 'created_at as talk_created_at')
             ->whereIn('talk_room_id', $talkRoomIds)
-            ->whereRaw('updated_at = (
-                SELECT MAX(updated_at)
+            ->whereRaw('created_at = (
+                SELECT MAX(created_at)
                 FROM t_talks AS inner_talks
                 WHERE inner_talks.talk_room_id = latest_talks.talk_room_id
             )');
@@ -119,29 +110,44 @@ class TalkRoomRepository extends Repository
                 'm_users.name',
                 'latest_talks.message',
                 'latest_talks.attached_file_path',
-                'latest_talks.talk_updated_at'
+                'latest_talks.talk_created_at'
             )
-            ->orderByDesc('latest_talks.talk_updated_at')
+            ->orderByDesc('latest_talks.talk_created_at')
             ->get();
 
         return !empty($talkRoomListWithOppositeUser) ? $talkRoomListWithOppositeUser->toArray() : [];
     }
-    // public function getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds, $userIdColumn, $deleteFlagColumn) {
+    // public function getTalkRoomWithOppositeUserByTargetUserId($talkRoomIds, $userIdColumn, $deleteFlagColumn)
+    // {
+    //     $latestTalkSub = DB::table('t_talks as latest_talks')
+    //         ->select('talk_room_id', 'message', 'attached_file_path', 'updated_at as talk_updated_at')
+    //         ->whereIn('talk_room_id', $talkRoomIds)
+    //         ->whereRaw('updated_at = (
+    //             SELECT MAX(updated_at)
+    //             FROM t_talks AS inner_talks
+    //             WHERE inner_talks.talk_room_id = latest_talks.talk_room_id
+    //         )');
+
     //     $talkRoomListWithOppositeUser = $this->talkRoom
-    //     ->join('m_users', 'm_users.id', '=', 't_talk_rooms.' . $userIdColumn)
-    //     // ->join('t_talks', 't_talks.talk_room_id', '=', 't_talk_rooms.id')
-    //     ->whereIn('t_talk_rooms.id', $talkRoomIds)
-    //     ->where('t_talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
-    //     ->distinct('t_talk_rooms.id')
-    //     ->select(
-    //         't_talk_rooms.id as talk_room_id',
-    //         't_talk_rooms.updated_at',
-    //         'm_users.id as user_id',
-    //         'm_users.icon_image',
-    //         'm_users.name',
-    //         // 't_talks.message'
-    //     )
-    //     ->get();
+    //         ->join('m_users', 'm_users.id', '=', 't_talk_rooms.' . $userIdColumn)
+    //         ->joinSub($latestTalkSub, 'latest_talks', function ($join) {
+    //             $join->on('latest_talks.talk_room_id', '=', 't_talk_rooms.id');
+    //         })
+    //         ->whereIn('t_talk_rooms.id', $talkRoomIds)
+    //         ->where('t_talk_rooms.' . $deleteFlagColumn, TalkConst::FLAG_OFF)
+    //         ->distinct('t_talk_rooms.id')
+    //         ->select(
+    //             't_talk_rooms.id as talk_room_id',
+    //             't_talk_rooms.updated_at',
+    //             'm_users.id as user_id',
+    //             'm_users.icon_image',
+    //             'm_users.name',
+    //             'latest_talks.message',
+    //             'latest_talks.attached_file_path',
+    //             'latest_talks.talk_updated_at'
+    //         )
+    //         ->orderByDesc('latest_talks.talk_updated_at')
+    //         ->get();
 
     //     return !empty($talkRoomListWithOppositeUser) ? $talkRoomListWithOppositeUser->toArray() : [];
     // }

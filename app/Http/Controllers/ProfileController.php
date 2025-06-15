@@ -75,7 +75,10 @@ class ProfileController extends Controller
             'icon_image_file'   => null,
             'discription'       => $request['discription'],
         ];
-        if($request->file('icon_image_file')) {
+        if($request->file('icon_image_file') && 
+        $request->file('icon_image_file') != null && 
+        $request->file('icon_image_file') != '' && 
+        $request->file('icon_image_file') != 'noImage.png') {
             $inputData['icon_image_file'] = $request;
         }
 

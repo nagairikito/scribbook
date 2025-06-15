@@ -52,12 +52,18 @@ class BlogService extends Service
 
         DB::beginTransaction();
         try {
+            if($inputData['thumbnail_img'] == '' || $inputData['thumbnail_img'] == null || $inputData['thumbnail_name'] == '' || $inputData['thumbnail_name'] == null) {
+                $inputData['thumbnail_name'] = 'noImage.png';
+            }
             $checkPostBlog = $this->blogRepository->postBlog($inputData);
             if($checkPostBlog) {
                 $postFlag = true;
             }
             if($inputData['base64_texts'] != [] || $inputData['base64_texts'] != null || $inputData['image_file_names'] != [] || $inputData['image_file_names'] != null) {
-                $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names']);
+                $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names'], 'blog_contents_images/');
+            }
+            if($inputData['thumbnail_img'] != '' || $inputData['thumbnail_img'] != null || $inputData['thumbnail_name'] != [] || $inputData['thumbnail_name'] != null) {
+                $this->storeBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], 'blog_thumbnail_images/');
             }
 
             DB::commit();
@@ -93,8 +99,18 @@ class BlogService extends Service
 
         DB::beginTransaction();
         try {
+            if($inputData['thumbnail_img'] != null && $inputData['thumbnail_img'] != '' || $inputData['thumbnail_img'] != null && $inputData['thumbnail_img'] != '') {
+                $this->updateBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], $targetBlog['blog_unique_id'], 'blog_thumbnail_images/');
+            } else {
+                // $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_thumbnail_images/');
+            }
+
+            if($inputData['base64_texts'] != null || $inputData['image_file_names'] != null) {
+                $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog['blog_unique_id'], 'blog_contents_images/');
+            } else {
+                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_contents_images/');
+            }
             // $this->deleteBlogContentsImageFromStorage($targetBlog[0]['blog_unique_id']);
-            $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog['blog_unique_id']);
             $checkEditBlog = $this->blogRepository->editBlog($inputData);
             if($checkEditBlog) {
                 $editBlogFlag = true;
@@ -136,7 +152,7 @@ class BlogService extends Service
         try {
             $checkDeleteBlog = $this->blogRepository->deleteBlog($targetBlog['id']);
             if($checkDeleteBlog) {
-                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id']);
+                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_contents_images');
                 $deleteBlogFlag = true;
             }
     
@@ -591,15 +607,15 @@ class BlogService extends Service
     /**
      * ブログコンテンツ画像保存,Storageに保存(更新用)
      * @param array $imageBase64Texts
-     * @param object $imageNames
+     * @param array $imageNames
      * @param string $prevBlogUniqueId
+     * @param string $path  :保存先パス
      * @return void
      */
-    public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId)
+    public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId, $path)
     {
         if(count($imageBase64Texts) > 0) {
             foreach($imageBase64Texts as $index => $imageBase64Data) {
-
                 if(preg_match('/^data:image\/[a-zA-Z]+;base64,/', $imageBase64Texts[$index])) {
                     // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
                     $base64Image = $imageBase64Texts[$index];
@@ -619,7 +635,7 @@ class BlogService extends Service
                     }
 
                     // ファイル名と保存パス生成
-                    $filePath = 'blog_contents_images/' . $imageNames[$index];
+                    $filePath = $path . $imageNames[$index];
 
                     // 保存（storage/app/public/images に保存）
                     $result = Storage::disk('public')->put($filePath, $imageData);
@@ -630,12 +646,14 @@ class BlogService extends Service
                     $parts = explode('_', $imageNames[$index]);
                     $remainingFileName = implode('_', array_slice($parts, 2));
 
-                    $allFiles = Storage::disk('public')->allFiles('blog_contents_images');
+                    $allFiles = Storage::disk('public')->allFiles($path);
+
                     $targetImageFileNames = array_filter($allFiles, function($file) use ($prevBlogUniqueId) {
                         if(str_contains($file, $prevBlogUniqueId)) {
                             return $file;
                         }
                     });
+
                     $targetImageFileName = array_filter($targetImageFileNames, function($file) use ($remainingFileName) {
                         if(str_contains($file, $remainingFileName)) {
                             return $file;
@@ -644,7 +662,7 @@ class BlogService extends Service
 
                     if($targetImageFileName) {
                         foreach($targetImageFileName as $fileName) {
-                            $changeNameFlag = Storage::disk('public')->move($fileName, 'blog_contents_images/' . $imageNames[$index]);
+                            $changeNameFlag = Storage::disk('public')->move($fileName, $path . $imageNames[$index]);
                             if($changeNameFlag == false) {
                                 throw new \Exception('画像名の更新に失敗しました');
                             }
@@ -652,17 +670,18 @@ class BlogService extends Service
                     }
                 }
             }
-            $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId);
+            $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId, $path);
         }
     }
 
     /**
      * ブログコンテンツ画像保存,Storageに保存(新規用)
-     * @param array $targetImageName
+     * @param array $imageBase64Texts
      * @param string $imageNames
+     * @param string $path :保存先のパス
      * @return void
      */
-    public function storeBase64Image($imageBase64Texts, $imageNames)
+    public function storeBase64Image($imageBase64Texts, $imageNames, $path)
     {
         if($imageBase64Texts == null || count($imageBase64Texts) > 0) {
             foreach($imageBase64Texts as $index => $imageBase64Data) {
@@ -684,7 +703,7 @@ class BlogService extends Service
                 }
 
                 // ファイル名と保存パス生成
-                $filePath = 'blog_contents_images/' . $imageNames[$index];
+                $filePath = $path . $imageNames[$index];
 
                 // 保存（storage/app/public/images に保存）
                 $result = Storage::disk('public')->put($filePath, $imageData);
@@ -698,11 +717,12 @@ class BlogService extends Service
     /**
      * ブログコンテンツ画像削除,Storageから削除
      * @param string $targetImageName
+     * @param string $path : 保存先パス
      * @return void
      */
-    public function deleteBlogContentsImageFromStorage($blogUniqueId) {
+    public function deleteBlogContentsImageFromStorage($blogUniqueId, $path) {
         if($blogUniqueId != null && $blogUniqueId != '') {
-            $allFiles = Storage::disk('public')->allFiles('blog_contents_images');
+            $allFiles = Storage::disk('public')->allFiles($path);
             $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
                 if(str_contains($file, $blogUniqueId)) {
                     return $file;
@@ -718,5 +738,22 @@ class BlogService extends Service
                 }
             }
         }
+    }
+
+    /**
+     * 画像ファイルをBase64に変換する
+     *
+     * @param string $relativePath storage/app/public 以下のパス（例: 'blog_thumbnail_images/xxx.jpeg'）
+     * @return string|null Base64エンコード済みの画像データ（data:image/...;base64,...）または null
+     */
+    private function convertImageToBase64FromStorage(string $relativePath): ?string
+    {
+        if (Storage::disk('public')->exists($relativePath)) {
+            $type = pathinfo($relativePath, PATHINFO_EXTENSION);
+            $data = base64_encode(Storage::disk('public')->get($relativePath));
+            return 'data:image/' . $type . ';base64,' . $data;
+        }
+
+        return null;
     }
 }

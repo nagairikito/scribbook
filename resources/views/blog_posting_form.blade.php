@@ -15,9 +15,19 @@
                 <form id="blog-posting-form" class="blog-posting-form" action="{{ route('post_blog') }}" method="POST">
                 @csrf
                     <h2>サムネイル</h2>
-                    <input type="file" name="thumbnail">
+                    <div class="thumbnail-area">
+                        <div id="thumbnail-preview-box" class="thumbnail-preview-box">
+                            <p>
+                                ここにサムネイル用画像をドラッグアンドドロップしてください<br><br><br>
+                                ファイルを選択ボタンからも登録できます
+                            </p>
+                        </div>
+                        <input type="file" id="import-thumbail-input" class="import-thumbail-btn" onchange="importThumbnail(this)">
+                        <input type="hidden" id="submit-thumbnail-name" name="thumbnail_name">
+                        <input type="hidden" id="submit-thumbnail-img" name="thumbnail_img">
+                    </div>
                     <h2>タイトル</h2>
-                    <input type="text" name="title" class="blog-title aaa" value="{{ old('title') }}">
+                    <input type="text" name="title" class="blog-title" value="{{ old('title') }}">
                     @if($errors->has('title'))
                         <p class="error-message">{{ $errors->first('title') }}</p>
                     @endif

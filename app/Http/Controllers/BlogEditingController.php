@@ -44,11 +44,13 @@ class BlogEditingController extends Controller
         $inputData = [
             'id' => $request['blog_id'],
             'blog_unique_id' => $request['blog_unique_id'],
+            'thumbnail_name' => $request['thumbnail_name'] != null ? $request['thumbnail_name'] : 'noImage.png',
+            'thumbnail_img' => $request['thumbnail_img'],
             'title' => $request['title'],
             'contents' => $request['contents'],
             'created_by' => $request['login_user_id'],
-            'image_file_names' => $request['image_file_name'],
-            'base64_texts' => $request['base64_text'],
+            'image_file_names' => array_key_exists('image_file_name', $request->toArray()) ? $request['image_file_name'] : null ,
+            'base64_texts' => array_key_exists('base64_text', $request->toArray()) ? $request['base64_text'] : null ,
         ];
 
         $result = $this->blogService->editBlog($inputData);

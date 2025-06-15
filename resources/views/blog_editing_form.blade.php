@@ -14,6 +14,24 @@
         <div class="blog-editing-form-wrapper">
             <form id="blog-editing-form" class="blog-editing-form" action="{{ route('edit_blog') }}" method="POST">
             @csrf
+                <h2>サムネイル</h2>
+                <div class="thumbnail-area">
+                    <div id="thumbnail-preview-box" class="{{ $blog['thumbnail'] != 'noImage.png' ? '' : 'thumbnail-preview-box' }}">
+                        @if($blog['thumbnail'] != 'noImage.png')
+                            <div class="delete-btn-wrapper" onclick="deleteThumbnail()"><span class="delete-btn-content">✕</span></div>
+                            <img id="thumbnail-preview-img" src="{{ asset('storage/blog_thumbnail_images/' . $blog['blog_unique_id'] . '_' . $blog['thumbnail']) }}" alt="{{ $blog['thumbnail'] }}" style="width: 300px; height: 300px;">
+                        @else
+                            <p>
+                                ここにサムネイル用画像をドラッグアンドドロップしてください<br><br><br>
+                                ファイルを選択ボタンからも登録できます
+                            </p>
+                        @endif
+                    </div>
+                    <input type="file" id="import-thumbail-input" class="import-thumbail-btn" onchange="importThumbnail(this)">
+                    <input type="hidden" id="submit-thumbnail-name" name="thumbnail_name">
+                    <input type="hidden" id="submit-thumbnail-img" name="thumbnail_img">
+                </div>
+
                 <h2>タイトル</h2>
                 <input type="text" name="title" class="blog-title" value="{{ old('title', $blog['title']) }}">
                 @if($errors->has('title'))
@@ -36,7 +54,7 @@
                 <input type="hidden" id="create-user-id" name="login_user_id" value="{{ Auth::id() }}">
             </form>
 
-            <div>
+            <div class="tools-field">
                 <div class="tool-list">
                     <div>
                         <button class="tool-btn" onclick="adoptFontSize()">文字サイズ</button>

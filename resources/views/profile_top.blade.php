@@ -116,11 +116,12 @@
                                 <div class="profile-editing-input-area">
                                     <div class="profile-editing-user-icon-area">
                                         <!-- <div class="profile-editing-user-icon-area-wrapper"> -->
-                                            <img src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}" class="profile-editing-user-icon">
+                                            <div class="img-delete-btn-wrapper" onclick="deleteProfileIconImage()"><span class="img-delete-btn-content">✕</span></div>
+                                            <img id="icon-image" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}" class="profile-editing-user-icon">
                                             <div class="display-center">
                                                 <input class="user-icon-choice-button" type="file" name="icon_image_file">
                                             </div>
-                                            <input type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
+                                            <input id="edit-icon-image" type="hidden" name="icon_image" value="{{ Auth::user()->icon_image }}">
                                         <!-- </div> -->
                                     </div>
                                     <div>

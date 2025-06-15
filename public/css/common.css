@@ -29,6 +29,26 @@ a {
     color: red;
 }
 
+.header-unread-messege-count-circle {
+    position: relative;
+    top: -7.5px;
+    left: -15px;
+}
+.header-unread-messege-count {
+    position: absolute;
+    background-color: red;
+    color: white;
+    font-size: 16px;
+    padding: 1px 0px;
+    border-radius: 9999px;
+    min-width: 20px;
+    min-height: 20px;
+    text-align: center;
+    line-height: 1;
+    font-weight: bold;
+}
+
+
 header {
     height: 70px;
     width: 100%;

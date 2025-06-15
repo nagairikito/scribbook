@@ -32,6 +32,8 @@ class TopPageController extends Controller
      * @return view
      */
     public function index() {
+        // $t = $this->talkService->getTalkRoomListByUserId(1);
+        // dd($t);
         $allBlogs = $this->blogService->getAllBlogs();
         return view('toppage', ['blogs' => $allBlogs]);
     }

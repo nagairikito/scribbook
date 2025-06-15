@@ -34,10 +34,7 @@ class TalkRoomController extends Controller
      * @return view
      */
     public function getTalkRoomList(Request $request) {
-        $loginId = Auth::id();
-        $talkRoomList = $this->talkService->getTalkRoomListByUserId($loginId);
-        // $talkRoomList = $this->talkService->getTalkRoomListByUserId(Auth::id());
-Log::debug('auth id', ['id' => Auth::id()]);
+        $talkRoomList = $this->talkService->getTalkRoomListByUserId(Auth::id());
 
         return response()->json([
             'html' => view('talk_room_list_parts', ['talkRoomList' => $talkRoomList])->render(),

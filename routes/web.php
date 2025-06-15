@@ -81,4 +81,5 @@ Route::post('/sendMessage', [TalkRoomDetailController::class, 'sendMessage'])->n
 // Route::get('/getLatestMessageBySender', [TalkRoomDetailController::class, 'getLatestMessageBySender'])->name('get_message');
 Route::get('/getMessages', [TalkRoomDetailController::class, 'getMessages'])->name('get_messages');
 Route::get('/getTalkRoomList', [TalkRoomController::class, 'getTalkRoomList'])->name('get_talk_room_list');
+Route::get('/getAllUnReadMessageCount', [TalkRoomDetailController::class, 'getAllUnReadMessageCount'])->name('get_all_unread_msg');
 

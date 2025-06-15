@@ -30,6 +30,8 @@ class BlogPostingController extends Controller
         $inputData = [
             'user_id' => $request['user_id'],
             'blog_unique_id' => $request['blog_unique_id'],
+            'thumbnail_name' => $request['thumbnail_name'],
+            'thumbnail_img' => $request['thumbnail_img'],
             'title' => $request['title'],
             'contents' => $request['contents'],
             'image_file_names' => $request['image_file_name'],

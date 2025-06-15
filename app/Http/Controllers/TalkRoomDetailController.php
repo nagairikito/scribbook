@@ -68,7 +68,7 @@ class TalkRoomDetailController extends Controller
     }
 
     /**
-     * メッセージ全件取得
+     * トークルームIDに紐づくメッセージ全件取得
      * @param object request
      */
     public function getMessages(Request $request) {
@@ -92,5 +92,19 @@ class TalkRoomDetailController extends Controller
         return response()->json([
             'html' => view('talk_room_parts', ['talkRoomDatas' => $talkRoomDatas])->render(),
         ]);
+    }
+
+    /**
+     * 全未読メッセージ数取得
+     * @param object request
+     * @return View
+     */
+    public function getAllUnReadMessageCount(Request $request) {
+        $unReadMsgCount = $this->talkService->getAllUnReadMessageCount(Auth::id());
+
+        return response()->json(['unReadMsgCount' => $unReadMsgCount]);
+        // return response()->json([
+        //     'unReadMsgCount' => view('CommonParts.header', ['unReadMsgCount' => $unReadMsgCount])
+        // ]);
     }
 }

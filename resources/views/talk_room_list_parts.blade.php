@@ -25,12 +25,12 @@
                                     <p class="message">{{ $talkRoom['message'] }}</p>
                                 </div>
                                 <div class="send-time-wrapper">
-                                    <p class="send-time">{{ $talkRoom['updated_at'] }}</p>
+                                    <p class="send-time">{{ $talkRoom['talk_created_at'] }}</p>
                                 </div>    
                             @elseif($talkRoom['message'] == null && $talkRoom['attached_file_path'] != null)
                                 <p>画像を送信しました</p>
                                 <div>
-                                    <p>{{ $talkRoom['updated_at'] }}</p>
+                                    <p>{{ $talkRoom['talk_created_at'] }}</p>
                                 </div>    
                             @else
                                 <p></p>

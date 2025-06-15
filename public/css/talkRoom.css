@@ -1,6 +1,12 @@
 #talk-room .message-display-header {
     display: flex;
     align-items: center;
+    position: sticky;
+    top: 70px;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    background-color: #f2f5db;
 }
 
 #talk-room .contents {

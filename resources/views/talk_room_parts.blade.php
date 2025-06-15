@@ -9,7 +9,7 @@
                 @endif
                 <p class="message-contents">{{ $message['message'] }}</p>
                 <div class="msg-stauts {{ $message['created_by'] == $talkRoomDatas['sender'] ? 'send' : 'receive' }}">
-                    @if($message['read_flag'] == config('consts.TALK.READ_FLAG_ON'))
+                    @if($message['read_flag'] == config('consts.TALK.READ_FLAG_ON') && $message['created_by'] == $talkRoomDatas['sender'])
                         <p class="already-read">既読</p>
                     @else
                         <p></p>

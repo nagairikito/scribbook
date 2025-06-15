@@ -61,3 +61,33 @@
     height: 25px;
     margin-bottom: 2px;
 }
+
+#blog-posting .thumbnail-area {
+    display: flex;
+}
+
+#blog-posting .thumbnail-preview-box {
+    width: 302px;
+    height: 302px;
+    border: 1px solid #888888;
+    border-radius: 3px;
+    margin: 0 10px;
+}
+#blog-posting .thumbnail-preview-box:hover {
+    opacity: 0.5;
+    background-color: #dfdfdf;
+    transition: all 0.3s;
+}
+#blog-posting .thumbnail-preview-box.e-non {
+    pointer-events: none;
+}
+
+#blog-posting .thumbnail-preview-box > p {
+    width: 100%;
+    padding: 50px;
+    text-align: center;
+}
+
+#blog-posting .import-thumbail-btn {
+    margin: 0 10px;
+}

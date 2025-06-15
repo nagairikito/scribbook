@@ -2,7 +2,12 @@ let modal = document.getElementById("modal");
 let modalEditProfile = document.getElementById("profile-editing-modal");
 let modalPrivacySetting = document.getElementById("privacy-setting-modal");
 let modalFavoriteUser = document.getElementById("favorite-user-modal");
-let iconImage = document.getElementsByName('icon_image');
+let iconImage = document.getElementById("icon-image");
+let editIconImage = document.getElementById("edit-icon-image");
+
+//画像の表示URL
+let displayImagePath = "http://localhost/storage/user_icon_images/"
+
 
 
 const EDIT_PROFILE           = 1;
@@ -62,8 +67,11 @@ function closeModal($contentsType) {
 /**
  * ユーザーアイコンを初期アイコンに戻す
  */
-function initUserIcon() {
-    iconImage[0].value = 'noImage.png';
+function deleteProfileIconImage() {
+    iconImage.src = displayImagePath + "noImage.png";
+    editIconImage.value = '';
+        console.log(editIconImage)
+
 }
 
 /**

@@ -7,6 +7,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\Talk;
 use App\Const\TalkConst;
 
+use function Laravel\Prompts\select;
+
 class TalkRepository extends Repository
 {
     public $talk;
@@ -30,7 +32,7 @@ class TalkRepository extends Repository
     }
 
     /**
-     * 未読メッセージ数
+     * トークルーム単体の未読メッセージ数
      * @param int $talkRoomId
      * @param int $createdBy
      * @return int $count
@@ -69,6 +71,32 @@ class TalkRepository extends Repository
         }
 
         return $result;    
+    }
+
+    /**
+     * トークルームごとの未読メッセージ数
+     * @param array $talkRoomIds
+     * @return int $total
+     */
+    public function getAllUnReadMessageCount($talkRoomIds, $loginUserId) {
+        $counts = $this->talk
+            ->select(
+                'talk_room_id',
+                DB::raw('count(*) as count')
+            )
+            ->whereIn('talk_room_id', $talkRoomIds)
+            ->where('updated_by', '!=', $loginUserId)
+            ->where('read_flag', TalkConst::ALREADY_READ_OFF)
+            ->groupBy('talk_room_id')
+            // ->first();
+            ->get();
+
+        $countList = !empty($counts) ? $counts->toArray() : [];
+        $total = 0;
+        foreach($countList as $count) {
+            $total += $count['count'];
+        }
+        return $total;
     }
 
     /**

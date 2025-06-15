@@ -32,21 +32,6 @@ let imageFileName = '';
 const blogPostingForm = document.getElementById("blog-posting-form");
 const inputData = document.getElementById('original-contents');
 
-//コンテンツの最初の行にdivタグ付与(なぜか1行目にdivタグがふよされないため以下の処理を記述)
-// const div = document.createElement("div");
-// div.appendChild(inputData.childNodes[0]);
-// inputData.prepend(div);
-
-//入力１行目にdivタグをつける処理
-// inputData.addEventListener('input', function (e) {
-//     inputChildNodes = Array.from(this.childNodes)
-//     if(inputChildNodes.length > 1) {
-//         inputChildNodes.forEach((child) => {
-//             return Array.from(child.childNodes);
-//         });
-//     }
-// });
-
 //submit後の処理：入力内容をテキストエリアにコピー（inputで送信できないため）
 blogPostingForm.addEventListener('submit', function(e) {
     e.preventDefault();
@@ -83,11 +68,14 @@ blogPostingForm.addEventListener('submit', function(e) {
         contents.after(p);
     }
 
+    //img srcをbase64から「保存先＋ファイル名」に差し替え
     if(validationFlag == true) {
-        //img srcをbase64から「保存先＋ファイル名」に差し替え
         let blogPostingForm = document.getElementById("blog-posting-form");
         let contentsImages = document.querySelectorAll('.contents-image');
+        let thumbnailName = document.getElementById("submit-thumbnail-name");
+        let thumbnailImg = document.getElementById("submit-thumbnail-img");
 
+        //ブログのユニークIDを生成
         let date = new Date();
         let subimtTime = date.getFullYear()
                         + ('0' + (date.getMonth() + 1)).slice(-2)
@@ -102,6 +90,14 @@ blogPostingForm.addEventListener('submit', function(e) {
         inputBlogUniqueId.value = blogUniqueId;
         blogPostingForm.appendChild(inputBlogUniqueId);
 
+        //サムネイルデータ加工
+        thumbnailPreviewImg = document.getElementById("thumbnail-preview-img");
+        if(thumbnailPreviewImg !== "undefined" && thumbnailPreviewImg !== null && thumbnailPreviewImg !== "") {
+            thumbnailName.value = thumbnailPreviewImg.alt
+            thumbnailImg.value = thumbnailPreviewImg.src
+        }
+
+        //画像データをlaravel側で取得できるように加工
         contentsImages.forEach((image) => {
             let base64Src = image.src;
             let fileName = blogUniqueId + "_" + image.alt;
@@ -125,11 +121,13 @@ blogPostingForm.addEventListener('submit', function(e) {
             div.appendChild(inputBase64Text);
         })
 
+        //ブログ編集フィールドの画像削除ボタン非表示でテーブルに登録（編集時display:none;を外して編集フォームでは表示できるようにする）
         let contentsImageAreaButtons = document.querySelectorAll('.contents-image-area-buttons');
         contentsImageAreaButtons.forEach((buttons) => {
             buttons.style = "display: none;";
         })
 
+        //contenteditable="true"のdivからtextareaにコピー
         const originalContents = document.getElementById("original-contents");
         const replacementContents = document.getElementById("replacement-contents");
         replacementContents.value = originalContents.innerHTML;
@@ -156,9 +154,9 @@ document.addEventListener('drop', (e) => {
 });
 
 document.addEventListener('dragstart', (e) => {
-    if(e.target.id == 'import-image-area') {
+    // if(e.target.id == 'import-image-area') {
         imageFileName = e.target.alt;
-    }
+    // }
 })
 
 //ブログ編集フィールドに画像をドラッグしたときの挙動
@@ -220,7 +218,7 @@ blogEditField.addEventListener('drop', (e) => {
         let randomStr = generateRandomString();
 
         //ブログ編集フィールドの画像altと登録時の画像ファイル名
-        let registerImageFileName = imageFileName + "_" + randomStr; 
+        let registerImageFileName = randomStr + "_" + file.name ; 
 
         let img = document.createElement("img");
         img.src = e.target.result;
@@ -274,6 +272,111 @@ function deleteContentsImage(target) {
     if(contentsImageAreas > 0) {
         adjustContentsImageArea(contentsImageAreas);
     }
+}
+
+//サムネイル登録（ファイル選択ボタンから）
+function importThumbnail(data) {
+    const file = data.files[0];
+    if(!file) return;
+    const fileName = file.name;
+    
+    const reader = new FileReader();
+    reader.addEventListener('error', () => {
+        return;
+    });
+    reader.addEventListener('load', (e) => {
+        let previewBox = document.getElementById("thumbnail-preview-box");
+        previewBox.innerHTML = '';
+        previewBox.classList.remove('thumbnail-preview-box');
+
+        let deleteBtn = document.createElement('div');
+        deleteBtn.classList.add('delete-btn-wrapper');
+        deleteBtn.setAttribute('onclick', 'deleteThumbnail()');
+        let span = document.createElement('span');
+        span.classList.add('delete-btn-content');
+        span.textContent = '✕';
+        deleteBtn.appendChild(span);
+        previewBox.appendChild(deleteBtn);
+
+        //ランダムな羅列生成
+        let randomStr = generateRandomString();
+
+        //ブログ編集フィールドの画像altと登録時の画像ファイル名
+        let registerImageFileName = randomStr + "_" + fileName; 
+
+        let img = document.createElement("img");
+        img.id = "thumbnail-preview-img";
+        img.src = e.target.result;
+        img.alt = registerImageFileName;
+        img.setAttribute("style", "width: 300px; height: 300px;");
+        previewBox.appendChild(img);
+    });
+    reader.readAsDataURL(file);
+}
+
+//サムネイル登録（ドラッグアンドドロップ）
+var thumbailField = document.getElementById("thumbnail-preview-box");
+
+thumbailField.addEventListener('drop', (e) => {
+    // let targetPoint = window.getSelection();
+    // if(targetPoint.anchorNode === null || !thumbailField.contains(targetPoint.anchorNode)) {
+    //     return;
+    // }
+    e.preventDefault();
+
+    var file = e.dataTransfer.files[0];
+    if(!file || !file.type.match('image.*')) {
+        return;
+    }
+
+    var reader = new FileReader();
+    reader.addEventListener('error', () => {
+        return;
+    });
+    reader.addEventListener('load', (e) => {
+                let previewBox = document.getElementById("thumbnail-preview-box");
+        previewBox.innerHTML = '';
+        previewBox.classList.remove('thumbnail-preview-box');
+
+        let deleteBtn = document.createElement('div');
+        deleteBtn.classList.add('delete-btn-wrapper');
+        deleteBtn.setAttribute('onclick', 'deleteThumbnail()');
+        let span = document.createElement('span');
+        span.classList.add('delete-btn-content');
+        span.textContent = '✕';
+        deleteBtn.appendChild(span);
+        previewBox.appendChild(deleteBtn);
+
+        //ランダムな羅列生成
+        let randomStr = generateRandomString();
+
+        //ブログ編集フィールドの画像altと登録時の画像ファイル名
+        let registerImageFileName = randomStr + "_" +  file.name; 
+
+        let img = document.createElement("img");
+        img.id = "thumbnail-preview-img";
+        img.src = e.target.result;
+        img.alt = registerImageFileName;
+        img.setAttribute("style", "width: 300px; height: 300px;");
+
+        previewBox.appendChild(img);
+    });
+    reader.readAsDataURL(file);
+});
+
+
+//サムネイル削除
+function deleteThumbnail() {
+    let inputThumbnail = document.getElementById("import-thumbail-input").value;
+    inputThumbnail.value = '';
+
+    let p = document.createElement('p');
+    p.innerHTML = 'ここにサムネイル用画像をドラッグアンドドロップしてください<br><br><br>ファイルを選択ボタンからも登録できます';
+
+    let previewBox = document.getElementById("thumbnail-preview-box");
+    previewBox.innerHTML = '';
+    previewBox.classList.add('thumbnail-preview-box');
+    previewBox.appendChild(p);
 }
 
 //文字サイズセット

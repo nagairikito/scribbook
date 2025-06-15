@@ -15,6 +15,7 @@ return new class extends Migration
             Schema::create('t_blogs', function (Blueprint $table) {
                 $table->increments('id');
                 $table->string('blog_unique_id', 50)->comment('ブログユニークID');
+                $table->string('thumbnail', 255)->default('noImage.png')->comment('サムネイル');
                 $table->string('title', 255)->comment('ブログタイトル');
                 $table->longText('contents')->comment('ブログコンテンツ');
                 $table->integer('view_count')->default(0)->comment('閲覧数');
