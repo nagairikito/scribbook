@@ -25,13 +25,14 @@ class FavoriteBlogRepository extends Repository
     public function getAllFavoriteBlogsByUserId($id) {
         $favoriteBlogs = $this->favoriteBlog
         ->join('t_blogs', 't_blogs.id', '=', 't_favorite_blogs.blog_id')
-        ->join('m_users', 'm_users.id', '=', 't_favorite_blogs.user_id')
+        ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
         ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->where('t_favorite_blogs.user_id', $id)
         ->orderByDesc('t_favorite_blogs.created_at')
         ->select(
             't_blogs.*',
-            'm_users.name'
+            'm_users.name',
+            'm_users.icon_image'
         )
         ->get();
 

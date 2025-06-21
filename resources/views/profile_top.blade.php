@@ -18,8 +18,8 @@
                 <div class="profile-card">
                     @if(Auth::user() && Auth::id() == $user['id'])
                         <div class="profile-button-list">
-                            <div class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)"><p>プロフィール編集</p></div>
-                            <div class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)"><p>プライバシー設定</p></div>
+                            <div class="open-edit-profile-modal" onclick="openModal(EDIT_PROFILE)"><i class="bi bi-pencil fos-1_5rem"></i></div>
+                            <div class="open-privacy-setting-modal" onclick="openModal(PRIVACY_SETTING)"><i class="bi bi-gear fos-1_5rem mr-5"></i></div>
                             <div>
                                 <form action="{{ route('logout') }}" method="GET">
                                     @csrf
@@ -37,20 +37,22 @@
                                     <img src="{{ asset('storage/user_icon_images/' .$user['icon_image']) }}" class="profile-icon">
                                 </div>
                                 @if(Auth::user() && Auth::id() == $user['id'])
-                                    <div class="open-favorite-user-modal" onclick="openModal(FAVORITE_USER)">お気に入りユーザー</div>
+                                    <div class="open-favorite-user-modal" onclick="openModal(FAVORITE_USER)"><i class="bi bi-person-lines-fill fos-1_5rem"></i></div>
 
                                 @elseif(Auth::user() && Auth::id() != $user['id'])
                                     @if($user['favorite_flag'] == false)
                                         <form action="{{ route('register_favorite_user') }}" metohd="POST">
                                             @csrf
-                                            <input type="submit" class="favorite-user-button mb-15p" value="お気に入り登録">
+                                            <input type="submit" id="add-fav-user" class="favorite-user-button mb-15p">
+                                            <label for="add-fav-user"><i class="bi bi-person-add fos-1_5rem"></i></label>
                                             <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
                                             <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
                                         </form>
                                     @else
                                         <form action="{{ route('delete_favorite_user') }}" metohd="POST">
                                             @csrf
-                                            <input type="submit" class="favorite-user-button mb-15p" value="お気に入り登録解除">
+                                            <input type="submit" id="remove-fav-user" class="favorite-user-button mb-15p">
+                                            <label for="remove-fav-user"><i class="bi bi-person-dash fos-1_5rem"></i></label>
                                             <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
                                             <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
                                             <input type="hidden" name="page_type" value="profile_top">
@@ -61,7 +63,8 @@
                                             @csrf
                                             <input type="hidden" name="sender" value="{{ Auth::id() }}">
                                             <input type="hidden" name="recipient" value="{{ $user['id'] }}">
-                                            <input type="submit" class="message-button" value="メッセージを送る">
+                                            <input type="submit" id="create-msg" class="message-button">
+                                            <label for="create-msg"><i class="bi bi-chat-dots fos-1_5rem"></i></label>
                                         </form>
                                     </div>
                                 @endif

@@ -33,12 +33,15 @@ class SearchRepository extends Repository
         ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->select(
             't_blogs.id as id',
+            't_blogs.thumbnail as thumbnail',
+            't_blogs.blog_unique_id as blog_unique_id',
             't_blogs.title as title',
             't_blogs.contents as contents',
             't_blogs.created_at as created_at',
             't_blogs.updated_at as updated_at',
             't_blogs.created_by as created_by',
             'm_users.name as name',
+            'm_users.icon_image as icon_image',
         )
         ->get();
 

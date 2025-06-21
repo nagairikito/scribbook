@@ -30,6 +30,8 @@ let displayImagePath = "http://localhost/storage/blog_contents_images/"
 //ブログ編集フィールドの画像のファイル名
 let imageFileName = '';
 
+//投稿フラグ(２重送信防止)
+let submitFlag = false;
 
 const blogEditingForm = document.getElementById("blog-editing-form");
 const inputData = document.getElementById('original-contents');
@@ -51,6 +53,11 @@ blogEditingForm.addEventListener('submit', function(e) {
             error.remove();
         });
     } 
+
+    if(submitFlag == true) {
+        return;
+    }
+
     //バリデーション
     let validationFlag = true;
     let titleElm = document.querySelector('.blog-title');
@@ -81,6 +88,8 @@ blogEditingForm.addEventListener('submit', function(e) {
 
     //img srcをbase64から「保存先＋ファイル名」に差し替え
     if(validationFlag == true) {
+        submitFlag = true;
+
         let blogEditingForm = document.getElementById("blog-editing-form");
         let contentsImages = document.querySelectorAll('.contents-image');
         let thumbnailName = document.getElementById("submit-thumbnail-name");

@@ -63,6 +63,10 @@ header .header-wrapper {
     height: 70px;
     padding: 10px;
     background-color: #fff0ab;
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 1000;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -77,6 +81,10 @@ header .header-logo {
 }
 header .header-logo-wrapper {
     cursor: pointer;
+}
+
+header .header-app-logo {
+    width: 60px;
 }
 
 header .header-search-bar {
@@ -103,6 +111,14 @@ header .search-textbox {
 
 header .search-button {
     height: 30px;
+}
+
+.sp-header-search-bar {
+    display: none;
+}
+
+header .sp-header-right-nav {
+    display: none;
 }
 
 header .header-nav {
@@ -155,4 +171,109 @@ footer .footer-wrapper {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#footer-menu {
+    display: none;
+}
+
+@media screen and (max-width: 767px) {
+    header {
+        height: 50px;
+        position: fixed;
+    }
+
+    header .header-wrapper {
+        height: 50px;
+    }
+
+    header .header-nav {
+        display: none;
+        width: 0;
+    }
+
+    header .sp-header-right-nav {
+        display: flex;
+        align-items: center;
+    }
+
+    header .header-search-bar {
+        display: none;
+    }
+
+    header .sp-header-search-bar {
+        display: block;
+        width: 100%;
+        min-width: initial;
+        height: 50px;
+        padding: 5px;
+        position: absolute;
+        background-color: rgba(210, 210, 210, 0.6);
+        top: 0;
+        left: 0;
+        z-index: 10;
+        transition: all 0.2s;
+    }
+    header .sp-header-search-bar.active {
+        top: 50px;
+    }
+
+    header .sp-header-search-bar-wrapper {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: nowrap;
+        flex: 1;
+    }
+
+    header .sp-search-icon {
+        margin-right: 20px;
+    }
+
+    header .sp-search-textbox {
+        flex: 1;
+        min-width: initial;
+        height: 30px;
+        margin-right: 0.5%;
+    }
+    
+    header .sp-search-button {
+        height: 30px;
+    }
+
+    header .sp-list-icon {
+        margin-right: 10px;
+    }
+
+    #footer-menu {
+        display: block;
+        position: fixed;
+        width: 100%;
+        height: 40px;
+        z-index: 100;
+        bottom: 0;
+        left: 0;
+        background-color: rgba(210, 210, 210, 0.6);
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    }
+
+    #footer-menu .footer-menu-wrapper {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+    }
+
+    #footer-menu .footer-menu-user-icon {
+        width: 30px;
+        height: 30px;
+        border: 1px solid #888888;
+        border-radius: 50%;
+    }
 }

@@ -81,6 +81,7 @@ class BlogRepository extends Repository
             't_blogs.contents',
             't_blogs.created_by',
             'm_users.name',
+            'm_users.icon_image',
             't_blogs.created_at',
             't_blogs.updated_at',
         )
@@ -104,6 +105,7 @@ class BlogRepository extends Repository
             't_blogs.contents',
             't_blogs.created_by',
             'm_users.name',
+            'm_users.icon_image',
             't_blogs.created_at',
             't_blogs.updated_at',
         )
@@ -127,6 +129,7 @@ class BlogRepository extends Repository
         ->select(
             't_blogs.*',
             'm_users.name',
+            'm_users.icon_image',
         )
         ->first();
 
@@ -175,6 +178,7 @@ class BlogRepository extends Repository
             't_blogs.created_by',
             't_blogs.updated_at',
             'm_users.name',
+            'm_users.icon_image',
         ])
         ->orderByDesc('t_blogs.id')
         ->get();
@@ -198,6 +202,7 @@ class BlogRepository extends Repository
             't_blogs.view_count',
             't_blogs.updated_at',
             'm_users.name',
+            'm_users.icon_image',
         )
         ->join('m_users', 'm_users.id', '=', 't_blogs.created_by')
         ->where('m_users.delete_flag', AccountConst::USER_DELETE_FLAG_OFF)

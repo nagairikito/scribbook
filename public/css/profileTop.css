@@ -71,14 +71,13 @@
 
 #profile-top .open-edit-profile-modal, 
 #profile-top .open-privacy-setting-modal, 
-#profile-top .open-favorite-user-modal, 
+#profile-top .open-favorite-user-modal {
+
+}
+
 #profile-top .favorite-user-button,
 #profile-top .message-button {
-    cursor: pointer;
-    border: 2px solid #888888;
-    border-radius: 7.5px;
-    width: 150px;
-    height: 30px;
+    display: none;
 }
 
 #profile-top .logout-button {
@@ -353,4 +352,34 @@
     height: 30px;
     background-color: #ff2929;
     margin: 5px 0 10px 0;
+}
+
+@media screen and (max-width:767px) {
+    #profile-top .profile-card {
+        padding: 10px 0 0 0;
+    }
+
+    #profile-top .profile-contents {
+        display: block;
+    }
+
+    #profile-top .profile-contents .right-contents {
+        padding: 20px 5px 0 0;
+    }
+
+    #profile-top .profile-contents .right-contents div > p:first-child {
+        text-align: right;
+        width: 100px;
+        margin-right: 30px;
+    }
+
+    #profile-top .word-wrap {
+        line-break: anywhere;
+        width: 90%;
+    }
+
+    #profile-top .logout-button {
+        width: 100px;
+    }
+
 }

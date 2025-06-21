@@ -43,7 +43,8 @@ class BrowsingHistoryRepository extends Repository
         ->orderByDesc('t_browsing_histories.updated_at')
         ->select(
             't_blogs.*',
-            'm_users.name as name'
+            'm_users.name as name',
+            'm_users.icon_image'
         )
         ->get();
 
