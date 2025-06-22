@@ -178,6 +178,11 @@ footer .footer-wrapper {
 }
 
 @media screen and (max-width: 767px) {
+    p {
+        margin: 8px 0;
+    }
+
+
     header {
         height: 50px;
         position: fixed;

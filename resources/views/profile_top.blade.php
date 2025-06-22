@@ -40,32 +40,34 @@
                                     <div class="open-favorite-user-modal" onclick="openModal(FAVORITE_USER)"><i class="bi bi-person-lines-fill fos-1_5rem"></i></div>
 
                                 @elseif(Auth::user() && Auth::id() != $user['id'])
-                                    @if($user['favorite_flag'] == false)
-                                        <form action="{{ route('register_favorite_user') }}" metohd="POST">
-                                            @csrf
-                                            <input type="submit" id="add-fav-user" class="favorite-user-button mb-15p">
-                                            <label for="add-fav-user"><i class="bi bi-person-add fos-1_5rem"></i></label>
-                                            <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
-                                        </form>
-                                    @else
-                                        <form action="{{ route('delete_favorite_user') }}" metohd="POST">
-                                            @csrf
-                                            <input type="submit" id="remove-fav-user" class="favorite-user-button mb-15p">
-                                            <label for="remove-fav-user"><i class="bi bi-person-dash fos-1_5rem"></i></label>
-                                            <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
-                                            <input type="hidden" name="page_type" value="profile_top">
-                                        </form>
-                                    @endif
-                                    <div>
-                                        <form action="{{ route('display_talk_room') }}" method="get">
-                                            @csrf
-                                            <input type="hidden" name="sender" value="{{ Auth::id() }}">
-                                            <input type="hidden" name="recipient" value="{{ $user['id'] }}">
-                                            <input type="submit" id="create-msg" class="message-button">
-                                            <label for="create-msg"><i class="bi bi-chat-dots fos-1_5rem"></i></label>
-                                        </form>
+                                    <div class="activity-btns">
+                                        @if($user['favorite_flag'] == false)
+                                            <form action="{{ route('register_favorite_user') }}" metohd="POST">
+                                                @csrf
+                                                <input type="submit" id="add-fav-user" class="favorite-user-button mb-15p">
+                                                <label for="add-fav-user"><i class="bi bi-person-add fos-1_5rem"></i></label>
+                                                <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                                <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
+                                            </form>
+                                        @else
+                                            <form action="{{ route('delete_favorite_user') }}" metohd="POST">
+                                                @csrf
+                                                <input type="submit" id="remove-fav-user" class="favorite-user-button mb-15p">
+                                                <label for="remove-fav-user"><i class="bi bi-person-dash fos-1_5rem"></i></label>
+                                                <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
+                                                <input type="hidden" name="target_favorite_user_id" value="{{ $user['id'] }}">
+                                                <input type="hidden" name="page_type" value="profile_top">
+                                            </form>
+                                        @endif
+                                        <div>
+                                            <form action="{{ route('display_talk_room') }}" method="get">
+                                                @csrf
+                                                <input type="hidden" name="sender" value="{{ Auth::id() }}">
+                                                <input type="hidden" name="recipient" value="{{ $user['id'] }}">
+                                                <input type="submit" id="create-msg" class="message-button">
+                                                <label for="create-msg"><i class="bi bi-chat-dots fos-1_5rem"></i></label>
+                                            </form>
+                                        </div>
                                     </div>
                                 @endif
                             </div>
@@ -136,7 +138,7 @@
                                     </div>
                                     <div>
                                         <p>概要欄</p>
-                                        <textarea name="discription" cols="70" rows="15" style="resize: none;">{{ old('discription', Auth::user()->discription) }}</textarea>
+                                        <textarea name="discription" class="description-text-area">{{ old('discription', Auth::user()->discription) }}</textarea>
                                         @if($errors->has('discription'))
                                         <p class="error-message me">{{ $errors->first('discription') }}</p>
                                         @endif
@@ -238,7 +240,8 @@
                                     <div class="right">
                                         <form action="{{ route('delete_favorite_user') }}" class="delete-favorite-user-button-wrapper">
                                             @csrf
-                                            <input type="submit" class="delete-favorite-user-button" value="お気に入り登録解除">
+                                            <input type="submit" id="remove-fav-user-modal" class="delete-favorite-user-button">
+                                            <label for="remove-fav-user-modal"><i class="bi bi-person-dash fos-1_5rem"></i></label>
                                             <input type="hidden" name="login_user_id" value="{{ Auth::id() }}">
                                             <input type="hidden" name="target_favorite_user_id" value="{{ $favorite_user['id'] }}">
                                             <input type="hidden" name="page_type" value="my_favorite_users">
