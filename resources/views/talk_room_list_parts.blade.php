@@ -8,7 +8,7 @@
                     </div>    
                     <div class="contents">
                         <div class="top">
-                            <p>{{ $talkRoom['name'] }}</p>
+                            <p class="user-name">{{ $talkRoom['name'] }}</p>
                             <div class="unread-messege-count-wrapper mr-20p">
                                 @if($talkRoom['unReadMsgCount'] > 0)
                                     <div class="unread-messege-count-circle">

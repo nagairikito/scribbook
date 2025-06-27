@@ -121,3 +121,14 @@
 .message-send-button::before {
     transform: rotate(45deg);
 }
+
+@media screen and (max-width: 767px) {
+    #talk-room .message-display-header {
+        top: 50px;
+    }
+
+    .message-send-textbox {
+        bottom: 40px;
+    }
+
+}

@@ -117,6 +117,10 @@ header .search-button {
     display: none;
 }
 
+header .tool-list {
+    display: none;
+}
+
 header .sp-header-right-nav {
     display: none;
 }
@@ -182,10 +186,8 @@ footer .footer-wrapper {
         margin: 8px 0;
     }
 
-
     header {
         height: 50px;
-        position: fixed;
     }
 
     header .header-wrapper {
@@ -237,6 +239,14 @@ footer .footer-wrapper {
         margin-right: 20px;
     }
 
+    header .sp-blog-tools {
+        display: none;
+    }
+
+    header .tool-list {
+        display: none;
+    }
+
     header .sp-search-textbox {
         flex: 1;
         min-width: initial;
@@ -254,7 +264,8 @@ footer .footer-wrapper {
 
     #footer-menu {
         display: block;
-        position: fixed;
+        /* position: fixed; */
+        position: sticky;
         width: 100%;
         height: 40px;
         z-index: 100;
@@ -281,4 +292,9 @@ footer .footer-wrapper {
         border: 1px solid #888888;
         border-radius: 50%;
     }
+
+    header .header-app-logo {
+        width: 40px;
+    }
+
 }

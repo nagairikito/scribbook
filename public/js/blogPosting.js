@@ -34,6 +34,14 @@ let submitFlag = false;
 const blogPostingForm = document.getElementById("blog-posting-form");
 const inputData = document.getElementById('original-contents');
 
+//spツールバーの表示/非表示
+const blogToolsBtn = document.getElementById('blog-tools');
+
+blogToolsBtn.addEventListener('click', () => {
+    let toolList = document.getElementById('tool-list');
+    toolList.classList.toggle('active');
+})
+
 //submit後の処理：入力内容をテキストエリアにコピー（inputで送信できないため）
 blogPostingForm.addEventListener('submit', handleSubmit);
 

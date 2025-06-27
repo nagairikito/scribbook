@@ -36,6 +36,14 @@ let submitFlag = false;
 const blogEditingForm = document.getElementById("blog-editing-form");
 const inputData = document.getElementById('original-contents');
 
+//spツールバーの表示/非表示
+const blogToolsBtn = document.getElementById('blog-tools');
+
+blogToolsBtn.addEventListener('click', () => {
+    let toolList = document.getElementById('tool-list');
+    toolList.classList.toggle('active');
+})
+
 //編集フォームロード時ブログ編集フィールドの画像のボタンを表示する処理
 let controlContentsImageButtons = document.querySelectorAll('.contents-image-area-buttons');
 

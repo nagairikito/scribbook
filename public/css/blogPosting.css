@@ -90,3 +90,79 @@
 #blog-posting .import-thumbail-btn {
     margin: 0 10px;
 }
+
+@media screen and (max-width: 767px) {
+    #blog-posting .tools-field {
+        display: none;
+    }
+
+    #blog-posting .thumbnail-area {
+        display: initial;
+    }
+
+    #blog-posting .thumbnail-preview-box {
+        margin: 0 auto;
+    }
+
+    #blog-posting #blog-posting-form .blog-title {
+        width: 90vw;
+    }
+
+    #blog-posting #blog-posting-form #original-contents.original-contents {
+        margin: 0 auto;
+        width: 90vw;
+        text-align: initial;
+    }
+
+    #blog-posting .blog-posting-form-wrapper {
+        text-align: center;
+    }
+
+    header .sp-search-icon {
+        display: none !important;
+    }
+
+    header .sp-blog-tools {
+        display: block !important;
+        margin-right: 20px;
+    }
+
+    header .tool-list {
+        display: block !important;
+        width: 100%;
+        height: 60px;
+        position: fixed;
+        top: -10px;
+        left: 0;
+        background-color: rgba(210, 210, 210, 0.6);
+        overflow: scroll;
+        transition: all 0.2s;
+    }
+    header .tool-list.active {
+        top: 50px;
+    }
+
+    header .tool-list-wrapper {
+        width: 100%;
+        height: 60px;
+        display: flex;
+        padding: 5px 0;
+        
+    }
+
+    header .tool-list-wrapper > div {
+        display: flex;
+        flex-direction: column;
+    }
+
+    header .tool-btn {
+        width: 40px;
+        height: 30px;
+    }
+
+    header .sub-tool-btn {
+        width: 40px;
+        height: 20px;
+    }
+
+}
