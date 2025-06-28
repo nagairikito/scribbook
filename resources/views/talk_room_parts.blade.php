@@ -7,7 +7,17 @@
                         <img class="user-icon" src="{{ asset('storage/user_icon_images/' . $talkRoomDatas['recipient']['icon_image']) }}">
                     </div>
                 @endif
-                <p class="message-contents">{{ $message['message'] }}</p>
+                <div class="message-contents-wrapper">
+                    <p class="message-contents">{{ $message['message'] }}</p>
+                    <div class="msg-stauts-sp {{ $message['created_by'] == $talkRoomDatas['sender'] ? 'send' : 'receive' }}">
+                        <p class="send-at-sp">{{ $message['updated_at'] }}</p>
+                        @if($message['read_flag'] == config('consts.TALK.READ_FLAG_ON') && $message['created_by'] == $talkRoomDatas['sender'])
+                            <p class="already-read-sp">既読</p>
+                        @else
+                            <p></p>
+                        @endif
+                    </div>
+                </div>
                 <div class="msg-stauts {{ $message['created_by'] == $talkRoomDatas['sender'] ? 'send' : 'receive' }}">
                     @if($message['read_flag'] == config('consts.TALK.READ_FLAG_ON') && $message['created_by'] == $talkRoomDatas['sender'])
                         <p class="already-read">既読</p>
@@ -17,8 +27,7 @@
                     <p class="send-at">{{ $message['updated_at'] }}</p>
                 </div>
             </div>
-        @endforeach
-    
+        @endforeach    
     @else
         <div></div>
     @endif

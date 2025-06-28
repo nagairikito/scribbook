@@ -91,6 +91,13 @@
     margin: 0 10px;
 }
 
+#blog-posting .tools-field {
+    position: sticky;
+    height: 100%;
+    top: 100px;
+    left: 0;
+}
+
 @media screen and (max-width: 767px) {
     #blog-posting .tools-field {
         display: none;

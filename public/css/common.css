@@ -297,4 +297,8 @@ footer .footer-wrapper {
         width: 40px;
     }
 
+    .header-unread-messege-count {
+        top: 0;
+        left: 0;
+    }
 }

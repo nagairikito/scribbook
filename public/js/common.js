@@ -7,7 +7,6 @@ window.addEventListener('DOMContentLoaded', () => {
     })
     .done((res) => {
         if(res.unReadMsgCount != 0 && res.unReadMsgCount != null) {
-            let targetElm = document.querySelector('.header-talk-area');
 
             parentSpan = document.createElement("span");
             parentSpan.classList.add('header-unread-messege-count-circle');
@@ -17,7 +16,14 @@ window.addEventListener('DOMContentLoaded', () => {
             childSpan.textContent = res.unReadMsgCount;
 
             parentSpan.appendChild(childSpan);
-            targetElm.insertBefore(parentSpan, targetElm.firstChild);
+
+            if(screen.availWidth > 767) {
+                let targetElmPc = document.querySelector('.header-talk-area');
+                targetElmPc.insertBefore(parentSpan, targetElmPc.firstChild);
+            } else {
+                let targetElmSp = document.querySelector('.footer-menu-talk-area');
+                targetElmSp.insertBefore(parentSpan, targetElmSp.firstChild);
+            }
         }
     })
     .fail((error) => {

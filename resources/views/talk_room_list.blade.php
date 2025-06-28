@@ -32,11 +32,11 @@
         },
     })
 
-    // function polling() {
-    //     pollingInterval = setInterval(function() {
-    //         getTalkRoomList(false);
-    //     }, 2000);
-    // }
+    function polling() {
+        pollingInterval = setInterval(function() {
+            getTalkRoomList(false);
+        }, 2000);
+    }
     // function polling() {
     //     initPolling();
 

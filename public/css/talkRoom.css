@@ -69,6 +69,13 @@
 
 }
 
+/* .message-contents-wrapper {
+} */
+
+/* .message-contents {
+    background-color: #22eeee;
+    margin: 0;
+} */
 .message-contents {
     margin: 15px 10px 0 10px;
     padding: 5px;
@@ -81,17 +88,13 @@
     display: flex;
     flex-direction: column;
     justify-content: flex-end;
+    line-height: 1.1;
 }
 .msg-stauts.send {
     align-items: flex-end;
 }
 .msg-stauts.receive {
     align-items: flex-start;
-}
-
-
-.msg-stauts {
-    line-height: 1.1;
 }
 
 .already-read {
@@ -104,6 +107,10 @@
     width: 120px;
     font-size: 15px;
     margin: 0;
+}
+
+.msg-stauts-sp {
+    display: none;
 }
 
 .message-send-button-wrapper {
@@ -122,6 +129,10 @@
     transform: rotate(45deg);
 }
 
+.footer-bgcover-sp {
+    display: none;
+}
+
 @media screen and (max-width: 767px) {
     #talk-room .message-display-header {
         top: 50px;
@@ -129,6 +140,47 @@
 
     .message-send-textbox {
         bottom: 40px;
+    }
+
+    .footer-bgcover-sp {
+        display: initial;
+        background-color: #f2f5db;
+        position: sticky;
+        height: 40px;
+        bottom: 0px;
+
+    }
+
+    .message-contents-wrapper {
+        margin: 0;
+        width: 70%;
+    }
+
+    .message {
+        max-width: 100%;
+    }
+
+    .message-contents {
+        padding: 5px;
+        border-radius: 5px;  
+        margin: 0;
+  
+    }
+
+    .msg-stauts-sp {
+        display: flex;
+    }
+
+    .msg-stauts {
+        display: none;
+    }
+
+    .already-read-sp {
+        margin: 0 10px 0 0;   
+    }
+
+    .send-at-sp {
+        margin: 0;   
     }
 
 }

@@ -24,15 +24,14 @@
                 <form>
                     @csrf
                     <input type="text" class="input-message" name="message">
-                    <!-- <textarea name="message" class="input-message" rows="2" cols="100"></textarea> -->
                     <input type="hidden" name="sender" value="{{ Auth::id() }}">
                     <input type="hidden" name="recipient" value="{{ $talkRoom['recipient'] }}">
                     <label for="message-send-button" class="message-send-button-wrapper"><i class="bi bi-send message-send-button"></i></label>
                     <button id="message-send-button" class="hidden-message-send-button" type="submit" style="display: none;"></button>
-                    <!-- <button id="message-send-button" type="submit" style="display: none;"></button> -->
 
                 </form>
             </div>
+            <div class="footer-bgcover-sp"></div>
         </div>
     </div>
 @endsection
@@ -131,7 +130,7 @@
             })
             .done((res) => {
                 html = parse(res.html);
-console.log(html)
+
                 if(firstFlag == true) {
                     replacementResHTML = html
                     $('.message-display').html(html);
@@ -147,31 +146,6 @@ console.log(html)
                 $('.message-display').html('');
                 $('.message-display').html(html);
                 replacementResHTML = html;
-
-                // talkRoom.messages.forEach(function(message) {
-                //     let selector;
-                //     if (message.created_by == talkRoom.sender) {
-                //         selector = "send";
-                //     } else {
-                //         selector = "receive";
-                //     }
-                //     html = `
-                //         <div class="message ${selector}">
-                //             ${selector === "receive" ?
-                //                 `
-                //                 <div>
-                //                     <img class="user-icon" src="{{ asset('storage/user_icon_images/${talkRoom.recipient[0].icon_image }') }}">
-                //                 </div>
-                //                 `
-                //                 :
-                //                 ``
-                //             }
-                //             <p class="message-contents">${message.message}</p>
-                //             <p class="send-at">${message.updated_at}</p>
-                //         </div>
-                //     `;
-                //     $(".message-display").append(html);
-                // });
             })
             .fail((error) => {
                 console.log('失敗！');
@@ -179,15 +153,15 @@ console.log(html)
         }
 
         //一定間隔処理
-        function polling() {
-            let datas = setUpUser(); // 送信者と受信者をURLパラメータから取得
-            const POLLING_DURATION = 2000 // ポーリング間隔
+        // function polling() {
+        //     let datas = setUpUser(); // 送信者と受信者をURLパラメータから取得
+        //     const POLLING_DURATION = 2000 // ポーリング間隔
 
-            // ポーリング処理
-            setInterval(function() {
-                getMessages(datas['data1']);
-            }, POLLING_DURATION);
-        }
+        //     // ポーリング処理
+        //     setInterval(function() {
+        //         getMessages(datas['data1']);
+        //     }, POLLING_DURATION);
+        // }
 
         //前のhtmlと最新のhtmlの要素が一致しているかを判定
         function equalFlag(data) {
