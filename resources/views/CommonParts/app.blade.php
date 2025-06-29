@@ -30,7 +30,11 @@
                 @yield('contents')
 
                 @if(!in_array(Route::currentRouteName(), $hideAdvertisementPage))
-                    @include('CommonParts.advertisement')
+                    @if(!isset($blogData))
+                        @include('CommonParts.advertisement')
+                    @else
+                        @include('CommonParts.advertisement', ['blogData' => $blogData])
+                    @endif
                 @endif
             </div>
         </main>

@@ -153,15 +153,15 @@
         }
 
         //一定間隔処理
-        // function polling() {
-        //     let datas = setUpUser(); // 送信者と受信者をURLパラメータから取得
-        //     const POLLING_DURATION = 2000 // ポーリング間隔
+        function polling() {
+            let datas = setUpUser(); // 送信者と受信者をURLパラメータから取得
+            const POLLING_DURATION = 2000 // ポーリング間隔
 
-        //     // ポーリング処理
-        //     setInterval(function() {
-        //         getMessages(datas['data1']);
-        //     }, POLLING_DURATION);
-        // }
+            // ポーリング処理
+            setInterval(function() {
+                getMessages(datas['data1']);
+            }, POLLING_DURATION);
+        }
 
         //前のhtmlと最新のhtmlの要素が一致しているかを判定
         function equalFlag(data) {

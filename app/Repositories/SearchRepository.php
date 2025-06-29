@@ -46,13 +46,15 @@ class SearchRepository extends Repository
         ->get();
 
         $users = $this->user
+        ->leftJoin('t_favorite_users', 't_favorite_users.favorite_user_id', '=', 'm_users.id')
         ->where('name', 'LIKE', "%{$inputData['keyword']}%")
         ->where('delete_flag', AccountConst::USER_DELETE_FLAG_OFF)
         ->select(
-            'id',
-            'name',
-            'icon_image',
-            'updated_at',
+            'm_users.id',
+            'm_users.name',
+            'm_users.icon_image',
+            't_favorite_users.user_id as login_user_id',
+            'm_users.updated_at',
         )
         ->get();
 
