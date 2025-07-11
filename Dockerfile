@@ -21,7 +21,7 @@ COPY . .
 RUN composer install --no-dev --optimize-autoloader
 
 # npm install & build（ViteやMixを使用する前提）
-RUN npm ci && npm run build
+RUN npm install && npm run build
 
 # WebポートをRenderに合わせる
 EXPOSE 10000
