@@ -21,4 +21,6 @@ CMD php artisan config:clear \
     && php artisan view:cache \
     && php artisan migrate --force \
     && php artisan storage:link \
+    && npm ci \
+    && npm run build \
     && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
