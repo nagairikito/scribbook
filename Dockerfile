@@ -11,12 +11,13 @@ WORKDIR /var/www
 
 COPY . .
 
-RUN composer install --no-dev --optimize-autoloader \
-    && php artisan config:clear \
+RUN composer install --no-dev --optimize-autoloader
+
+EXPOSE 10000
+
+CMD php artisan config:clear \
     && php artisan config:cache \
     && php artisan route:cache \
-    && php artisan view:cache
-
-EXPOSE 8000
-
-CMD php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000
+    && php artisan view:cache \
+    && php artisan migrate --force \
+    && php artisan serve --host=0.0.0.0 --port=${PORT:-10000}
