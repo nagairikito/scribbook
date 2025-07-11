@@ -17,7 +17,18 @@ use App\Http\Controllers\TalkRoomController;
 use App\Http\Controllers\TalkRoomDetailController;
 use App\Http\Controllers\TopicsController;
 use App\Http\Middleware\AuthMiddleware;
+use Illuminate\Support\Facades\DB;
 
+// デプロイ時DB接続確認用
+
+Route::get('/db-check', function () {
+    try {
+        DB::connection()->getPdo();
+        return 'DB 接続成功しました！';
+    } catch (\Exception $e) {
+        return 'DB接続失敗: ' . $e->getMessage();
+    }
+});
 
 // トップページ
 Route::get('/', [TopPageController::class, 'index'])->name('toppage');
