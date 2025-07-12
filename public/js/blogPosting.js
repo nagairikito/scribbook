@@ -24,7 +24,7 @@ let imageSize = 300;
 
 //画像の表示URL
 // let displayImagePath = "http://localhost/storage/blog_contents_images/"
-let displayImagePath = APP_URL + "storage/blog_contents_images/";
+let displayImagePath = APP_URL + "/storage/blog_contents_images/";
 
 //ブログ編集フィールドの画像のファイル名
 let imageFileName = '';
