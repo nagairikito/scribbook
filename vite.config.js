@@ -27,7 +27,7 @@ export default defineConfig({
                 'public/js/common.js',
                 'public/js/displayScreenSizeSetting.js',
                 'public/js/profileTop.js',
-                'public/js/seatch.js',
+                'public/js/search.js',
                 'public/js/talkRoomList.js',
                 'public/js/topPageGetScreenSize.js',
             ],
