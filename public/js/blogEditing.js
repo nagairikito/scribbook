@@ -24,7 +24,8 @@ let selectedImage = null;
 let imageSize = 300;
 
 //画像の表示URL
-let displayImagePath = "http://localhost/storage/blog_contents_images/"
+// let displayImagePath = "http://localhost/storage/blog_contents_images/"
+let displayImagePath = APP_URL + "storage/blog_contents_images/";
 // let displayThumbnailPath = "http://localhost/storage/blog_thumbnail_images/"
 
 //ブログ編集フィールドの画像のファイル名

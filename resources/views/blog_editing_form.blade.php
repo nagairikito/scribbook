@@ -4,6 +4,9 @@
     @parent
     <link rel="stylesheet" href="{{ asset('css/blogEditing.css') }}">
     <script src="{{ asset('js/blogEditing.js') }}" defer></script>
+    <script>
+        const APP_URL = "{{ env('APP_URL') }}"
+    </script>
     <title>編集フォーム_{{ $blog['title'] }}</title>
 @endsection
 

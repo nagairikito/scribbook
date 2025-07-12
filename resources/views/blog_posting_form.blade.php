@@ -4,6 +4,9 @@
     @parent
     <link rel="stylesheet" href="{{ asset('css/blogPosting.css') }}">
     <script src="{{ asset('js/blogPosting.js') }}" defer></script>
+    <script>
+        const APP_URL = "{{ env('APP_URL') }}"
+    </script>
     <title>ブログ投稿フォーム</title>
 @endsection
 
