@@ -1,9 +1,8 @@
 FROM php:8.2-fpm
 
-# Node.js 18.x をインストール（Viteやnpm用）
-RUN curl -fsSL https://deb.nodesource.com/setup_18.x | bash - && \
-    apt-get update && apt-get install -y \
-    git curl zip unzip nodejs \
+# 必要なパッケージのみインストール（Node.js削除済）
+RUN apt-get update && apt-get install -y \
+    git curl zip unzip \
     libpng-dev libjpeg-dev libfreetype6-dev libonig-dev libxml2-dev libzip-dev libpq-dev \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install pdo pdo_mysql mbstring zip exif pcntl bcmath gd
@@ -19,9 +18,6 @@ COPY . .
 
 # Composer install（本番向け最適化）
 RUN composer install --no-dev --optimize-autoloader
-
-# npm install & build（ViteやMixを使用する前提）
-RUN npm install && npm run build
 
 # WebポートをRenderに合わせる
 EXPOSE 10000
