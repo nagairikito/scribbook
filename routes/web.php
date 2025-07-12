@@ -19,11 +19,6 @@ use App\Http\Controllers\TopicsController;
 use App\Http\Middleware\AuthMiddleware;
 use Illuminate\Support\Facades\Storage;
 
-// 
-Route::get('/blog-contents-images-list', function () {
-    $files = Storage::disk('public/blog_contents_images')->files();
-    return response()->json($files);
-});
 
 // トップページ
 Route::get('/', [TopPageController::class, 'index'])->name('toppage');
