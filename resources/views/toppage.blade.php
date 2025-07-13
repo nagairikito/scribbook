@@ -6,6 +6,7 @@
     <meta name="robots" content="index, follow">
     <meta name="description" content="自由帳感覚で書けるブログです。">
     <title>ScribBook</title>
+    <meta name="google-site-verification" content="pbytO9E5mWVEeBLZsKppXwgMLprUyzWuya5kzsMYmww" />
 @endsection
 
 @section('contents')
