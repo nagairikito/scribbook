@@ -18,7 +18,17 @@ use App\Http\Controllers\TalkRoomDetailController;
 use App\Http\Controllers\TopicsController;
 use App\Http\Middleware\AuthMiddleware;
 use Illuminate\Support\Facades\Storage;
+use Spatie\Sitemap\Sitemap;
+use Spatie\Sitemap\Tags\Url;
 
+// 検索エンジン用sitemap.xmlパス
+Route::get('/sitemap.xml', function () {
+    return Sitemap::create()
+        ->add(Url::create('/'))
+        ->add(Url::create('/about'))
+        ->add(Url::create('/contact'))
+        ->toResponse(request());
+});
 
 // トップページ
 Route::get('/', [TopPageController::class, 'index'])->name('toppage');

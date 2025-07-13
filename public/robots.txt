@@ -1,2 +1,4 @@
 User-agent: *
 Disallow:
+
+Sitemap: https://scribbook.onrender.com/sitemap.xml
