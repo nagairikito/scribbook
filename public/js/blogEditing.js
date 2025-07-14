@@ -42,7 +42,9 @@ const blogToolsBtn = document.getElementById('blog-tools');
 
 blogToolsBtn.addEventListener('click', () => {
     let toolList = document.getElementById('tool-list');
+    let importedImageField = document.querySelector('.imported-img-field-wrapper');
     toolList.classList.toggle('active');
+    importedImageField.classList.toggle('active');
 })
 
 //編集フォームロード時ブログ編集フィールドの画像のボタンを表示する処理
@@ -666,7 +668,11 @@ function importImage(data) {
         img.id = "import-image-area";
         img.src = e.target.result;
         img.alt = fileName;
-        img.setAttribute("style", "width: 300px;");
+        if(screen.availWidth > 767) {
+            img.setAttribute("style", "width: 200px; height: 200px;");
+        } else {
+            img.setAttribute("style", "width: 50px; height: 50px;");
+        }
         let inputImageField = document.querySelector(`.import-image-area.${imageNo}`);
         data.remove();
         inputImageField.appendChild(img);

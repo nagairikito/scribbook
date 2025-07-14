@@ -117,7 +117,9 @@ header .search-button {
     display: none;
 }
 
-header .tool-list {
+header .tool-list,
+header .imported-img-field-wrapper
+{
     display: none;
 }
 
@@ -243,7 +245,9 @@ footer .footer-wrapper {
         display: none;
     }
 
-    header .tool-list {
+    header .tool-list,
+    header .imported-img-field-wrapper
+    {
         display: none;
     }
 

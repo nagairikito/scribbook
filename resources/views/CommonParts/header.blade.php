@@ -89,4 +89,8 @@
                 </div>
             </div>
         </div>
+        <div class="imported-img-field-wrapper">
+            <div class="imported-img-field"></div>
+        </div>
+
     </header>

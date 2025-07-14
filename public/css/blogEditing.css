@@ -123,7 +123,8 @@
         margin-right: 20px;
     }
 
-    header .tool-list {
+    header .tool-list,
+    header .imported-img-field-wrapper {
         display: block !important;
         width: 100%;
         height: 60px;
@@ -136,6 +137,9 @@
     }
     header .tool-list.active {
         top: 50px;
+    }
+    header .imported-img-field-wrapper {
+        top: 110px;
     }
 
     header .tool-list-wrapper {
