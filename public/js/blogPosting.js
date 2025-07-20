@@ -641,7 +641,6 @@ function deleteImportedImage(target) {
 
 //画像インポート
 function importImage(data) {
-    const imageNo = data.classList[1];
     const file = data.files[0];
     if(!file) return;
 
