@@ -3,7 +3,7 @@
             <div class="header-logo">
                 <div class="header-logo-wrapper">
                     <a href="{{ route('toppage') }}">
-                        <img src="{{ asset('storage/scribbook_top_logo.png') }}" class="header-app-logo">
+                        <img src="{{ asset('storage/scribbook_logo.png') }}" class="header-app-logo">
                     </a>
                 </div>
             </div>
@@ -81,7 +81,7 @@
                     <button class="tool-btn" onclick="adoptUrl()"><i class="bi bi-link fos-1_3rem"></i></button>
                 </div>
                 <div>
-                    <button class="tool-btn" onclick="addImage()"><i class="bi bi-card-image fos-1_3rem"></i></button>
+                    <button class="tool-btn" onclick="addImageTool()"><i class="bi bi-card-image fos-1_3rem"></i></button>
                 </div>
                 <div>
                     <button class="tool-btn" onclick="adoptImageSize()"><i class="bi bi-aspect-ratio fos-1_3rem"></i></button>
@@ -89,8 +89,8 @@
                 </div>
             </div>
         </div>
-        <div class="imported-img-field-wrapper">
+        <!-- <div class="imported-img-field-wrapper">
             <div class="imported-img-field"></div>
-        </div>
+        </div> -->
 
     </header>

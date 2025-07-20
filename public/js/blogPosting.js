@@ -205,7 +205,7 @@ blogEditField.addEventListener('drop', (e) => {
 
         //クラス名「contents-image-area」の数を取得し再命名
         let contentsImageAreas = document.querySelectorAll('.contents-image-area');
-        if(contentsImageAreas > 0) {
+        if(contentsImageAreas.length > 0) {
             adjustContentsImageArea(contentsImageAreas);
         }
 
@@ -247,7 +247,7 @@ blogEditField.addEventListener('drop', (e) => {
         img.alt = registerImageFileName;
         img.classList.add("contents-image"),
         img.classList.add(`no${contentsImageAreas.length + 1}`),
-        img.setAttribute("style", "width: 300px;");
+        img.setAttribute("style", "width: 500px;");
 
         contentsImageField.appendChild(img);
 
@@ -267,17 +267,21 @@ function adjustContentsImageArea(contentsImageAreas) {
     let contentsImage = document.querySelectorAll('.contents-image');
 
     contentsImageAreas.forEach((contentsImageArea) => {
-        deleteTarget = contentsImageArea.classList[1];
-        contentsImageArea.classList.remove($deleteTarget);
+        let deleteTarget = contentsImageArea.classList[1];
+        contentsImageArea.classList.remove(deleteTarget);
         contentsImageArea.classList.add(`no${contentsImageCount}`);
 
-        deleteContentsImageButton[index].classList.remove($deleteTarget);
+        deleteContentsImageButton[index].classList.remove(deleteTarget);
+        deleteContentsImageButton[index].removeAttribute('onclick');
         deleteContentsImageButton[index].classList.add(`no${contentsImageCount}`);
+        deleteContentsImageButton[index].setAttribute('onclick', `deleteContentsImage(".contents-image-area.no${contentsImageCount}")`)
         
-        selectContentsImageButton[index].classList.remove($deleteTarget);
+        selectContentsImageButton[index].classList.remove(deleteTarget);
+        selectContentsImageButton[index].removeAttribute('onclick');
         selectContentsImageButton[index].classList.add(`no${contentsImageCount}`);
+        selectContentsImageButton[index].setAttribute('onclick', `setSelectedImage(".contents-image.no${contentsImageCount}")`)
 
-        contentsImage[index].classList.remove($deleteTarget);
+        contentsImage[index].classList.remove(deleteTarget);
         contentsImage[index].classList.add(`no${contentsImageCount}`);
 
         index += 1;
@@ -291,7 +295,7 @@ function deleteContentsImage(target) {
     targetImage.remove();
 
     let contentsImageAreas = document.querySelectorAll('.contents-image-area');
-    if(contentsImageAreas > 0) {
+    if(contentsImageAreas.length > 0) {
         adjustContentsImageArea(contentsImageAreas);
     }
 }
@@ -596,8 +600,13 @@ function adoptUrl() {
 }
 
 //画像インポートツール表示(画像インポートボタン押下時)
-function addImage() {
-    let importedImageField = document.querySelector('.imported-img-field');
+function addImageTool() {
+    var blogEditField = document.getElementById("original-contents");
+
+    let targetPoint = window.getSelection();
+    if(targetPoint.anchorNode === null || !blogEditField.contains(targetPoint.anchorNode)) {
+        return;
+    }
 
     const importImageAreas = document.querySelectorAll('.import-image-area');
 
@@ -606,43 +615,28 @@ function addImage() {
     }
 
     const parentElement = document.createElement("div");
-    parentElement.classList.add("import-image-area");
-    parentElement.classList.add(`no${importImageAreas.length + 1}`);
 
     const deleteButton = document.createElement("button");
-    deleteButton.setAttribute('onclick', `deleteImportedImage(".import-image-area.no${importImageAreas.length + 1}")`);
-    deleteButton.style = 'width: 30px;'
-    deleteButton.textContent = '✕';
+    deleteButton.setAttribute('onclick', 'deleteImportedImage(this)');
+    deleteButton.textContent = "✕";
     parentElement.appendChild(deleteButton);
 
     const inputImageButton = document.createElement("input");
     inputImageButton.type = "file";
-    inputImageButton.classList.add("import-image-button");
-    inputImageButton.classList.add(`no${importImageAreas.length + 1}`);
     inputImageButton.setAttribute("onchange", "importImage(this)")
     parentElement.appendChild(inputImageButton);
 
-    importedImageField.appendChild(parentElement);
+    const br = document.createElement("div");
+    br.innerHTML = "<br>"
+    parentElement.appendChild(br);
+
+    let range = targetPoint.getRangeAt(0);
+    range.insertNode(parentElement);
 }
 
-//画像インポートパーツ増減時のclass名の調整
-function adjustImportImageArea(importImageAreas) {
-    let importImageCount = 1;
-    importImageAreas.forEach((importImageArea) => {
-        targetClass = importImageArea.classList[1];
-        importImageArea.classList.remove(targetClass);
-        importImageArea.classList.add(`no${importImageCount}`);
-        importImageCount += 1;
-    });
-}
-
-//ツールバーフィールド画像削除
+//画像インポートツール削除
 function deleteImportedImage(target) {
-    targetImage = document.querySelector(target);
-    targetImage.remove();
-
-    const importImageAreas = document.querySelectorAll('.import-image-area');
-    adjustImportImageArea(importImageAreas);
+    target.parentElement.remove();
 }
 
 //画像インポート
@@ -650,25 +644,69 @@ function importImage(data) {
     const imageNo = data.classList[1];
     const file = data.files[0];
     if(!file) return;
-    const fileName = file.name;
-    
+
     const reader = new FileReader();
     reader.addEventListener('error', () => {
         return;
     });
     reader.addEventListener('load', (e) => {
-        let img = document.createElement("img");
-        img.id = "import-image-area";
-        img.src = e.target.result;
-        img.alt = fileName;
-        if(screen.availWidth > 767) {
-            img.setAttribute("style", "width: 200px; height: 200px;");
-        } else {
-            img.setAttribute("style", "width: 50px; height: 50px;");
+        let contentsImageAreas = document.querySelectorAll('.contents-image-area');
+        if(contentsImageAreas.length > 0) {
+            adjustContentsImageArea(contentsImageAreas);
         }
-        let inputImageField = document.querySelector(`.import-image-area.${imageNo}`);
-        data.remove();
-        inputImageField.appendChild(img);
+
+        let contentsImageField = document.createElement("div");
+        contentsImageField.classList.add("contents-image-area");
+        contentsImageField.classList.add(`no${contentsImageAreas.length + 1}`);
+        contentsImageField.setAttribute("style", "display: flex; flex-direction: column;");
+        contentsImageField.setAttribute("contenteditable", false);
+
+        let contentsImageFieldButtons = document.createElement("div");
+        contentsImageFieldButtons.classList.add("contents-image-area-buttons");
+
+        contentsImageField.appendChild(contentsImageFieldButtons);
+
+        let deleteButton = document.createElement("button");
+        deleteButton.classList.add("delete-contents-image-button");
+        deleteButton.classList.add(`no${contentsImageAreas.length + 1}`);
+        deleteButton.setAttribute("onclick", `deleteContentsImage(".contents-image-area.no${contentsImageAreas.length + 1}")`);
+        deleteButton.textContent = "✕";
+
+        let selectButton = document.createElement("input");
+        selectButton.type = "radio";
+        selectButton.name = "contents-image";
+        selectButton.classList.add("select-contents-image-button");
+        selectButton.classList.add(`no${contentsImageAreas.length + 1}`);
+        selectButton.setAttribute("onclick", `setSelectedImage(".contents-image.no${contentsImageAreas.length + 1}")`);
+
+        contentsImageFieldButtons.appendChild(deleteButton);
+        contentsImageFieldButtons.appendChild(selectButton);
+
+        //ランダムな羅列生成
+        let randomStr = generateRandomString();
+
+        //ブログ編集フィールドの画像altと登録時の画像ファイル名
+        let registerImageFileName = randomStr + "_" + file.name; 
+
+        let img = document.createElement("img");
+        img.src = e.target.result;
+        img.alt = registerImageFileName;
+        img.classList.add("contents-image"),
+        img.classList.add(`no${contentsImageAreas.length + 1}`),
+        img.setAttribute("style", "width: 300px;");
+        contentsImageField.appendChild(img);
+
+        const br = document.createElement("div");
+        br.innerHTML = "<br>"
+        
+        data.parentElement.replaceWith(contentsImageField, br);
+
+        const range = document.createRange();
+        const sel = window.getSelection();
+        range.setStart(br, 0);  // newDivの最初の位置にカーソル
+        range.collapse(true);   // 範囲を折りたたんでキャレットのみ
+        sel.removeAllRanges();
+        sel.addRange(range);
     });
     reader.readAsDataURL(file);
 }
