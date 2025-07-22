@@ -12,7 +12,7 @@
             <form action="{{ route('login') }}" method="POST" class="login-form-area">
             @csrf
                 <div class="app-logo-area">
-                    <img src="{{ asset('storage/scribbook_top_logo.png') }}" class="app-logo">
+                    <img src="{{ asset('commonImages/scribbook_logo.png') }}" class="app-logo">
                 </div>
                 <div class="login-id-area">
                     <p>ログインID</p>

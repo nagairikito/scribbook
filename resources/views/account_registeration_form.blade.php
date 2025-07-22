@@ -12,7 +12,7 @@
             <form action="{{ route('register_account') }}" class="account-registration-form-area" method="POST">
             @csrf
                 <div class="app-logo-area">
-                    <img src="{{ asset('storage/scribbook_top_logo.png') }}" class="app-logo">
+                    <img src="{{ asset('commonImages/scribbook_logo.png') }}" class="app-logo">
                 </div>
                 <div class="user-name-area">
                     <p>ユーザー名</p>

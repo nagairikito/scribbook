@@ -3,7 +3,7 @@
             <div class="header-logo">
                 <div class="header-logo-wrapper">
                     <a href="{{ route('toppage') }}">
-                        <img src="{{ asset('storage/scribbook_logo.png') }}" class="header-app-logo">
+                        <img src="{{ asset('commonImages/scribbook_logo.png') }}" class="header-app-logo">
                     </a>
                 </div>
             </div>

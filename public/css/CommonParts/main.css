@@ -35,7 +35,6 @@ main nav .nav-wrapper {
     min-width: inherit;
     padding: 30px 0 0 20px;
     margin: 10px 0;
-    border-right: 0.1px solid #bebebe;
     overflow-y: scroll;
     /*スクロールバー非表示（IE・Edge）*/
     -ms-overflow-style: none;
