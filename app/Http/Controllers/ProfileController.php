@@ -79,7 +79,7 @@ class ProfileController extends Controller
         $request->file('icon_image_file') != null && 
         $request->file('icon_image_file') != '' && 
         $request->file('icon_image_file') != 'noImage.png') {
-            $inputData['icon_image_file'] = $request->file('icon_image_file');
+            $inputData['icon_image_file'] = $request;
         }
 
         $result = $this->accountService->updateProfile($inputData);

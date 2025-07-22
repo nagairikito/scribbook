@@ -9,15 +9,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
-use Exception;
+
 
 class AccountService extends Service
 {
     public $accountRepository;
     public $favoriteUserRepository;
-
-    public const IMAGE_STORAGE_PATH = 'storage/user_icon_images/%s';
 
     public function __construct(AccountRepository $accountRepository, FavoriteUserRepository $favoriteUserRepository) {
         $this->accountRepository = $accountRepository;
@@ -102,10 +99,6 @@ class AccountService extends Service
         }
 
         $targetAccount = $this->accountRepository->getAccountById($id);
-        if(!app()->environment('production')) {
-        // if(app()->environment('production')) {
-            $targetAccount['icon_image'] = asset(sprintf($this::IMAGE_STORAGE_PATH, $targetAccount['icon_image']));
-        }
         $targetAccount['favorite_users'] = [];
         $targetAccount['favorite_flag'] = false;
         if(Auth::user() && Auth::id() == $id) {
@@ -168,39 +161,18 @@ class AccountService extends Service
     public function upsertUserIconImageIntoStorage($iconImageFile, $oldImageName) {
         DB::beginTransaction();        
         try {    
-            if($oldImageName && $oldImageName != '') {
+            if($oldImageName && $oldImageName != null) {
                 $this->deleteIconImageFromStorage($oldImageName);
             }
     
             $newImageName = 'noImage.png';
-            if($iconImageFile) {
-                // $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
-                $originalName = $iconImageFile->getClientOriginalName();
+            if($iconImageFile && $iconImageFile!= null) {
+                $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
                 $newImageName = date('Ymd_His') . '_' . $originalName;
-
-                //本番環境の画像の保存先（cloudinary）
-                if(app()->environment('production')) {
-                // if(app()->environment('local')) {
-                    $uploaded = Cloudinary::upload(
-                        $iconImageFile->getRealPath(),
-                        [
-                            'folder'    => 'user_icon_images',
-                            'public_id' => pathinfo($newImageName, PATHINFO_FILENAME),
-                            'overwrite' => true,
-                        ]
-                    );
-                    if (!$uploaded) {
-                        throw new \Exception('Cloudinaryへのアップロードに失敗しました');
-                    }
-                    $newImageName = $uploaded->getSecurePath();
-                }
-                //開発環境の画像の保存先（laravelストレージ）
-                else {
-                    $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
-                    if($registerImageFlag == false) {
-                        throw new \Exception('画像の登録に失敗しました');
-                    }
-
+        
+                $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
+                if($registerImageFlag == false) {
+                    throw new \Exception('画像の登録に失敗しました');
                 }
             }
     
