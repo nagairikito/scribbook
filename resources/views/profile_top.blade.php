@@ -34,7 +34,7 @@
                         <div class="left-contents">
                             <div>
                                 <div class="profile-image-frame">
-                                    <img src="{{ asset('storage/user_icon_images/' .$user['icon_image']) }}" class="profile-icon">
+                                    <img src="{{ $user['icon_image'] }}" class="profile-icon">
                                 </div>
                                 @if(Auth::user() && Auth::id() == $user['id'])
                                     <div class="open-favorite-user-modal" onclick="openModal(FAVORITE_USER)"><i class="bi bi-person-lines-fill fos-1_5rem"></i></div>

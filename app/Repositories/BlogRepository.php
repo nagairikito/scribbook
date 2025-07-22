@@ -45,7 +45,6 @@ class BlogRepository extends Repository
      * @return bool $result
      */
     public function editBlog($inputData) {
-        // dd($inputData);
         $result = $this->blog->where('id', $inputData['id'])->update([
             'blog_unique_id' => $inputData['blog_unique_id'],
             'thumbnail'      => $inputData['thumbnail_name'],
