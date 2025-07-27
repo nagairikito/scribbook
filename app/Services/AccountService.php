@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+<<<<<<< Updated upstream
 use Exception;
+=======
+>>>>>>> Stashed changes
 
 class AccountService extends Service
 {
@@ -159,6 +162,7 @@ class AccountService extends Service
         }
     }
 
+<<<<<<< Updated upstream
     /**
      * ユーザーアイコン更新,Storageに保存
      * @param object $iconImageFile
@@ -201,17 +205,69 @@ class AccountService extends Service
                         throw new \Exception('画像の登録に失敗しました');
                     }
 
+=======
+public function upsertUserIconImageIntoStorage($iconImageFile, $oldImageName) {
+    DB::beginTransaction();        
+    try {
+        if ($oldImageName && $oldImageName !== 'noImage.png') {
+            $this->deleteIconImageFromStorage($oldImageName);
+        }
+
+        $newImageName = 'noImage.png';
+
+        if ($iconImageFile) {
+            $originalName = $iconImageFile->getClientOriginalName();
+            $newImageName = date('Ymd_His') . '_' . $originalName;
+
+            if (!app()->environment('production')) {
+                // Cloudinaryにアップロードし、URLを返す
+                $imageUrl = Cloudinary::upload($iconImageFile->getRealPath())->getSecurePath();
+                dd($imageUrl);
+                DB::commit();
+                return $imageUrl; // ← Cloudinaryはファイル名でなくURLを返すのが一般的
+            } else {
+                $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile, $newImageName);
+                if (!$registerImageFlag) {
+                    throw new \Exception('画像の登録に失敗しました');
+>>>>>>> Stashed changes
                 }
             }
-    
-            DB::commit();
-            return $newImageName;
-
-        } catch (\Exception $e) {
-            DB::rollBack();
-            report($e);
         }
+
+        DB::commit();
+        return $newImageName; // ローカル環境ではファイル名を返す
+
+    } catch (\Exception $e) {
+        DB::rollBack();
+        report($e);
+        return null; // 失敗時に明示的に返す
     }
+}    // public function upsertUserIconImageIntoStorage($iconImageFile, $oldImageName) {
+    //     DB::beginTransaction();        
+    //     try {    
+    //         if($oldImageName && $oldImageName != null) {
+    //             $this->deleteIconImageFromStorage($oldImageName);
+    //         }
+    
+    //         $newImageName = 'noImage.png';
+    //         if($iconImageFile && $iconImageFile!= null) {
+    //             $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
+    //             $newImageName = date('Ymd_His') . '_' . $originalName;
+        
+    //             $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
+    //             if($registerImageFlag == false) {
+    //                 throw new \Exception('画像の登録に失敗しました');
+    //             }
+    //         }
+    
+    //         DB::commit();
+    //         return $newImageName;
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         report($e);
+    //     }
+    // }
 
     /**
      * ユーザーアイコン削除,Storageから削除

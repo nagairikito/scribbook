@@ -30,6 +30,10 @@ Route::get('/sitemap.xml', function () {
         ->toResponse(request());
 });
 
+Route::get('/check-cloudinary', function () {
+    dd(env('CLOUDINARY_URL'), config('cloudinary.cloud_url'));
+});
+
 // トップページ
 Route::get('/', [TopPageController::class, 'index'])->name('toppage');
 

@@ -79,7 +79,11 @@ class ProfileController extends Controller
         $request->file('icon_image_file') != null && 
         $request->file('icon_image_file') != '' && 
         $request->file('icon_image_file') != 'noImage.png') {
+<<<<<<< Updated upstream
             $inputData['icon_image_file'] = $request->file('icon_image_file');
+=======
+            $inputData['icon_image_file'] = $request['icon_image_file'];
+>>>>>>> Stashed changes
         }
 
         $result = $this->accountService->updateProfile($inputData);
