@@ -9,9 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+// use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Exception;
-
+use Cloudinary\Cloudinary;
 class AccountService extends Service
 {
     public $accountRepository;
@@ -181,14 +181,29 @@ class AccountService extends Service
                 //本番環境の画像の保存先（cloudinary）
                 if(app()->environment('production')) {
                 // if(app()->environment('local')) {
-                    $uploaded = Cloudinary::upload(
+                    // $uploaded = Cloudinary::upload(
+                    //     $iconImageFile->getRealPath(),
+                    //     [
+                    //         'folder'    => 'user_icon_images',
+                    //         'public_id' => pathinfo($newImageName, PATHINFO_FILENAME),
+                    //     ]
+                    // );
+                    $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key'    => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                    ]);
+
+                    $uploaded = $cloudinary->uploadApi()->upload(
                         $iconImageFile->getRealPath(),
                         [
                             'folder'    => 'user_icon_images',
                             'public_id' => pathinfo($newImageName, PATHINFO_FILENAME),
-                            'overwrite' => true,
                         ]
                     );
+
                     if (!$uploaded) {
                         throw new \Exception('Cloudinaryへのアップロードに失敗しました');
                     }

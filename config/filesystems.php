@@ -57,6 +57,15 @@ return [
             'throw' => false,
         ],
 
+        'cloudinary' => [
+            'driver' => 'cloudinary',
+            // 'url' => config('cloudinary.cloud_url'),
+            // または個別に分けて書くなら下記も可：
+            'cloud' => env('CLOUDINARY_CLOUD_NAME'),
+            'key' => env('CLOUDINARY_API_KEY'),
+            'secret' => env('CLOUDINARY_API_SECRET'),
+            'secure' => true,
+        ],
     ],
 
     /*
