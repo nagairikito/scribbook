@@ -9,8 +9,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-
-
+// use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Exception;
+use Cloudinary\Cloudinary;
 class AccountService extends Service
 {
     public $accountRepository;
@@ -169,21 +170,76 @@ class AccountService extends Service
             if($iconImageFile && $iconImageFile!= null) {
                 $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
                 $newImageName = date('Ymd_His') . '_' . $originalName;
-        
-                $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
-                if($registerImageFlag == false) {
-                    throw new \Exception('画像の登録に失敗しました');
+
+                //本番環境の画像の保存先（cloudinary）
+                if(app()->environment('production')) {
+                    $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key'    => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                    ]);
+
+                    $uploaded = $cloudinary->uploadApi()->upload(
+                        $iconImageFile->getRealPath(),
+                        [
+                            'folder'    => 'user_icon_images',
+                            'public_id' => pathinfo($newImageName, PATHINFO_FILENAME),
+                        ]
+                    );
+
+                    if (!$uploaded) {
+                        throw new \Exception('Cloudinaryへのアップロードに失敗しました');
+                    }
+                    $newImageName = $uploaded['secure_url'];
+                    // $newImageName = $uploaded->getSecurePath();
+                }
+                //開発環境の画像の保存先（laravelストレージ）
+                else {
+                    $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
+                    if($registerImageFlag == false) {
+                        throw new \Exception('画像の登録に失敗しました');
+                    }
+
                 }
             }
-    
+            
             DB::commit();
-            return $newImageName;
+            return $newImageName; // ローカル環境ではファイル名を返す
 
         } catch (\Exception $e) {
             DB::rollBack();
             report($e);
+            return null; // 失敗時に明示的に返す
         }
-    }
+    }    
+    // public function upsertUserIconImageIntoStorage($iconImageFile, $oldImageName) {
+    //     DB::beginTransaction();        
+    //     try {    
+    //         if($oldImageName && $oldImageName != null) {
+    //             $this->deleteIconImageFromStorage($oldImageName);
+    //         }
+    
+    //         $newImageName = 'noImage.png';
+    //         if($iconImageFile && $iconImageFile!= null) {
+    //             $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
+    //             $newImageName = date('Ymd_His') . '_' . $originalName;
+        
+    //             $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
+    //             if($registerImageFlag == false) {
+    //                 throw new \Exception('画像の登録に失敗しました');
+    //             }
+    //         }
+    
+    //         DB::commit();
+    //         return $newImageName;
+
+    //     } catch (\Exception $e) {
+    //         DB::rollBack();
+    //         report($e);
+    //     }
+    // }
 
     /**
      * ユーザーアイコン削除,Storageから削除
@@ -194,12 +250,33 @@ class AccountService extends Service
         DB::beginTransaction();
         try {    
             if($targetImageName != null && $targetImageName != 'noImage.png') {
-                $targetImageNameExists = Storage::disk('public')->exists('user_icon_images/'. $targetImageName);
-                if($targetImageNameExists) {
-                    $result = Storage::disk('public')->delete('user_icon_images/'. $targetImageName);
-                    if($result == false) {
-                        throw new \Exception('画像の削除に失敗しました');
+                if(app()->environment('production')) {
+                    $path = parse_url($targetImageName, PHP_URL_PATH);
+                    if (preg_match('#/image/upload/v\d+/(.+)\.\w+$#', $path, $matches)) {
+                        $publicId = urldecode($matches[1]);
+                        $cloudinary = new Cloudinary([
+                            'cloud' => [
+                                'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                                'api_key'    => config('filesystems.disks.cloudinary.key'),
+                                'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                            ],
+                        ]);
+                        $result = $cloudinary->uploadApi()->destroy($publicId);
+                        if($result['result'] !== 'ok') {
+                            throw new \Exception('Cloudinaryからの画像削除に失敗しました1');
+                        }
+                    } else {
+                        throw new Exception("CloudinaryのURLからpublic_idを抽出できませんでした");
                     }
+                } else {
+                    $targetImageNameExists = Storage::disk('public')->exists('user_icon_images/'. $targetImageName);
+                    if($targetImageNameExists) {
+                        $result = Storage::disk('public')->delete('user_icon_images/'. $targetImageName);
+                        if($result == false) {
+                            throw new \Exception('画像の削除に失敗しました');
+                        }
+                    }
+
                 }
             }
     
