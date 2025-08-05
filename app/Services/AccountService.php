@@ -180,14 +180,6 @@ class AccountService extends Service
 
                 //本番環境の画像の保存先（cloudinary）
                 if(app()->environment('production')) {
-                // if(app()->environment('local')) {
-                    // $uploaded = Cloudinary::upload(
-                    //     $iconImageFile->getRealPath(),
-                    //     [
-                    //         'folder'    => 'user_icon_images',
-                    //         'public_id' => pathinfo($newImageName, PATHINFO_FILENAME),
-                    //     ]
-                    // );
                     $cloudinary = new Cloudinary([
                         'cloud' => [
                             'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
@@ -207,7 +199,8 @@ class AccountService extends Service
                     if (!$uploaded) {
                         throw new \Exception('Cloudinaryへのアップロードに失敗しました');
                     }
-                    $newImageName = $uploaded->getSecurePath();
+                    $newImageName = $uploaded['secure_url'];
+                    // $newImageName = $uploaded->getSecurePath();
                 }
                 //開発環境の画像の保存先（laravelストレージ）
                 else {
@@ -264,12 +257,33 @@ class AccountService extends Service
         DB::beginTransaction();
         try {    
             if($targetImageName != null && $targetImageName != 'noImage.png') {
-                $targetImageNameExists = Storage::disk('public')->exists('user_icon_images/'. $targetImageName);
-                if($targetImageNameExists) {
-                    $result = Storage::disk('public')->delete('user_icon_images/'. $targetImageName);
-                    if($result == false) {
-                        throw new \Exception('画像の削除に失敗しました');
+                if(app()->environment('production')) {
+                    $path = parse_url($targetImageName, PHP_URL_PATH);
+                    if (preg_match('#/image/upload/v\d+/(.+)\.\w+$#', $path, $matches)) {
+                        $publicId = urldecode($matches[1]);
+                        $cloudinary = new Cloudinary([
+                            'cloud' => [
+                                'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                                'api_key'    => config('filesystems.disks.cloudinary.key'),
+                                'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                            ],
+                        ]);
+                        $result = $cloudinary->uploadApi()->destroy($publicId);
+                        if($result['result'] !== 'ok') {
+                            throw new \Exception('Cloudinaryからの画像削除に失敗しました1');
+                        }
+                    } else {
+                        throw new Exception("CloudinaryのURLからpublic_idを抽出できませんでした");
                     }
+                } else {
+                    $targetImageNameExists = Storage::disk('public')->exists('user_icon_images/'. $targetImageName);
+                    if($targetImageNameExists) {
+                        $result = Storage::disk('public')->delete('user_icon_images/'. $targetImageName);
+                        if($result == false) {
+                            throw new \Exception('画像の削除に失敗しました');
+                        }
+                    }
+
                 }
             }
     
