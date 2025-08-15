@@ -17,7 +17,8 @@ class AccountService extends Service
     public $accountRepository;
     public $favoriteUserRepository;
 
-    public const IMAGE_STORAGE_PATH = 'storage/user_icon_images/%s';
+    public const LOCAL_STORAGE_PATH = 'storage/user_icon_images/%s';
+    public const NOIMAGE_PATH = 'commonImages/user_icon_images/noImage.png';
 
     public function __construct(AccountRepository $accountRepository, FavoriteUserRepository $favoriteUserRepository) {
         $this->accountRepository = $accountRepository;
@@ -102,15 +103,31 @@ class AccountService extends Service
         }
 
         $targetAccount = $this->accountRepository->getAccountById($id);
-        if(!app()->environment('production')) {
-        // if(app()->environment('production')) {
-            $targetAccount['icon_image'] = asset(sprintf($this::IMAGE_STORAGE_PATH, $targetAccount['icon_image']));
+
+        if($targetAccount['icon_image'] !== 'noImage.png') {
+            if(!app()->environment('production')) {
+                $targetAccount['icon_image'] = asset(sprintf($this::LOCAL_STORAGE_PATH, $targetAccount['icon_image']));
+            }
+        } else {
+            // 本番環境でも開発環境でもpublic/commonImages/user_icon_images/noImage.pngを参照
+            $targetAccount['icon_image'] = asset($this::NOIMAGE_PATH);
         }
+
         $targetAccount['favorite_users'] = [];
         $targetAccount['favorite_flag'] = false;
         if(Auth::user() && Auth::id() == $id) {
             $favoriteUsers = $this->favoriteUserRepository->getFavoriteUsersByUserId($id);
-            $targetAccount['favorite_users'] = $favoriteUsers;    
+            $processedFavoriteUsers = array_map(function($user) {
+                if($user['icon_image'] !== 'noImage.png') {
+                    if(!app()->environment('production')) {
+                        $user['icon_image'] = asset(sprintf($this::LOCAL_STORAGE_PATH, $user['icon_image']));
+                    }
+                } else {
+                    $user['icon_image'] = asset($this::NOIMAGE_PATH);
+                }
+                return $user;
+            }, $favoriteUsers);
+            $targetAccount['favorite_users'] = $processedFavoriteUsers;
         }
         if(Auth::user() && Auth::id() != $id) {
             $checkFavoriteFlag = $this->favoriteUserRepository->checkFavorite(Auth::id(), $id);
@@ -204,7 +221,8 @@ class AccountService extends Service
                 }
                 //開発環境の画像の保存先（laravelストレージ）
                 else {
-                    $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
+                    // $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile->file('icon_image_file'), $newImageName);
+                    $registerImageFlag = Storage::disk('public')->putFileAs('user_icon_images', $iconImageFile, $newImageName);
                     if($registerImageFlag == false) {
                         throw new \Exception('画像の登録に失敗しました');
                     }

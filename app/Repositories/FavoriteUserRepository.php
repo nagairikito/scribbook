@@ -34,7 +34,7 @@ class FavoriteUserRepository extends Repository
     }
 
     /**
-     * 対象のユーザーIDに紐づくお気に入り登録されたユーザーを全件取得
+     * 対象のユーザーIDに紐づくお気に入り登録されたユーザーの存在チェック
      * @param int $loginUserId
      * @param int $targetFavoriteUserId
      * @return bool $checkFavorite

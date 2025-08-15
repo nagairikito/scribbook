@@ -28,7 +28,7 @@
                     <div class="category-user-wrapper">
                         @foreach($result['users'] as $user)
                             <div class="user-unit">
-                                <a href="{{ route('profile_top', ['id' => $user['id']]) }}"><img class="user-icon" src="{{ asset('storage/user_icon_images/' .$user['icon_image']) }}"></a>
+                                <a href="{{ route('profile_top', ['id' => $user['id']]) }}"><img class="user-icon" src="{{ $user['icon_image'] }}"></a>
                                 <div class="right">
                                     <a class="user-name" href="{{ route('profile_top', ['id' => $user['id']]) }}">{{ $user['name'] }}</a>
                                     @if($user['id'] != Auth::id())

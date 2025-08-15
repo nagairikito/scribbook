@@ -35,7 +35,8 @@ class TalkRoomDetailController extends Controller
         $talkRoomId = $this->talkService->getTargetTalkRoomId($inputData['sender'], $inputData['recipient']);
         $inputData['talk_room_id'] = $talkRoomId;
 
-        $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
+        // $recipient = $this->accountRepository->getAccountById($inputData['recipient']);
+        $recipient = $this->talkService->getRecipient($inputData['recipient']);
         $recipientName = $recipient['name'];
 
         $talkRoom = [

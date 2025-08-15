@@ -6,6 +6,7 @@ use App\Models\Talk;
 use App\Models\TalkRoom;
 use App\Repositories\TalkRepository;
 use App\Repositories\TalkRoomRepository;
+use App\Repositories\AccountRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -14,10 +15,32 @@ class TalkService extends Service
 {
     public $talkRepository;
     public $talkRoomRepository;
+    public $accountRepository;
+    public const LOCAL_STORAGE_PATH = 'storage/user_icon_images/%s';
+    public const NOIMAGE_PATH = 'commonImages/user_icon_images/noImage.png';
 
-    public function __construct(TalkRepository $talkRepository, TalkRoomRepository $talkRoomRepository) {
+    public function __construct(TalkRepository $talkRepository, TalkRoomRepository $talkRoomRepository, AccountRepository $accountRepository) {
         $this->talkRepository = $talkRepository;
         $this->talkRoomRepository = $talkRoomRepository;
+        $this->accountRepository = $accountRepository;
+    }
+
+    /**
+     * トーク相手の取得
+     * @param int $recipientId トーク相手のid
+     * @return array $recipient トーク相手のアカウント情報
+     */
+    public function getRecipient($recipientId) {
+        $recipient = $this->accountRepository->getAccountById($recipientId);
+        if($recipient['icon_image'] !== 'noImage.png') {
+            if(!app()->environment('production')) {
+                $recipient['icon_image'] = asset(sprintf($this::LOCAL_STORAGE_PATH, $recipient['icon_image']));
+            }
+        } else {
+            $recipient['icon_image'] = asset($this::NOIMAGE_PATH);
+        }
+
+        return $recipient;
     }
 
     /**
@@ -49,6 +72,14 @@ class TalkService extends Service
         $unReadMsgCounts = $this->talkRepository->getUnReadMessageCounts($margedTalkRoomIds, Auth::id());;
         for($i=0; $i<count($talkRoomList); $i++) {
             $talkRoomList[$i]['unReadMsgCount'] = $unReadMsgCounts[$i];
+
+            if($talkRoomList[$i]['icon_image'] !== 'noImage.png') {
+                if(!app()->environment('production')) {
+                    $talkRoomList[$i]['icon_image'] = asset(sprintf($this::LOCAL_STORAGE_PATH, $talkRoomList[$i]['icon_image']));
+                }
+            } else {
+                $talkRoomList[$i]['icon_image'] = asset($this::NOIMAGE_PATH);
+            }
         }
 
         return $talkRoomList;

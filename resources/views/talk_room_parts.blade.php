@@ -4,7 +4,7 @@
             <div class="message {{ $message['created_by'] == $talkRoomDatas['sender'] ? 'send' : 'receive' }}">
                 @if($message['created_by'] == $talkRoomDatas['recipient']['id'])
                     <div>
-                        <img class="user-icon" src="{{ asset('storage/user_icon_images/' . $talkRoomDatas['recipient']['icon_image']) }}">
+                        <img class="user-icon" src="{{ $talkRoomDatas['recipient']['icon_image'] }}">
                     </div>
                 @endif
                 <div class="message-contents-wrapper">

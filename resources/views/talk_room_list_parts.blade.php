@@ -4,7 +4,7 @@
             <div class="talk-room-unit">
                 <a href="{{ route('display_talk_room', ['sender' => Auth::id(), 'recipient' => $talkRoom['user_id']]) }}" class="talk-room-unit-wrapper">
                     <div class="user-icon-wrapper">
-                        <img class="user-icon" src="{{ asset('storage/user_icon_images/' .$talkRoom['icon_image']) }}">
+                        <img class="user-icon" src="{{ $talkRoom['icon_image'] }}">
                     </div>    
                     <div class="contents">
                         <div class="top">

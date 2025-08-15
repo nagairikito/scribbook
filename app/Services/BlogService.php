@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use PhpParser\ErrorHandler\Throwing;
+use Exception;
+use Cloudinary\Cloudinary;
 
 class BlogService extends Service
 {
@@ -59,8 +61,8 @@ class BlogService extends Service
             if($checkPostBlog) {
                 $postFlag = true;
             }
+            $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names'], 'blog_contents_images/');
             if($inputData['base64_texts'] != [] || $inputData['base64_texts'] != null || $inputData['image_file_names'] != [] || $inputData['image_file_names'] != null) {
-                $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names'], 'blog_contents_images/');
             }
             if($inputData['thumbnail_img'] != '' || $inputData['thumbnail_img'] != null || $inputData['thumbnail_name'] != [] || $inputData['thumbnail_name'] != null) {
                 $this->storeBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], 'blog_thumbnail_images/');
@@ -706,9 +708,33 @@ class BlogService extends Service
                 $filePath = $path . $imageNames[$index];
 
                 // 保存（storage/app/public/images に保存）
-                $result = Storage::disk('public')->put($filePath, $imageData);
-                if($result == false) {
-                    throw new \Exception('画像の保存に失敗しました');
+                if(app()->environment('production')) {
+                    $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key'    => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                    ]);
+
+                    $uploaded = $cloudinary->uploadApi()->upload(
+                        $imageBase64Data,
+                        [
+                            'folder'    => 'blog_contents_images',
+                            'public_id' => pathinfo($imageNames[$index], PATHINFO_FILENAME),
+                        ]
+                    );
+
+                    if (!$uploaded) {
+                        throw new \Exception('Cloudinaryへのアップロードに失敗しました');
+                    }
+                    $newImageName = $uploaded['secure_url'];
+
+                } else {
+                    $result = Storage::disk('public')->put($filePath, $imageData);
+                    if($result == false) {
+                        throw new \Exception('画像の保存に失敗しました');
+                    }
                 }
             }
         }
