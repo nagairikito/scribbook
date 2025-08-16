@@ -128,8 +128,8 @@ function handleSubmit(e) {
             let fileName = blogUniqueId + "_" + image.alt;
 
             if(appEnv === 'production') {
-                image.src = productionDispImagePath + fileName;
-                console.log(image.src)
+                withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
+                image.src = productionDispImagePath + withoutExt;
             } else {
                 image.src = localDispImagePath + fileName;
             }

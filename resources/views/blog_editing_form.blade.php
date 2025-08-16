@@ -6,6 +6,7 @@
     <script src="{{ asset('js/blogEditing.js') }}" defer></script>
     <script>
         const APP_URL = "{{ env('APP_URL') }}"
+        const APP_ENV = "{{ app()->environment() }}"
     </script>
     <title>編集フォーム_{{ $blog['title'] }}</title>
 @endsection

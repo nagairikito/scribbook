@@ -15,7 +15,9 @@ use Illuminate\Support\Facades\Storage;
 use PhpParser\ErrorHandler\Throwing;
 use Exception;
 use Cloudinary\Cloudinary;
-
+use Cloudinary\Api\Search\SearchApi;
+use Cloudinary\Api\Admin\AdminApi;
+use Cloudinary\Configuration\Configuration;
 class BlogService extends Service
 {
     public $accountRepository;
@@ -748,18 +750,53 @@ class BlogService extends Service
      */
     public function deleteBlogContentsImageFromStorage($blogUniqueId, $path) {
         if($blogUniqueId != null && $blogUniqueId != '') {
-            $allFiles = Storage::disk('public')->allFiles($path);
-            $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
-                if(str_contains($file, $blogUniqueId)) {
-                    return $file;
-                }
-            });
+            if(app()->environment('production')) {
+                $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key'    => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                    ]);
 
-            if($targetImageFileNames) {
-                foreach($targetImageFileNames as $targetImageFileName) {
-                    $result = Storage::disk('public')->delete($targetImageFileName);
-                    if($result == false) {
-                        throw new \Exception('ファイルの削除に失敗しました。');
+                $adminApi = new AdminApi([
+                    'cloud' => [
+                        'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                        'api_key'    => config('filesystems.disks.cloudinary.key'),
+                        'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                    ],
+                ]);
+                
+                try {
+                    $escapedId = addcslashes($blogUniqueId, ':*');
+                    $expression = "folder:blog_contents_images AND public_id:*{$escapedId}*";
+
+                    $result = $cloudinary->searchApi()->expression($expression)->maxResults(100)->execute();
+dd($result['resources']);
+                    $publicIds = array_map(fn($r) => $r['public_id'], $result['resources'] ?? []);
+
+                    $adminApi = $cloudinary->adminApi();
+                    foreach ($publicIds as $publicId) {
+                        $adminApi->deleteAssets([$publicId]);
+                    }
+
+                } catch (\Exception $e) {
+                    throw new \Exception("Cloudinary 上の画像削除に失敗しました: " . $e->getMessage());
+                }
+            } else {
+                $allFiles = Storage::disk('public')->allFiles($path);
+                $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
+                    if(str_contains($file, $blogUniqueId)) {
+                        return $file;
+                    }
+                });
+
+                if($targetImageFileNames) {
+                    foreach($targetImageFileNames as $targetImageFileName) {
+                        $result = Storage::disk('public')->delete($targetImageFileName);
+                        if($result == false) {
+                            throw new \Exception('ファイルの削除に失敗しました。');
+                        }
                     }
                 }
             }

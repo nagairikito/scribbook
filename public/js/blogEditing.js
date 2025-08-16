@@ -23,10 +23,12 @@ let selectedImage = null;
 //設定された画像サイズ
 let imageSize = 300;
 
+//APP_ENV
+let appEnv = APP_ENV;
+
 //画像の表示URL
-// let displayImagePath = "http://localhost/storage/blog_contents_images/"
-let displayImagePath = APP_URL + "/storage/blog_contents_images/";
-// let displayThumbnailPath = "http://localhost/storage/blog_thumbnail_images/"
+let localDispImagePath = APP_URL + "/storage/blog_contents_images/"; //開発環境
+let productionDispImagePath = 'https://res.cloudinary.com/dqyo04d6k/image/upload/v1754640091/blog_contents_images/'; //本番環境
 
 //ブログ編集フィールドの画像のファイル名
 let imageFileName = '';
@@ -131,7 +133,12 @@ blogEditingForm.addEventListener('submit', function(e) {
             let base64Src = image.src;
             let fileName = blogUniqueId + "_" + image.alt;
 
-            image.src = displayImagePath + fileName;
+            if(appEnv === 'production') {
+                withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
+                image.src = productionDispImagePath + withoutExt;
+            } else {
+                image.src = localDispImagePath + fileName;
+            }
 
             let div = document.createElement('div');
             div.classList.add(fileName);
@@ -350,10 +357,6 @@ function importThumbnail(data) {
 var thumbailField = document.getElementById("thumbnail-preview-box");
 
 thumbailField.addEventListener('drop', (e) => {
-    // let targetPoint = window.getSelection();
-    // if(targetPoint.anchorNode === null || !thumbailField.contains(targetPoint.anchorNode)) {
-    //     return;
-    // }
     e.preventDefault();
 
     var file = e.dataTransfer.files[0];
@@ -605,34 +608,6 @@ function adoptUrl() {
     range.insertNode(a);
 }
 
-//画像インポートツール表示(画像インポートボタン押下時)
-// function addImageTool() {
-//     let toolSettingField = document.querySelector('.tool-setting-field');
-
-//     const importImageAreas = document.querySelectorAll('.import-image-area');
-
-//     if(importImageAreas.length > 0) {
-//         adjustImportImageArea(importImageAreas);
-//     }
-
-//     const parentElement = document.createElement("div");
-//     parentElement.classList.add("import-image-area");
-//     parentElement.classList.add(`no${importImageAreas.length + 1}`);
-
-//     const deleteButton = document.createElement("button");
-//     deleteButton.setAttribute('onclick', `deleteToolbarFieldImage(".import-image-area.no${importImageAreas.length + 1}")`);
-//     deleteButton.textContent = "削除";
-//     parentElement.appendChild(deleteButton);
-
-//     const inputImageButton = document.createElement("input");
-//     inputImageButton.type = "file";
-//     inputImageButton.classList.add("import-image-button");
-//     inputImageButton.classList.add(`no${importImageAreas.length + 1}`);
-//     inputImageButton.setAttribute("onchange", "importImage(this)")
-//     parentElement.appendChild(inputImageButton);
-
-//     toolSettingField.appendChild(parentElement);
-// }
 function addImageTool() {
     var blogEditField = document.getElementById("original-contents");
 
