@@ -8,16 +8,12 @@ use App\Repositories\BrowsingHistoryRepository;
 use App\Repositories\AccountRepository;
 use App\Repositories\AdvertisementRepository;
 use App\Repositories\FavoriteBlogRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\ErrorHandler\Throwing;
 use Exception;
 use Cloudinary\Cloudinary;
-use Cloudinary\Api\Search\SearchApi;
 use Cloudinary\Api\Admin\AdminApi;
-use Cloudinary\Configuration\Configuration;
 class BlogService extends Service
 {
     public $accountRepository;
@@ -768,11 +764,10 @@ class BlogService extends Service
                 ]);
                 
                 try {
-                    $escapedId = addcslashes($blogUniqueId, ':*');
-                    $expression = "folder:blog_contents_images AND public_id:*{$escapedId}*";
+                    $blogUniqueId = preg_replace('/\s+/', '', $blogUniqueId);
+                    $expression = "folder:blog_contents_images AND public_id LIKE '*{$blogUniqueId}*'";
+                    $result = $cloudinary->searchApi()->expression($expression)->execute();
 
-                    $result = $cloudinary->searchApi()->expression($expression)->maxResults(100)->execute();
-dd($result['resources']);
                     $publicIds = array_map(fn($r) => $r['public_id'], $result['resources'] ?? []);
 
                     $adminApi = $cloudinary->adminApi();
