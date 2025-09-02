@@ -89,7 +89,7 @@
                         <button class="tool-btn" onclick="adoptUrl()">リンク作成</button>
                     </div>
                     <div>
-                        <button class="tool-btn" onclick="addImage()">画像インポート</button>
+                        <button class="tool-btn" onclick="addImageTool()">画像インポート</button>
                     </div>
                     <div>
                         <button class="tool-btn" onclick="adoptImageSize()">画像サイズ適用</button>
