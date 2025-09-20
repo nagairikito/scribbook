@@ -130,6 +130,7 @@ function handleSubmit(e) {
             if(appEnv === 'production') {
                 withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
                 image.src = productionDispImagePath + withoutExt;
+                // image.src = productionDispImagePath + fileName;
             } else {
                 image.src = localDispImagePath + fileName;
             }

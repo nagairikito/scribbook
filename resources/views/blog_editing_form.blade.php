@@ -23,7 +23,7 @@
                     <div id="thumbnail-preview-box" class="{{ $blog['thumbnail'] != 'noImage.png' ? '' : 'thumbnail-preview-box' }}">
                         @if($blog['thumbnail'] != 'noImage.png')
                             <div class="delete-btn-wrapper" onclick="deleteThumbnail()"><span class="delete-btn-content">✕</span></div>
-                            <img id="thumbnail-preview-img" src="{{ asset('storage/blog_thumbnail_images/' . $blog['blog_unique_id'] . '_' . $blog['thumbnail']) }}" alt="{{ $blog['thumbnail'] }}" style="width: 300px; height: 300px;">
+                            <img id="thumbnail-preview-img" src="{{ $blog['thumbnail'] }}" alt="{{ $blog['thumbnail'] }}" style="width: 300px; height: 300px;">
                         @else
                             <p>
                                 ここにサムネイル用画像をドラッグアンドドロップしてください<br><br><br>

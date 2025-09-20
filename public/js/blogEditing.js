@@ -134,8 +134,9 @@ blogEditingForm.addEventListener('submit', function(e) {
             let fileName = blogUniqueId + "_" + image.alt;
 
             if(appEnv === 'production') {
-                withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
-                image.src = productionDispImagePath + withoutExt;
+                // withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
+                // image.src = productionDispImagePath + withoutExt;
+                image.src = productionDispImagePath + fileName;
             } else {
                 image.src = localDispImagePath + fileName;
             }
@@ -696,7 +697,6 @@ function importImage(data) {
 
         //ブログ編集フィールドの画像altと登録時の画像ファイル名
         let registerImageFileName = randomStr + "_" + file.name; 
-
         let img = document.createElement("img");
         img.src = e.target.result;
         img.alt = registerImageFileName;
