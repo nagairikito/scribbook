@@ -4,7 +4,11 @@
             <div class="message {{ $message['created_by'] == $talkRoomDatas['sender'] ? 'send' : 'receive' }}">
                 @if($message['created_by'] == $talkRoomDatas['recipient']['id'])
                     <div>
-                        <img class="user-icon" src="{{ $talkRoomDatas['recipient']['icon_image'] }}">
+                        @if($talkRoomDatas['recipient']['icon_image'] != 'noImage.png')
+                            <img class="user-icon" src="{{ $talkRoomDatas['recipient']['icon_image'] }}">
+                        @else
+                            <img class="user-icon" src="{{ asset('commonImages/user_icon_images/noImage.png') }}">
+                        @endif
                     </div>
                 @endif
                 <div class="message-contents-wrapper">

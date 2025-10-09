@@ -10,14 +10,14 @@
     
 
         <a class="post-user" href="{{ route('profile_top', ['id' => $blog['created_by']]) }}">
-            <img class="blog-user-icon" src="{{ asset('storage/user_icon_images/' . $blog['icon_image']) }}">
+            <img class="blog-user-icon" src="{{ $blog['icon_image'] }}">
             <p>{{ $blog['name'] }}</p>
         </a>
 
         @if($blog['thumbnail'] != 'noImage.png')
-            <img class="thumbnail" src="{{ asset('storage/blog_thumbnail_images/' . $blog['blog_unique_id'] . '_' . $blog['thumbnail']) }}">
+            <img class="thumbnail" src="{{ $blog['thumbnail'] }}">
         @else
-            <img class="thumbnail" src="{{ asset('storage/blog_thumbnail_images/noImage.png') }}">
+            <img class="thumbnail" src="{{ asset('commonImages/noImage.png') }}">
         @endif
     </li>
     @endforeach
