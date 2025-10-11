@@ -73,6 +73,10 @@
     cursor: pointer;
 }
 
+#blog-detail .blog-body {
+    overflow-wrap: anywhere;
+}
+
 #blog-detail .comment-list {
     width: 100%;
 }
