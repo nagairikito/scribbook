@@ -191,7 +191,8 @@ class AccountService extends Service
     
             $newImageName = 'noImage.png';
             if($iconImageFile && $iconImageFile!= null) {
-                $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
+                // $originalName = $iconImageFile->file('icon_image_file')->getClientOriginalName();
+                $originalName = $iconImageFile->getClientOriginalName();
                 $newImageName = date('Ymd_His') . '_' . $originalName;
 
                 //本番環境の画像の保存先（cloudinary）
@@ -286,9 +287,9 @@ class AccountService extends Service
                             ],
                         ]);
                         $result = $cloudinary->uploadApi()->destroy($publicId);
-                        if($result['result'] !== 'ok') {
-                            throw new \Exception('Cloudinaryからの画像削除に失敗しました1');
-                        }
+                        // if($result['result'] !== 'ok') {
+                        //     throw new \Exception('Cloudinaryからの画像削除に失敗しました1');
+                        // }
                     } else {
                         throw new Exception("CloudinaryのURLからpublic_idを抽出できませんでした");
                     }
