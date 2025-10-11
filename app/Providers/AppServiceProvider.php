@@ -26,8 +26,8 @@ class AppServiceProvider extends ServiceProvider
         });
 
         // 開発環境ではコメントアウトしないとjs,css,ファイルが読み込めなくなる
-        // if (env('APP_ENV') === 'production') {
-        //     URL::forceScheme('https');
-        // }
+        if (env('APP_ENV') === 'production') {
+            URL::forceScheme('https');
+        }
     }
 }
