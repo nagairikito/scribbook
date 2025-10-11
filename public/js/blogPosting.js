@@ -22,9 +22,12 @@ let selectedImage = null;
 //設定された画像サイズ
 let imageSize = 300;
 
+//APP_ENV
+let appEnv = APP_ENV;
+
 //画像の表示URL
-// let displayImagePath = "http://localhost/storage/blog_contents_images/"
-let displayImagePath = APP_URL + "/storage/blog_contents_images/";
+let localDispImagePath = APP_URL + "/storage/blog_contents_images/"; //開発環境
+let productionDispImagePath = 'https://res.cloudinary.com/dqyo04d6k/image/upload/v1754640091/blog_contents_images/'; //本番環境
 
 //ブログ編集フィールドの画像のファイル名
 let imageFileName = '';
@@ -124,7 +127,13 @@ function handleSubmit(e) {
             let base64Src = image.src;
             let fileName = blogUniqueId + "_" + image.alt;
 
-            image.src = displayImagePath + fileName;
+            if(appEnv === 'production') {
+                withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
+                image.src = productionDispImagePath + withoutExt;
+                // image.src = productionDispImagePath + fileName;
+            } else {
+                image.src = localDispImagePath + fileName;
+            }
 
             let div = document.createElement('div');
             div.classList.add(fileName);

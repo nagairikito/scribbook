@@ -14,7 +14,15 @@
             <div class="footer-menu-talk-area"><a href="{{ route('talk_room_list') }}" class="fos-1_15rem"><i class="bi bi-envelope fos-1_3rem"></i></a></div>
             <div>
                 <a class="footer-user-icon" href="{{ route('profile_top', ['id' => Auth::id()]) }}">
-                    <img class="footer-menu-user-icon" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}">
+                    @if(Auth::user()->icon_image !== 'noImage.png')
+                        @if(app()->environment('production'))
+                            <img class="footer-menu-user-icon" src="{{ Auth::user()->icon_image }}">
+                        @else
+                            <img class="footer-menu-user-icon" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}">
+                        @endif
+                    @else
+                        <img class="footer-menu-user-icon" src="{{ asset('commonImages/user_icon_images/noImage.png') }}">
+                    @endif
                 </a>
             </div>
             @endif

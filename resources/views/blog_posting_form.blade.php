@@ -6,6 +6,7 @@
     <script src="{{ asset('js/blogPosting.js') }}" defer></script>
     <script>
         const APP_URL = "{{ env('APP_URL') }}"
+        const APP_ENV = "{{ app()->environment() }}"
     </script>
     <title>ブログ投稿フォーム</title>
 @endsection

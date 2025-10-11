@@ -122,7 +122,7 @@
                                     <div class="profile-editing-user-icon-area">
                                         <!-- <div class="profile-editing-user-icon-area-wrapper"> -->
                                             <div class="img-delete-btn-wrapper" onclick="deleteProfileIconImage()"><span class="img-delete-btn-content">✕</span></div>
-                                            <img id="icon-image" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}" class="profile-editing-user-icon">
+                                            <img id="icon-image" src="{{ $user['icon_image'] }}" class="profile-editing-user-icon">
                                             <div class="display-center">
                                                 <input class="user-icon-choice-button" type="file" name="icon_image_file">
                                             </div>
@@ -228,7 +228,7 @@
                                 <div class="favorite-user-unit">
                                     <div class="left">
                                         <a href="{{ route('profile_top', ['id' => $favorite_user['id']]) }}">
-                                            <img class="favorite-user-icon" src="{{ asset('storage/user_icon_images/' . $favorite_user['icon_image']) }}">
+                                            <img class="favorite-user-icon" src="{{ $favorite_user['icon_image'] }}">
                                         </a>
                                     </div>
                                     <div class="center">

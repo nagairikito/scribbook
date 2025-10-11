@@ -32,7 +32,15 @@
                         <div class="header-talk-area"><a href="{{ route('talk_room_list') }}" class="fos-1_15rem"><i class="bi bi-envelope mr-5p fos-1_15rem"></i>トーク</a></div>
                         <div>
                             <a class="header-user-icon-href" href="{{ route('profile_top', ['id' => Auth::id()]) }}">
-                                <img class="header-user-icon-image" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}">
+                                @if(Auth::user()->icon_image !== 'noImage.png') 
+                                    @if(!app()->environment('production'))
+                                        <img class="header-user-icon-image" src="{{ asset('storage/user_icon_images/' . Auth::user()->icon_image) }}">
+                                    @else
+                                        <img class="header-user-icon-image" src="{{ Auth::user()->icon_image }}">
+                                    @endif
+                                @else
+                                    <img class="header-user-icon-image" src="{{ asset('commonImages/user_icon_images/noImage.png') }}">
+                                @endif
                             </a>
                         </div>
                     @endif

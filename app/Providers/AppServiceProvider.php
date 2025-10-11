@@ -25,8 +25,9 @@ class AppServiceProvider extends ServiceProvider
             return $carbon->format('Y-m-d H:i:s');
         });
 
-        if (env('APP_ENV') === 'production') {
-            URL::forceScheme('https');
-        }
+        // 開発環境ではコメントアウトしないとjs,css,ファイルが読み込めなくなる
+        // if (env('APP_ENV') === 'production') {
+        //     URL::forceScheme('https');
+        // }
     }
 }

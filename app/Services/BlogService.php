@@ -8,11 +8,13 @@ use App\Repositories\BrowsingHistoryRepository;
 use App\Repositories\AccountRepository;
 use App\Repositories\AdvertisementRepository;
 use App\Repositories\FavoriteBlogRepository;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use PhpParser\ErrorHandler\Throwing;
+use Exception;
+use Cloudinary\Cloudinary;
+use Cloudinary\Api\Admin\AdminApi;
+use Cloudinary\Api\Upload\UploadApi;
 
 class BlogService extends Service
 {
@@ -22,6 +24,9 @@ class BlogService extends Service
     public $favoriteBlogRepository;
     public $BrowsingHistoryRepository;
     public $advertisementRepository;
+
+    public const LOCAL_THUMBNAIL_STORAGE_PATH = 'storage/blog_thumbnail_images/%s';
+    public const THUMBNAIL_NOIMAGE_PATH = 'commonImages/noImage.png';
 
     public function __construct(AccountRepository $accountRepository, BlogRepository $blogRepository, BlogCommentRepository $blogCommentRepository
                                 , FavoriteBlogRepository $favoriteBlogRepository, BrowsingHistoryRepository $browsingHistoryRepository, AdvertisementRepository $advertisementRepository) {
@@ -52,18 +57,17 @@ class BlogService extends Service
 
         DB::beginTransaction();
         try {
-            if($inputData['thumbnail_img'] == '' || $inputData['thumbnail_img'] == null || $inputData['thumbnail_name'] == '' || $inputData['thumbnail_name'] == null) {
+            if($inputData['thumbnail_img'] == '' || $inputData['thumbnail_img'] == null || $inputData['thumbnail_name'] == '' || $inputData['thumbnail_name'] == null || $inputData['thumbnail_name'] == []) {
                 $inputData['thumbnail_name'] = 'noImage.png';
+            } else {
+                $inputData['thumbnail_name'] = $this->storeBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], 'blog_thumbnail_images');
+            }
+            if($inputData['base64_texts'] != [] || $inputData['base64_texts'] != null || $inputData['image_file_names'] != [] || $inputData['image_file_names'] != null) {
+                $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names'], 'blog_contents_images');
             }
             $checkPostBlog = $this->blogRepository->postBlog($inputData);
             if($checkPostBlog) {
                 $postFlag = true;
-            }
-            if($inputData['base64_texts'] != [] || $inputData['base64_texts'] != null || $inputData['image_file_names'] != [] || $inputData['image_file_names'] != null) {
-                $this->storeBase64Image($inputData['base64_texts'], $inputData['image_file_names'], 'blog_contents_images/');
-            }
-            if($inputData['thumbnail_img'] != '' || $inputData['thumbnail_img'] != null || $inputData['thumbnail_name'] != [] || $inputData['thumbnail_name'] != null) {
-                $this->storeBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], 'blog_thumbnail_images/');
             }
 
             DB::commit();
@@ -99,16 +103,31 @@ class BlogService extends Service
 
         DB::beginTransaction();
         try {
-            if($inputData['thumbnail_img'] != null && $inputData['thumbnail_img'] != '' || $inputData['thumbnail_img'] != null && $inputData['thumbnail_img'] != '') {
-                $this->updateBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], $targetBlog['blog_unique_id'], 'blog_thumbnail_images/');
-            } else {
-                // $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_thumbnail_images/');
+            // サムネイル画像
+            if($inputData['thumbnail_name'] != 'noImage.png') {
+                if(app()->environment('production')) {
+                    $fileName = basename($inputData['thumbnail_name']);
+                    $parts = explode('_', $fileName);
+                    $inputImageName = implode('_', array_slice($parts, 2));
+                    $this->updateBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputImageName], $targetBlog['blog_unique_id'], 'blog_thumbnail_images');
+                } else {
+                    $this->updateBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], $targetBlog['blog_unique_id'], 'blog_thumbnail_images');
+                }
             }
+            if($inputData['thumbnail_name'] == 'noImage.png' && $targetBlog['thumbnail'] != 'noImage.png') {
+                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_thumbnail_images');
+            }
+            // if($inputData['thumbnail_img'] != null && $inputData['thumbnail_img'] != '' || $inputData['thumbnail_img'] != null && $inputData['thumbnail_img'] != '') {
+            //     $this->updateBase64Image([$inputData['thumbnail_img']], [$inputData['blog_unique_id'] . '_' . $inputData['thumbnail_name']], $targetBlog['blog_unique_id'], 'blog_thumbnail_images');
+            // } else {
+            //     // $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_thumbnail_images/');
+            // }
 
+            // コンテンツ画像
             if($inputData['base64_texts'] != null || $inputData['image_file_names'] != null) {
-                $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog['blog_unique_id'], 'blog_contents_images/');
+                $this->updateBase64Image($inputData['base64_texts'], $inputData['image_file_names'], $targetBlog['blog_unique_id'], 'blog_contents_images');
             } else {
-                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_contents_images/');
+                $this->deleteBlogContentsImageFromStorage($targetBlog['blog_unique_id'], 'blog_contents_images');
             }
             // $this->deleteBlogContentsImageFromStorage($targetBlog[0]['blog_unique_id']);
             $checkEditBlog = $this->blogRepository->editBlog($inputData);
@@ -605,18 +624,19 @@ class BlogService extends Service
     }
 
     /**
-     * ブログコンテンツ画像保存,Storageに保存(更新用)
+     * ブログ画像保存,Storageに保存(更新用)
      * @param array $imageBase64Texts
      * @param array $imageNames
      * @param string $prevBlogUniqueId
      * @param string $path  :保存先パス
      * @return void
      */
-    public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId, $path)
+    public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId, $folderPath)
     {
         if(count($imageBase64Texts) > 0) {
             foreach($imageBase64Texts as $index => $imageBase64Data) {
                 if(preg_match('/^data:image\/[a-zA-Z]+;base64,/', $imageBase64Texts[$index])) {
+                // 新規画像保存時
                     // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
                     $base64Image = $imageBase64Texts[$index];
 
@@ -635,47 +655,115 @@ class BlogService extends Service
                     }
 
                     // ファイル名と保存パス生成
-                    $filePath = $path . $imageNames[$index];
+                    $filePath = $folderPath . '/' . $imageNames[$index];
 
-                    // 保存（storage/app/public/images に保存）
-                    $result = Storage::disk('public')->put($filePath, $imageData);
-                    if($result == false) {
-                        throw new \Exception('画像の保存に失敗しました');
+                    // 保存（storage/app/public/images に保存）,本番環境はcloudinaryアップロード
+                    if(app()->environment('production')) {
+                        $cloudinary = new Cloudinary([
+                            'cloud' => [
+                                'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                                'api_key'    => config('filesystems.disks.cloudinary.key'),
+                                'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                            ],
+                        ]);
+
+                        $uploaded = $cloudinary->uploadApi()->upload(
+                            $imageBase64Data,
+                            [
+                                'folder'    => $folderPath,
+                                'public_id' => pathinfo($imageNames[$index], PATHINFO_FILENAME),
+                            ]
+                        );
+
+                        if (!$uploaded) {
+                            throw new \Exception('Cloudinaryへのアップロードに失敗しました');
+                        }
+                        $newImageName = $uploaded['secure_url'];
+
+                    } else {
+                        $result = Storage::disk('public')->put($filePath, $imageData);
+                        if($result == false) {
+                            throw new \Exception('画像の保存に失敗しました');
+                        }
                     }
                 } else {
+                // 既存画像保存時
                     $parts = explode('_', $imageNames[$index]);
                     $remainingFileName = implode('_', array_slice($parts, 2));
 
-                    $allFiles = Storage::disk('public')->allFiles($path);
+                    if(app()->environment('production')) {
+                        $cloudinary = new Cloudinary([
+                            'cloud' => [
+                                'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                                'api_key'    => config('filesystems.disks.cloudinary.key'),
+                                'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                            ],
+                        ]);
 
-                    $targetImageFileNames = array_filter($allFiles, function($file) use ($prevBlogUniqueId) {
-                        if(str_contains($file, $prevBlogUniqueId)) {
-                            return $file;
+                        $target = preg_replace('/\s+/', '', $remainingFileName);
+                        $withoutExtension = pathinfo($target, PATHINFO_FILENAME);
+                        $expression = "folder:{$folderPath} AND public_id LIKE '*{$withoutExtension}*'";
+                        $result = $cloudinary->searchApi()->expression($expression)->execute();
+
+                        $oldPublicId = null;
+                        if($result['resources']) {
+                            $oldPublicId = $result['resources'][0]['public_id'];
+                        } else {
+                            throw new \Exception('画像名の更新に失敗しました');
                         }
-                    });
 
-                    $targetImageFileName = array_filter($targetImageFileNames, function($file) use ($remainingFileName) {
-                        if(str_contains($file, $remainingFileName)) {
-                            return $file;
-                        }
-                    });
+                        if($oldPublicId) {
+                            $uploadApi = new UploadApi([
+                                'cloud' => [
+                                    'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                                    'api_key'    => config('filesystems.disks.cloudinary.key'),
+                                    'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                                ],
+                            ]);
 
-                    if($targetImageFileName) {
-                        foreach($targetImageFileName as $fileName) {
-                            $changeNameFlag = Storage::disk('public')->move($fileName, $path . $imageNames[$index]);
-                            if($changeNameFlag == false) {
+                            $registerImage = pathinfo($imageNames[$index], PATHINFO_FILENAME);
+
+                            $proChangeNameFlag = $uploadApi->rename($oldPublicId, $folderPath . '/' . $registerImage, [
+                                'overwrite' => false
+                            ]);
+
+                            if(!$proChangeNameFlag) {
                                 throw new \Exception('画像名の更新に失敗しました');
+                            }
+                        }
+                    } else {
+
+                        $allFiles = Storage::disk('public')->allFiles($folderPath);
+
+                        $targetImageFileNames = array_filter($allFiles, function($file) use ($prevBlogUniqueId) {
+                            if(str_contains($file, $prevBlogUniqueId)) {
+                                return $file;
+                            }
+                        });
+
+                        $targetImageFileName = array_filter($targetImageFileNames, function($file) use ($remainingFileName) {
+                            if(str_contains($file, $remainingFileName)) {
+                                return $file;
+                            }
+                        });
+
+                        if($targetImageFileName) {
+                            foreach($targetImageFileName as $fileName) {
+                                $changeNameFlag = Storage::disk('public')->move($fileName, $folderPath . $imageNames[$index]);
+                                if($changeNameFlag == false) {
+                                    throw new \Exception('画像名の更新に失敗しました');
+                                }
                             }
                         }
                     }
                 }
             }
-            $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId, $path);
+            $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId, $folderPath);
         }
     }
 
     /**
-     * ブログコンテンツ画像保存,Storageに保存(新規用)
+     * ブログ画像保存,Storageに保存(新規用)
      * @param array $imageBase64Texts
      * @param string $imageNames
      * @param string $path :保存先のパス
@@ -683,6 +771,7 @@ class BlogService extends Service
      */
     public function storeBase64Image($imageBase64Texts, $imageNames, $path)
     {
+        $newImageName = 'noImage.png';
         if($imageBase64Texts == null || count($imageBase64Texts) > 0) {
             foreach($imageBase64Texts as $index => $imageBase64Data) {
                 // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
@@ -703,37 +792,96 @@ class BlogService extends Service
                 }
 
                 // ファイル名と保存パス生成
-                $filePath = $path . $imageNames[$index];
+                $filePath = $path . '/' . $imageNames[$index];
 
                 // 保存（storage/app/public/images に保存）
-                $result = Storage::disk('public')->put($filePath, $imageData);
-                if($result == false) {
-                    throw new \Exception('画像の保存に失敗しました');
+                if(app()->environment('production')) {
+                    $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key'    => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                    ]);
+
+                    $uploaded = $cloudinary->uploadApi()->upload(
+                        $imageBase64Data,
+                        [
+                            'folder'    => $path,
+                            'public_id' => pathinfo($imageNames[$index], PATHINFO_FILENAME),
+                        ]
+                    );
+
+                    if (!$uploaded) {
+                        throw new \Exception('Cloudinaryへのアップロードに失敗しました');
+                    }
+                    $newImageName = $uploaded['secure_url'];
+
+                } else {
+                    $result = Storage::disk('public')->put($filePath, $imageData);
+                    if($result == false) {
+                        throw new \Exception('画像の保存に失敗しました');
+                    }
                 }
             }
         }
+        return $newImageName;
     }
 
     /**
-     * ブログコンテンツ画像削除,Storageから削除
+     * ブログ画像削除,Storageから削除
      * @param string $targetImageName
      * @param string $path : 保存先パス
      * @return void
      */
     public function deleteBlogContentsImageFromStorage($blogUniqueId, $path) {
         if($blogUniqueId != null && $blogUniqueId != '') {
-            $allFiles = Storage::disk('public')->allFiles($path);
-            $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
-                if(str_contains($file, $blogUniqueId)) {
-                    return $file;
-                }
-            });
+            if(app()->environment('production')) {
+                $cloudinary = new Cloudinary([
+                        'cloud' => [
+                            'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                            'api_key'    => config('filesystems.disks.cloudinary.key'),
+                            'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                        ],
+                    ]);
 
-            if($targetImageFileNames) {
-                foreach($targetImageFileNames as $targetImageFileName) {
-                    $result = Storage::disk('public')->delete($targetImageFileName);
-                    if($result == false) {
-                        throw new \Exception('ファイルの削除に失敗しました。');
+                $adminApi = new AdminApi([
+                    'cloud' => [
+                        'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
+                        'api_key'    => config('filesystems.disks.cloudinary.key'),
+                        'api_secret' => config('filesystems.disks.cloudinary.secret'),
+                    ],
+                ]);
+                
+                try {
+                    $blogUniqueId = preg_replace('/\s+/', '', $blogUniqueId);
+                    $expression = "folder:{$path} AND public_id LIKE '*{$blogUniqueId}*'";
+                    $result = $cloudinary->searchApi()->expression($expression)->execute();
+
+                    $publicIds = array_map(fn($r) => $r['public_id'], $result['resources'] ?? []);
+
+                    $adminApi = $cloudinary->adminApi();
+                    foreach ($publicIds as $publicId) {
+                        $adminApi->deleteAssets([$publicId]);
+                    }
+
+                } catch (\Exception $e) {
+                    throw new \Exception("Cloudinary 上の画像削除に失敗しました: " . $e->getMessage());
+                }
+            } else {
+                $allFiles = Storage::disk('public')->allFiles($path);
+                $targetImageFileNames = array_filter($allFiles, function($file) use ($blogUniqueId) {
+                    if(str_contains($file, $blogUniqueId)) {
+                        return $file;
+                    }
+                });
+
+                if($targetImageFileNames) {
+                    foreach($targetImageFileNames as $targetImageFileName) {
+                        $result = Storage::disk('public')->delete($targetImageFileName);
+                        if($result == false) {
+                            throw new \Exception('ファイルの削除に失敗しました。');
+                        }
                     }
                 }
             }

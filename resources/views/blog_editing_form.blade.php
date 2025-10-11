@@ -6,6 +6,7 @@
     <script src="{{ asset('js/blogEditing.js') }}" defer></script>
     <script>
         const APP_URL = "{{ env('APP_URL') }}"
+        const APP_ENV = "{{ app()->environment() }}"
     </script>
     <title>編集フォーム_{{ $blog['title'] }}</title>
 @endsection
@@ -22,7 +23,7 @@
                     <div id="thumbnail-preview-box" class="{{ $blog['thumbnail'] != 'noImage.png' ? '' : 'thumbnail-preview-box' }}">
                         @if($blog['thumbnail'] != 'noImage.png')
                             <div class="delete-btn-wrapper" onclick="deleteThumbnail()"><span class="delete-btn-content">✕</span></div>
-                            <img id="thumbnail-preview-img" src="{{ asset('storage/blog_thumbnail_images/' . $blog['blog_unique_id'] . '_' . $blog['thumbnail']) }}" alt="{{ $blog['thumbnail'] }}" style="width: 300px; height: 300px;">
+                            <img id="thumbnail-preview-img" src="{{ $blog['thumbnail'] }}" alt="{{ $blog['thumbnail'] }}" style="width: 300px; height: 300px;">
                         @else
                             <p>
                                 ここにサムネイル用画像をドラッグアンドドロップしてください<br><br><br>
@@ -88,7 +89,7 @@
                         <button class="tool-btn" onclick="adoptUrl()">リンク作成</button>
                     </div>
                     <div>
-                        <button class="tool-btn" onclick="addImage()">画像インポート</button>
+                        <button class="tool-btn" onclick="addImageTool()">画像インポート</button>
                     </div>
                     <div>
                         <button class="tool-btn" onclick="adoptImageSize()">画像サイズ適用</button>
