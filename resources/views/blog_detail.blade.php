@@ -98,7 +98,11 @@
                             <div class="comment">
                                 <div class="left">
                                     <a href="{{ route('profile_top', ['id' => $comment['created_by']]) }}">
-                                        <img class="user-icon" src="{{ asset('storage/user_icon_images/' . $comment['icon_image']) }}">
+                                        @if($comment['icon_image'] != 'noImage.png')
+                                            <img class="user-icon" src="{{ $comment['icon_image'] }}">
+                                        @else
+                                            <img class="user-icon" src="{{ asset('commonImages/user_icon_images/noImage.png') }}">
+                                        @endif
                                     </a>
                                 </div>
                                 <div class="right">

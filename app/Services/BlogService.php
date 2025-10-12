@@ -706,13 +706,13 @@ class BlogService extends Service
                         $result = $cloudinary->searchApi()->expression($expression)->execute();
 
                         $oldPublicId = null;
-                        if($result['resources']) {
+                        if(count($result['resources']) > 0) {
                             $oldPublicId = $result['resources'][0]['public_id'];
-                        } else {
-                            throw new \Exception('画像名の更新に失敗しました');
+                        // } else {
+                        //     throw new \Exception('画像名の更新に失敗しました');
                         }
 
-                        if($oldPublicId) {
+                        if($oldPublicId != null) {
                             $uploadApi = new UploadApi([
                                 'cloud' => [
                                     'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
@@ -759,6 +759,7 @@ class BlogService extends Service
                 }
             }
             $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId, $folderPath);
+            return;
         }
     }
 
