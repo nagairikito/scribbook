@@ -134,9 +134,9 @@ blogEditingForm.addEventListener('submit', function(e) {
             let fileName = blogUniqueId + "_" + image.alt;
 
             if(appEnv === 'production') {
-                // withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
-                // image.src = productionDispImagePath + withoutExt;
-                image.src = productionDispImagePath + fileName;
+                withoutExt = fileName.substring(0, fileName.lastIndexOf("."));
+                image.src = productionDispImagePath + withoutExt;
+                // image.src = productionDispImagePath + fileName;
             } else {
                 image.src = localDispImagePath + fileName;
             }
