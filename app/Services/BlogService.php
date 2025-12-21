@@ -633,147 +633,9 @@ class BlogService extends Service
      * @param string $path  :保存先パス
      * @return void
      */
-    // public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId, $folderPath)
-    // {
-    //     if(count($imageBase64Texts) > 0) {
-    //         foreach($imageBase64Texts as $index => $imageBase64Data) {
-    //             if(preg_match('/^data:image\/[a-zA-Z]+;base64,/', $imageBase64Texts[$index])) {
-    //                 dd();
-    //             // 新規画像保存時
-    //                 // 例: data:image/png;base64,iVBORw0KGgoAAAANS...
-    //                 $base64Image = $imageBase64Texts[$index];
-
-    //                 // 正規表現でMIMEタイプとBase64本体を抽出
-    //                 if (preg_match('/^data:image\/(\w+);base64,/', $base64Image, $matches)) {
-    //                     $extension = strtolower($matches[1]); // 例: png, jpeg
-    //                     $base64Data = substr($base64Image, strpos($base64Image, ',') + 1);
-    //                 } else {
-    //                     return response()->json(['error' => 'Invalid base64 format.'], 400);
-    //                 }
-
-    //                 // Base64デコード
-    //                 $imageData = base64_decode($base64Data);
-    //                 if ($imageData === false) {
-    //                     return response()->json(['error' => 'Failed to decode base64.'], 400);
-    //                 }
-
-    //                 // ファイル名と保存パス生成
-    //                 $filePath = $folderPath . '/' . $imageNames[$index];
-
-    //                 // 保存（storage/app/public/images に保存）,本番環境はcloudinaryアップロード
-    //                 if(app()->environment('production')) {
-    //                     $cloudinary = new Cloudinary([
-    //                         'cloud' => [
-    //                             'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-    //                             'api_key'    => config('filesystems.disks.cloudinary.key'),
-    //                             'api_secret' => config('filesystems.disks.cloudinary.secret'),
-    //                         ],
-    //                     ]);
-
-    //                     $uploaded = $cloudinary->uploadApi()->upload(
-    //                         $imageBase64Data,
-    //                         [
-    //                             'folder'    => $folderPath,
-    //                             'public_id' => pathinfo($imageNames[$index], PATHINFO_FILENAME),
-    //                         ]
-    //                     );
-
-    //                     if (!$uploaded) {
-    //                         throw new \Exception('Cloudinaryへのアップロードに失敗しました');
-    //                     }
-    //                     $newImageName = $uploaded['secure_url'];
-
-    //                 } else {
-    //                     $result = Storage::disk('public')->put($filePath, $imageData);
-    //                     if($result == false) {
-    //                         throw new \Exception('画像の保存に失敗しました');
-    //                     }
-    //                 }
-    //             } else {
-    //             // 既存画像保存時
-    //                 $parts = explode('_', $imageNames[$index]);
-    //                 $remainingFileName = implode('_', array_slice($parts, 2));
-
-    //                 if(app()->environment('production')) {
-    //                     $cloudinary = new Cloudinary([
-    //                         'cloud' => [
-    //                             'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-    //                             'api_key'    => config('filesystems.disks.cloudinary.key'),
-    //                             'api_secret' => config('filesystems.disks.cloudinary.secret'),
-    //                         ],
-    //                     ]);
-
-    //                     $target = preg_replace('/\s+/', '', $remainingFileName);
-    //                     $withoutExtension = pathinfo($target, PATHINFO_FILENAME);
-    //                     $expression = "folder:{$folderPath} AND public_id LIKE '*{$withoutExtension}*'";
-    //                     $result = $cloudinary->searchApi()->expression($expression)->execute();
-
-    //                     $oldPublicId = null;
-    //                     if(count($result['resources']) > 0) {
-    //                         $oldPublicId = $result['resources'][0]['public_id'];
-    //                     // } else {
-    //                     //     throw new \Exception('画像名の更新に失敗しました');
-    //                     }
-
-    //                     if($oldPublicId != null) {
-    //                         $uploadApi = new UploadApi([
-    //                             'cloud' => [
-    //                                 'cloud_name' => config('filesystems.disks.cloudinary.cloud'),
-    //                                 'api_key'    => config('filesystems.disks.cloudinary.key'),
-    //                                 'api_secret' => config('filesystems.disks.cloudinary.secret'),
-    //                             ],
-    //                         ]);
-
-    //                         $registerImage = pathinfo($imageNames[$index], PATHINFO_FILENAME);
-
-    //                         $proChangeNameFlag = $uploadApi->rename($oldPublicId, $folderPath . '/' . $registerImage, [
-    //                             'overwrite' => false
-    //                         ]);
-
-    //                         if(!$proChangeNameFlag) {
-    //                             throw new \Exception('画像名の更新に失敗しました');
-    //                         }
-
-    //                         return $registerImage;
-    //                     }
-    //                 } else {
-
-    //                     $allFiles = Storage::disk('public')->allFiles($folderPath);
-
-    //                     $targetImageFileNames = array_filter($allFiles, function($file) use ($prevBlogUniqueId) {
-    //                         if(str_contains($file, $prevBlogUniqueId)) {
-    //                             return $file;
-    //                         }
-    //                     });
-
-    //                     $targetImageFileName = array_filter($targetImageFileNames, function($file) use ($remainingFileName) {
-    //                         if(str_contains($file, $remainingFileName)) {
-    //                             return $file;
-    //                         }
-    //                     });
-
-    //                     if($targetImageFileName) {
-    //                         foreach($targetImageFileName as $fileName) {
-    //                             $changeNameFlag = Storage::disk('public')->move($fileName, $folderPath . $imageNames[$index]);
-    //                             if($changeNameFlag == false) {
-    //                                 throw new \Exception('画像名の更新に失敗しました');
-    //                             }
-    //                         }
-    //                     }
-    //                 }
-    //             }
-    //         }
-    //         $this->deleteBlogContentsImageFromStorage($prevBlogUniqueId, $folderPath);
-    //         return;
-    //     }
-    // }
-
     public function updateBase64Image($imageBase64Texts, $imageNames, $prevBlogUniqueId, $folderPath)
     {
         if(count($imageBase64Texts) > 0) {
-if($folderPath === 'blog_contents_images') {
-    dd($imageBase64Texts);
-}
             for($i=0; $i<count($imageBase64Texts); $i++) {
                 if(preg_match('/^data:image\/[a-zA-Z]+;base64,/', $imageBase64Texts[$i]) === 1) {
                 // 新規画像保存時
@@ -828,7 +690,7 @@ if($folderPath === 'blog_contents_images') {
                     }
                 } else {
                 // 既存画像保存時
-                    $parts = explode('_', $imageNames[$i]);
+                    $parts = explode('_', $imageBase64Texts[$i]);
                     $remainingFileName = implode('_', array_slice($parts, 2));
 
                     if(app()->environment('production')) {
@@ -871,7 +733,9 @@ if($folderPath === 'blog_contents_images') {
                                 throw new \Exception('画像名の更新に失敗しました');
                             }
 
-                            return $registerImage;
+                            if($folderPath === 'blog_thumbnail_images') {
+                                return $registerImage;
+                            }
                         }
                     } else {
 
@@ -1003,9 +867,7 @@ if($folderPath === 'blog_contents_images') {
                     // $expression = "resource_type:image AND type:upload AND prefix:{$path}/ AND public_id:*{$blogUniqueId}*";
 
                     $result = $cloudinary->searchApi()->expression($expression)->execute();
-if($path === "blog_contents_images") {
-dd($result);
-}
+
                     $publicIds = array_map(fn($r) => $r['public_id'], $result['resources'] ?? []);
 
                     $adminApi = $cloudinary->adminApi();
