@@ -129,14 +129,16 @@
         width: 100%;
         height: 60px;
         position: fixed;
-        top: -10px;
+        /* top: -10px; */
+        bottom: -60px;
         left: 0;
         background-color: rgba(210, 210, 210, 0.6);
         overflow: scroll;
         transition: all 0.2s;
     }
     header .tool-list.active {
-        top: 50px;
+        /* top: 50px; */
+        bottom: 40px;
     }
     header .imported-img-field-wrapper {
         top: 110px;
