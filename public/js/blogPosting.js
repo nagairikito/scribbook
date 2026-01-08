@@ -24,7 +24,7 @@ let imageSize = 300;
 
 //APP_ENV
 let appEnv = APP_ENV;
-
+console.log(appEnv)
 //画像の表示URL
 let localDispImagePath = APP_URL + "/storage/blog_contents_images/"; //開発環境
 let productionDispImagePath = 'https://res.cloudinary.com/dqyo04d6k/image/upload/v1754640091/blog_contents_images/'; //本番環境
@@ -701,7 +701,7 @@ function importImage(data) {
         img.alt = registerImageFileName;
         img.classList.add("contents-image"),
         img.classList.add(`no${contentsImageAreas.length + 1}`),
-        img.setAttribute("style", "width: 300px;");
+        img.setAttribute("style", "width: 300px; max-width: 100%; height: auto;");
         contentsImageField.appendChild(img);
 
         const br = document.createElement("div");
@@ -733,7 +733,7 @@ function adoptImageSize() {
     if(imageSize == null || imageSize == "" || imageSize == [] || imageSize === "undefined") {
         return;
     }
-    selectedImage.setAttribute("style", `width: ${imageSize}px;`);
+    selectedImage.setAttribute("style", `width: ${imageSize}px; max-width: 100%; height: auto;`);
 
 }
 

@@ -702,7 +702,7 @@ function importImage(data) {
         img.alt = registerImageFileName;
         img.classList.add("contents-image"),
         img.classList.add(`no${contentsImageAreas.length + 1}`),
-        img.setAttribute("style", "width: 300px;");
+        img.setAttribute("style", "width: 300px; max-width: 100%; height: auto;");
         contentsImageField.appendChild(img);
 
         const br = document.createElement("div");
@@ -734,7 +734,7 @@ function adoptImageSize() {
     if(imageSize == null || imageSize == "" || imageSize == [] || imageSize === "undefined") {
         return;
     }
-    selectedImage.setAttribute("style", `width: ${imageSize}px;`);
+    selectedImage.setAttribute("style", `width: ${imageSize}px; max-width: 100%; height: auto;`);
 
 }
 
